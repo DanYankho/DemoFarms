@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Collection Hub</title>
+  <title>Elim Farms - Data Hub</title>
   <!-- Simple modern styling, no external dependencies -->
   <style>
     * {
@@ -40,10 +40,7 @@
       font-size: 2.8rem;
       font-weight: 600;
       letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+      color: #0d2136;
       margin-bottom: 0.5rem;
     }
 
@@ -59,7 +56,7 @@
       margin-top: 0.5rem;
     }
 
-    /* Card grid */
+    /* Card grid - 2 columns */
     .card-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -86,6 +83,11 @@
       box-shadow: 0 28px 40px -16px rgba(37, 99, 235, 0.18), 0 6px 12px -4px rgba(0, 0, 0, 0.05);
       border-color: #cbd5e1;
       background: rgba(255, 255, 255, 0.95);
+    }
+
+    /* Database card spans 2 columns */
+    .form-card.span-two {
+      grid-column: span 2;
     }
 
     .card-icon {
@@ -132,6 +134,16 @@
     .btn i {
       margin-right: 6px;
       font-style: normal;
+    }
+
+    /* Database card special styling */
+    .form-card.database-card .btn {
+      background: #059669;
+      box-shadow: 0 6px 12px -6px rgba(5, 150, 105, 0.35);
+    }
+
+    .form-card.database-card .btn:hover {
+      background: #047857;
     }
 
     /* Dashboard / future section */
@@ -189,12 +201,41 @@
       text-decoration: none;
     }
 
+    /* Floating Powered By */
+    .powered-by {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 0.6rem 1.2rem;
+      border-radius: 40px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(203, 213, 225, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #475569;
+      z-index: 100;
+    }
+
+    .powered-by img {
+      height: 24px;
+      width: auto;
+      object-fit: contain;
+    }
+
     /* Responsive */
     @media (max-width: 640px) {
-      body { padding: 1.5rem 1rem; }
-      .header h1 { font-size: 2.2rem; }
+      body { padding: 1.5rem 1rem 5rem; }
+      .header h1 { font-size: 2rem; }
       .card-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+      .form-card.span-two { grid-column: span 1; }
       .dashboard-preview { flex-direction: column; align-items: flex-start; }
+      .powered-by { bottom: 15px; right: 15px; padding: 0.5rem 1rem; }
     }
   </style>
 </head>
@@ -206,14 +247,13 @@
       <p style="margin-top: 0.8rem; color: #475569;">Select a form below to submit data. Links open in a new tab.</p>
     </div>
 
-    <!-- 4 Google Forms cards - EDIT THESE LINKS -->
+    <!-- 5 Cards - 4 Google Forms + 1 Database (Google Sheet) -->
     <div class="card-grid">
       <!-- Card 1 -->
       <div class="form-card">
         <div class="card-icon">📝</div>
         <h2>Pump Log</h2>
         <p>Live update on activity of all pumps found at the farm.</p>
-        <!-- CHANGE the href to your actual Google Form URL -->
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSfqPkoiG4S1vTRkqlaXrsHRtlOi45SoJHrRhd-IgcbuEk9btA/viewform?usp=header" class="btn" target="_blank" rel="noopener">
           <i>→</i> Open pump log form
         </a>
@@ -224,7 +264,6 @@
         <div class="card-icon">🏷️</div>
         <h2>Tagging</h2>
         <p>Helping you track and update the growth of your bananas.</p>
-        <!-- CHANGE the href to your actual Google Form URL -->
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSdQhArOLQ49CHv-NpqvFAHYFxWfgn8hv6XZz9kXC6TLm5Pycg/viewform?usp=header" class="btn" target="_blank" rel="noopener">
           <i>→</i> Open tagging data form
         </a>
@@ -235,7 +274,6 @@
         <div class="card-icon">🚜</div>
         <h2>Harvesting</h2>
         <p>Record the quantity and quality of your harvest banana bunches.</p>
-        <!-- CHANGE the href to your actual Google Form URL -->
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSet4llXfSSV4wOrjzlFt_fjrK9evCUEbQ7vgvK__5qAb_ROCA/viewform?usp=header" class="btn" target="_blank" rel="noopener">
           <i>→</i> Open harvesting data form
         </a>
@@ -246,30 +284,46 @@
         <div class="card-icon">💧</div>
         <h2>Irrigation</h2>
         <p>Log water usage and scheduling changes of your irrigation patterns.</p>
-        <!-- CHANGE the href to your actual Google Form URL -->
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSfEbQGnc1pEJldk9vbVmUQBqSpFpwSsCB1E_3xvFQNCguYaGA/viewform?usp=header" class="btn" target="_blank" rel="noopener">
           <i>→</i> Open irrigation data form
         </a>
       </div>
+
+      <!-- Card 5 - Database (Google Sheet) - Spans 2 columns -->
+      <div class="form-card database-card span-two">
+        <div class="card-icon">🗄️</div>
+        <h2>Database</h2>
+        <p>View all submitted data in the master Google Sheet.</p>
+        <!-- CHANGE the href to your actual Google Sheet URL -->
+        <a href="https://docs.google.com/spreadsheets/d/1KNqzCOnvgn-pU5zVnh-hOjPXKQe6Z9DDpZjKMDEcY1k/edit?usp=sharing" class="btn" target="_blank" rel="noopener">
+          <i>→</i> Open database
+        </a>
+      </div>
     </div>
 
-    <!-- Future dashboard / extra links section (editable later) -->
+    <!-- Future dashboard / extra links section -->
     <div class="dashboard-preview">
       <div class="preview-text">
-        <h3>📈 Dashboard & resources</h3>
-        <p>Coming soon: real‑time summaries, charts, and document library. You'll be able to add more links here as the project grows.</p>
+        <h3>📈 Dashboard & Analytics</h3>
+        <p>Coming soon: real‑time visualizations, charts, and reports for all farm operations.</p>
       </div>
       <div class="coming-soon-badge">
-        <span>🔜</span> Dashboard · Docs · Archive
+        <span>🔜</span> Dashboard · Reports · Archive
       </div>
     </div>
 
     <div class="footer">
       <p>🔒 All forms are private. For internal use only. <br> 
       <span style="opacity: 0.7;">Hosted on GitHub Pages · 
-        <a href="#" onclick="alert('Edit this page to add dashboard links later.')">➕ add more links</a>
+        <a href="#" onclick="alert('Edit this page to add dashboard links later.')">➕ adding more links soon</a>
       </span></p>
     </div>
+  </div>
+
+  <!-- Floating Powered By -->
+  <div class="powered-by">
+    <span>Powered by</span>
+    <img src="Logo.png" alt="Elim Farms Logo" onerror="this.style.display='none'">
   </div>
 </body>
 </html>
