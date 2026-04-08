@@ -3,6 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Favicon / Browser tab icon -->
+  <link rel="icon" type="image/png" href="browser.png">
+  <link rel="apple-touch-icon" href="browser.png">
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#0d2136">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Elim Farms">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
   <title>Elim Farms - Data Hub</title>
   <!-- Simple modern styling, no external dependencies -->
   <style>
@@ -54,6 +68,36 @@
       border-radius: 30px;
       backdrop-filter: blur(4px);
       margin-top: 0.5rem;
+    }
+
+    /* Install PWA button */
+    .install-prompt {
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    .install-btn {
+      background: #0d2136;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s;
+      margin-top: 0.8rem;
+    }
+
+    .install-btn:hover {
+      background: #1a334d;
+    }
+
+    .install-btn.hidden {
+      display: none;
     }
 
     /* Card grid - 2 columns */
@@ -127,7 +171,7 @@
     }
 
     .btn:hover {
-      background: #1d4ed8;
+      background: #1a334d;
       box-shadow: 0 10px 18px -8px #1e3a8a80;
     }
 
@@ -143,7 +187,7 @@
     }
 
     .form-card.database-card .btn:hover {
-      background: #047857;
+      background: #6b6e4a;
     }
 
     /* Dashboard / future section */
@@ -245,6 +289,13 @@
       <h1>🍌 Elim Farms - Data Hub</h1>
       <div class="badge">All tools in one place · secure · updated</div>
       <p style="margin-top: 0.8rem; color: #475569;">Select a form below to submit data. Links open in a new tab.</p>
+      
+      <!-- PWA Install Button (hidden by default, shown when installable) -->
+      <div class="install-prompt">
+        <button id="installBtn" class="install-btn hidden">
+          📲 Install App
+        </button>
+      </div>
     </div>
 
     <!-- 5 Cards - 4 Google Forms + 1 Database (Google Sheet) -->
@@ -325,5 +376,61 @@
     <span>Powered by</span>
     <img src="Logo.png" alt="Elim Farms Logo" onerror="this.style.display='none'">
   </div>
+
+  <!-- PWA Install Script -->
+  <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    // Listen for the beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later
+      deferredPrompt = e;
+      // Show the install button
+      installBtn.classList.remove('hidden');
+    });
+
+    // Handle install button click
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      
+      // Show the install prompt
+      deferredPrompt.prompt();
+      
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      // Optionally, send analytics event with outcome of install
+      console.log(`User response to the install prompt: ${outcome}`);
+      
+      // Clear the deferredPrompt variable
+      deferredPrompt = null;
+      
+      // Hide the install button
+      installBtn.classList.add('hidden');
+    });
+
+    // Log when app is successfully installed
+    window.addEventListener('appinstalled', () => {
+      console.log('PWA was installed successfully!');
+      installBtn.classList.add('hidden');
+      deferredPrompt = null;
+    });
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('Service Worker registered with scope:', registration.scope);
+          })
+          .catch((error) => {
+            console.log('Service Worker registration failed:', error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
