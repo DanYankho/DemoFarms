@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kwacha Farms — Operations Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy:    #0d2136;
+    --gold:    #a8935a;
+    --cream:   #f4f2ef;
+    --sand:    #d8d0c6;
+    --olive:   #81845a;
+    --forest:  #2f3527;
+    --navy-lt: #152d47;
+    --gold-lt: #c4ac74;
+    --gold-dim:#7a6b41;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ───────────────────────────────────────── */
+  header {
+    background: var(--navy);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 3px solid var(--gold);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 64px;
+  }
+  .logo-group { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: var(--gold);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .logo-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(14px, 3vw, 20px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .logo-text span {
+    font-size: 11px;
+    color: var(--sand);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .header-meta {
+    font-size: 12px;
+    color: var(--sand);
+    text-align: right;
+    line-height: 1.5;
+  }
+  .header-meta strong { color: var(--gold); }
+
+  /* ── TAB NAV ──────────────────────────────────────── */
+  nav {
+    background: var(--navy-lt);
+    padding: 0 16px;
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid rgba(168,147,90,0.2);
+  }
+  nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 12px 18px;
+    background: none;
+    border: none;
+    color: var(--sand);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: color .2s, border-color .2s;
+  }
+  .tab-btn:hover { color: var(--gold-lt); }
+  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* ── MAIN ─────────────────────────────────────────── */
+  main { padding: 20px 16px 40px; max-width: 1280px; margin: 0 auto; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+  /* ── SECTION TITLE ────────────────────────────────── */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(18px, 4vw, 26px);
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .section-sub {
+    font-size: 13px;
+    color: var(--olive);
+    margin-bottom: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── KPI CARDS ────────────────────────────────────── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--navy);
+    border-radius: 12px;
+    padding: 18px 16px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(168,147,90,0.15);
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--gold);
+  }
+  .kpi-card .icon {
+    font-size: 22px;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .kpi-card .value {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .kpi-card .label {
+    font-size: 11px;
+    color: var(--sand);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+  }
+  .kpi-card .sub {
+    font-size: 12px;
+    color: var(--olive);
+    margin-top: 6px;
+  }
+  .kpi-card.accent { background: var(--gold); }
+  .kpi-card.accent::before { background: var(--navy); }
+  .kpi-card.accent .value { color: var(--navy); }
+  .kpi-card.accent .label { color: var(--navy); opacity: 0.7; }
+  .kpi-card.accent .sub { color: var(--forest); }
+
+  /* ── CHART GRID ───────────────────────────────────── */
+  .chart-grid {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .chart-grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .chart-grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .chart-grid.cols-1-2 { grid-template-columns: 1fr; }
+
+  .chart-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--sand);
+    box-shadow: 0 2px 8px rgba(13,33,54,0.06);
+  }
+  .chart-card.dark {
+    background: var(--navy);
+    border-color: rgba(168,147,90,0.2);
+  }
+  .chart-card.span-2 { grid-column: 1 / -1; }
+  .chart-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .chart-card.dark .chart-title { color: var(--gold); }
+  .chart-sub {
+    font-size: 12px;
+    color: var(--olive);
+    margin-bottom: 16px;
+  }
+  .chart-card.dark .chart-sub { color: var(--sand); opacity: 0.7; }
+  .chart-wrap { position: relative; }
+
+  /* ── TABLE ────────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: var(--navy);
+    color: var(--gold);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--sand);
+    color: var(--forest);
+    white-space: nowrap;
+  }
+  tr:hover td { background: rgba(168,147,90,0.06); }
+  tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-gold  { background: rgba(168,147,90,0.15); color: var(--gold-dim); }
+  .badge-navy  { background: rgba(13,33,54,0.1);    color: var(--navy); }
+  .badge-olive { background: rgba(129,132,90,0.15);  color: var(--olive); }
+
+  /* ── COLOUR SWATCH ────────────────────────────────── */
+  .colour-swatch {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 6px;
+    border: 1px solid rgba(0,0,0,.15);
+  }
+
+  /* ── LEGEND BAR ───────────────────────────────────── */
+  .legend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--sand);
+    font-size: 13px;
+    gap: 8px;
+  }
+  .legend-row:last-child { border-bottom: none; }
+  .legend-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--sand);
+    border-radius: 3px;
+    margin: 0 10px;
+    overflow: hidden;
+  }
+  .legend-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--gold);
+    transition: width .6s ease;
+  }
+  .legend-val { font-weight: 600; color: var(--navy); min-width: 40px; text-align: right; font-size: 12px; }
+
+  /* ── DIVIDER ──────────────────────────────────────── */
+  .divider { height: 1px; background: var(--sand); margin: 24px 0; }
+
+  /* ── RESPONSIVE ───────────────────────────────────── */
+  @media (max-width: 600px) {
+    main { padding: 16px 12px 32px; }
+    .chart-card { padding: 14px; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-group">
+    <div class="logo-icon">🌿</div>
+    <div class="logo-text">
+      <h1>Kwacha Farms</h1>
+      <span>Operations Dashboard</span>
+    </div>
+  </div>
+  <div class="header-meta">
+    <strong>Data up to 2025</strong><br>
+    3 Sheets · Multi-year Records
+  </div>
+</header>
+
+<nav>
+  <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
+  <button class="tab-btn" onclick="showTab('harvest')">Harvesting</button>
+  <button class="tab-btn" onclick="showTab('tagging')">Tagging</button>
+  <button class="tab-btn" onclick="showTab('pump')">Pump Log</button>
+  <button class="tab-btn" onclick="showTab('irrigation')">Irrigation</button>
+</nav>
+
+<main>
+
+<!-- ══ OVERVIEW ══════════════════════════════════════════════════════ -->
+<div id="tab-overview" class="tab-panel active">
+  <p class="section-title">Farm Operations Overview</p>
+  <p class="section-sub">Consolidated summary across Harvesting, Tagging, Pump and Irrigation records</p>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <span class="icon">🍌</span>
+      <div class="value">15,628<small style="font-size:14px"> kg</small></div>
+      <div class="label">Total Harvest Weight</div>
+      <div class="sub">1,034 bunches · 2021</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🏷️</span>
+      <div class="value">9,449</div>
+      <div class="label">Mats Tagged</div>
+      <div class="sub">Jan – Nov 2025</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">⚙️</span>
+      <div class="value">1,411<small style="font-size:14px"> hrs</small></div>
+      <div class="label">Total Pump Hours</div>
+      <div class="sub">4 pumps · 2021–2025</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">💧</span>
+      <div class="value">2,857<small style="font-size:14px"> L</small></div>
+      <div class="label">Irrigation Fuel Used</div>
+      <div class="sub">753 sessions · 2020–2025</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📏</span>
+      <div class="value">15.1<small style="font-size:14px"> kg</small></div>
+      <div class="label">Avg Bunch Weight</div>
+      <div class="sub">All blocks combined</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🗺️</span>
+      <div class="value">9</div>
+      <div class="label">Blocks Active</div>
+      <div class="sub">M1 – M9</div>
+    </div>
+  </div>
+
+  <div class="chart-grid cols-2">
+    <div class="chart-card dark">
+      <div class="chart-title">Harvest by Block</div>
+      <div class="chart-sub">Total weight (kg) per block — 2021 season</div>
+      <div class="chart-wrap"><canvas id="c_blockHarvest" height="200"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Mats Tagged by Block</div>
+      <div class="chart-sub">Total mats tagged per block — 2025</div>
+      <div class="chart-wrap"><canvas id="c_tagBlock" height="200"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Pump Hours by Year</div>
+      <div class="chart-sub">Cumulative operating hours across all pumps</div>
+      <div class="chart-wrap"><canvas id="c_pumpYear_ov" height="200"></canvas></div>
+    </div>
+    <div class="chart-card dark">
+      <div class="chart-title">Irrigation Fuel by Year</div>
+      <div class="chart-sub">Total litres consumed per year</div>
+      <div class="chart-wrap"><canvas id="c_irrYear_ov" height="200"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HARVEST ════════════════════════════════════════════════════════ -->
+<div id="tab-harvest" class="tab-panel">
+  <p class="section-title">Harvesting Data</p>
+  <p class="section-sub">Bunch weights recorded across blocks M1, M2, M3 — May/June 2021</p>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <span class="icon">⚖️</span>
+      <div class="value">15,628<small style="font-size:13px"> kg</small></div>
+      <div class="label">Total Harvested</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📦</span>
+      <div class="value">1,034</div>
+      <div class="label">Bunches Harvested</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📐</span>
+      <div class="value">15.1<small style="font-size:13px"> kg</small></div>
+      <div class="label">Avg Bunch Weight</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🏆</span>
+      <div class="value">M2</div>
+      <div class="label">Top Block by Weight</div>
+      <div class="sub">5,782 kg</div>
+    </div>
+  </div>
+
+  <div class="chart-grid cols-2">
+    <div class="chart-card dark span-2">
+      <div class="chart-title">Monthly Harvest Totals</div>
+      <div class="chart-sub">Weight harvested per month across all blocks</div>
+      <div class="chart-wrap"><canvas id="c_monthlyHarvest" height="160"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Harvest Weight by Block</div>
+      <div class="chart-sub">Comparison across M1, M2, M3</div>
+      <div class="chart-wrap"><canvas id="c_blockHarvest2" height="220"></canvas></div>
+    </div>
+    <div class="chart-card dark">
+      <div class="chart-title">Bunch Count by Block</div>
+      <div class="chart-sub">Number of bunches per block</div>
+      <div class="chart-wrap"><canvas id="c_blockCount" height="220"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Block Performance Summary</div>
+    <div class="chart-sub">Harvest weight, count and average per block</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Block</th><th>Total (kg)</th><th>Bunches</th><th>Avg (kg)</th><th>Share</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-gold">M1</span></td>
+            <td>5,572.3</td><td>361</td><td>15.44</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;min-width:60px;">
+                  <div style="width:35.7%;height:100%;background:var(--gold);border-radius:3px;"></div>
+                </div>
+                <span style="font-size:12px;color:var(--olive);">35.7%</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-gold">M2</span></td>
+            <td>5,781.8</td><td>363</td><td>15.93</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;min-width:60px;">
+                  <div style="width:37%;height:100%;background:var(--gold);border-radius:3px;"></div>
+                </div>
+                <span style="font-size:12px;color:var(--olive);">37.0%</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-olive">M3</span></td>
+            <td>4,273.9</td><td>310</td><td>13.79</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;min-width:60px;">
+                  <div style="width:27.3%;height:100%;background:var(--olive);border-radius:3px;"></div>
+                </div>
+                <span style="font-size:12px;color:var(--olive);">27.3%</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAGGING ═══════════════════════════════════════════════════════ -->
+<div id="tab-tagging" class="tab-panel">
+  <p class="section-title">Tagging Data</p>
+  <p class="section-sub">Mat tagging records across blocks M1–M9 — 2025 season, 18 tag types</p>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <span class="icon">🏷️</span>
+      <div class="value">9,449</div>
+      <div class="label">Total Mats Tagged</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🎨</span>
+      <div class="value">18</div>
+      <div class="label">Tag Colours Used</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🗺️</span>
+      <div class="value">8</div>
+      <div class="label">Blocks Tagged</div>
+      <div class="sub">M1 – M9 (excl. M8)</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🏆</span>
+      <div class="value">M3</div>
+      <div class="label">Top Tagged Block</div>
+      <div class="sub">1,804 mats</div>
+    </div>
+  </div>
+
+  <div class="chart-grid cols-2">
+    <div class="chart-card dark span-2">
+      <div class="chart-title">Mats Tagged by Block</div>
+      <div class="chart-sub">Total mats per block across all tag rounds in 2025</div>
+      <div class="chart-wrap"><canvas id="c_tagBlock2" height="160"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top Tag Colours by Volume</div>
+      <div class="chart-sub">Number of mats per tag colour</div>
+      <div class="chart-wrap"><canvas id="c_tagColour" height="260"></canvas></div>
+    </div>
+    <div class="chart-card dark">
+      <div class="chart-title">Tag Colour Distribution</div>
+      <div class="chart-sub">Proportional share of all tags</div>
+      <div class="chart-wrap" style="display:flex;justify-content:center;"><canvas id="c_tagPie" width="260" height="260"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-top:0;">
+    <div class="chart-title">Tag Volume by Colour — Detail</div>
+    <div class="chart-sub">All 18 tag types ranked by mat count</div>
+    <div id="tag-legend"></div>
+  </div>
+</div>
+
+<!-- ══ PUMP ═══════════════════════════════════════════════════════════ -->
+<div id="tab-pump" class="tab-panel">
+  <p class="section-title">Pump Log</p>
+  <p class="section-sub">Operating hours for Pumps 2, 3, 4 & 5 — 2021 to 2025</p>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <span class="icon">⚙️</span>
+      <div class="value">1,411<small style="font-size:13px"> hrs</small></div>
+      <div class="label">Total Operating Hours</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🔢</span>
+      <div class="value">4</div>
+      <div class="label">Active Pumps</div>
+      <div class="sub">Pump 2, 3, 4, 5</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📋</span>
+      <div class="value">246</div>
+      <div class="label">Log Entries</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">⚠️</span>
+      <div class="value">3</div>
+      <div class="label">Maintenance Events</div>
+      <div class="sub">Lubricant / Breakdown</div>
+    </div>
+  </div>
+
+  <div class="chart-grid cols-2">
+    <div class="chart-card dark span-2">
+      <div class="chart-title">Pump 2 — Operating Hours by Year</div>
+      <div class="chart-sub">Pump 2 has the longest operational history (2021–2025)</div>
+      <div class="chart-wrap"><canvas id="c_pump2year" height="160"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Hours Distribution by Pump</div>
+      <div class="chart-sub">All-time hours per pump</div>
+      <div class="chart-wrap"><canvas id="c_pumpPie" height="220"></canvas></div>
+    </div>
+    <div class="chart-card dark">
+      <div class="chart-title">2025 Pump Comparison</div>
+      <div class="chart-sub">Hours logged per pump in 2025 (all 4 active)</div>
+      <div class="chart-wrap"><canvas id="c_pump2025" height="220"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Pump Hours Summary</div>
+    <div class="chart-sub">By pump and year</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pump</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-gold">Pump 2</span></td>
+            <td>168</td><td>278</td><td>719</td><td>28</td><td>57</td>
+            <td><strong>1,250</strong></td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-olive">Pump 3</span></td>
+            <td>—</td><td>—</td><td>—</td><td>—</td><td>58</td>
+            <td><strong>58</strong></td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-olive">Pump 4</span></td>
+            <td>—</td><td>—</td><td>—</td><td>—</td><td>52</td>
+            <td><strong>52</strong></td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-olive">Pump 5</span></td>
+            <td>—</td><td>—</td><td>—</td><td>—</td><td>51</td>
+            <td><strong>51</strong></td>
+          </tr>
+          <tr style="background:rgba(168,147,90,0.05);">
+            <td><strong>Total</strong></td>
+            <td>168</td><td>278</td><td>719</td><td>28</td><td>218</td>
+            <td><strong>1,411</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ IRRIGATION ═════════════════════════════════════════════════════ -->
+<div id="tab-irrigation" class="tab-panel">
+  <p class="section-title">Irrigation Records</p>
+  <p class="section-sub">753 irrigation sessions across all blocks — 2020 to 2025</p>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <span class="icon">💧</span>
+      <div class="value">2,857<small style="font-size:13px"> L</small></div>
+      <div class="label">Total Fuel Used</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📅</span>
+      <div class="value">753</div>
+      <div class="label">Irrigation Sessions</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📈</span>
+      <div class="value">2023</div>
+      <div class="label">Peak Fuel Year</div>
+      <div class="sub">1,136 litres</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🗺️</span>
+      <div class="value">3.8<small style="font-size:13px"> L</small></div>
+      <div class="label">Avg Fuel / Session</div>
+    </div>
+  </div>
+
+  <div class="chart-grid cols-2">
+    <div class="chart-card dark span-2">
+      <div class="chart-title">Annual Fuel Consumption</div>
+      <div class="chart-sub">Total irrigation fuel used per year (litres)</div>
+      <div class="chart-wrap"><canvas id="c_irrYear" height="160"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top 10 Blocks by Fuel Consumed</div>
+      <div class="chart-sub">Aggregated across all years</div>
+      <div class="chart-wrap"><canvas id="c_irrBlock" height="260"></canvas></div>
+    </div>
+    <div class="chart-card dark">
+      <div class="chart-title">Session Count by Year</div>
+      <div class="chart-sub">Number of irrigation runs per year</div>
+      <div class="chart-wrap"><canvas id="c_irrSessions" height="260"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Annual Irrigation Summary</div>
+    <div class="chart-sub">Fuel used and sessions per year</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Year</th><th>Sessions</th><th>Fuel (L)</th><th>Avg L/Session</th><th>Fuel Share</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>2020</td><td>71</td><td>238.5</td><td>3.4</td>
+            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:8.3%;height:100%;background:var(--gold);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">8.3%</span></div></td>
+          </tr>
+          <tr>
+            <td>2021</td><td>112</td><td>392.5</td><td>3.5</td>
+            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:13.7%;height:100%;background:var(--gold);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">13.7%</span></div></td>
+          </tr>
+          <tr>
+            <td>2022</td><td>181</td><td>715.0</td><td>3.9</td>
+            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:25%;height:100%;background:var(--gold);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">25.0%</span></div></td>
+          </tr>
+          <tr>
+            <td>2023</td><td>310</td><td>1,136.0</td><td>3.7</td>
+            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:39.8%;height:100%;background:var(--olive);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">39.8%</span></div></td>
+          </tr>
+          <tr>
+            <td>2024</td><td>11</td><td>38.5</td><td>3.5</td>
+            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:1.3%;height:100%;background:var(--gold);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">1.3%</span></div></td>
+          </tr>
+          <tr>
+            <td>2025</td><td>68</td><td>327.5</td><td>4.8</td>
+            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:11.5%;height:100%;background:var(--gold);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">11.5%</span></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+/* ── GLOBAL CHART DEFAULTS ─────────────────────── */
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.color = '#7a7a7a';
+
+const NAVY   = '#0d2136';
+const GOLD   = '#a8935a';
+const CREAM  = '#f4f2ef';
+const SAND   = '#d8d0c6';
+const OLIVE  = '#81845a';
+const FOREST = '#2f3527';
+const GOLD_L = '#c4ac74';
+const GOLD_D = '#7a6b41';
+const NAVY_L = '#1a3352';
+
+/* ── TAB LOGIC ─────────────────────────────────── */
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+/* ── CHART HELPERS ─────────────────────────────── */
+function barOptions(dark=false, horizontal=false) {
+  return {
+    responsive: true,
+    indexAxis: horizontal ? 'y' : 'x',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: {
+        grid: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
+        ticks: { color: dark ? SAND : FOREST, font:{size:11} }
+      },
+      y: {
+        grid: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
+        ticks: { color: dark ? SAND : FOREST, font:{size:11} }
+      }
+    }
+  };
+}
+
+/* ═══════ OVERVIEW CHARTS ══════════════════════════════════════════ */
+new Chart(document.getElementById('c_blockHarvest'), {
+  type: 'bar',
+  data: {
+    labels: ['M1','M2','M3'],
+    datasets: [{
+      data: [5572.27, 5781.83, 4273.88],
+      backgroundColor: [GOLD, GOLD_L, OLIVE],
+      borderRadius: 6, borderSkipped: false
+    }]
+  },
+  options: {
+    ...barOptions(true),
+    plugins: { legend:{display:false},
+      tooltip:{ callbacks:{ label: ctx => ` ${ctx.parsed.y.toFixed(0)} kg` } }
+    }
+  }
+});
+
+new Chart(document.getElementById('c_tagBlock'), {
+  type: 'bar',
+  data: {
+    labels: ['M1','M2','M3','M4','M5','M6','M7','M9'],
+    datasets: [{
+      data: [1432,1735,1804,1679,1563,1128,105,3],
+      backgroundColor: [NAVY,NAVY,GOLD,NAVY,NAVY,NAVY,OLIVE,OLIVE].map((c,i)=> i===2? GOLD : NAVY_L),
+      borderRadius: 5, borderSkipped: false
+    }]
+  },
+  options: {
+    ...barOptions(false),
+    plugins: { legend:{display:false} }
+  }
+});
+
+new Chart(document.getElementById('c_pumpYear_ov'), {
+  type: 'line',
+  data: {
+    labels: ['2021','2022','2023','2024','2025'],
+    datasets: [{
+      data: [168, 278, 719, 28, 218],
+      borderColor: GOLD, backgroundColor: 'rgba(168,147,90,0.12)',
+      fill: true, tension: 0.4, pointBackgroundColor: GOLD, pointRadius: 4
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend:{display:false} },
+    scales: {
+      x: { grid:{color:'rgba(0,0,0,0.05)'}, ticks:{color:FOREST,font:{size:11}} },
+      y: { grid:{color:'rgba(0,0,0,0.05)'}, ticks:{color:FOREST,font:{size:11}} }
+    }
+  }
+});
+
+new Chart(document.getElementById('c_irrYear_ov'), {
+  type: 'bar',
+  data: {
+    labels: ['2020','2021','2022','2023','2024','2025'],
+    datasets: [{
+      data: [238.5, 392.5, 715.0, 1136.0, 38.5, 327.5],
+      backgroundColor: [GOLD_L,GOLD_L,GOLD,GOLD_L,OLIVE,GOLD_L],
+      borderRadius: 5, borderSkipped: false
+    }]
+  },
+  options: {
+    ...barOptions(true),
+    plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y} L`}}}
+  }
+});
+
+/* ═══════ HARVEST CHARTS ════════════════════════════════════════════ */
+new Chart(document.getElementById('c_monthlyHarvest'), {
+  type: 'bar',
+  data: {
+    labels: ['May 2021','June 2021'],
+    datasets: [{
+      label: 'kg harvested',
+      data: [3592.04, 12035.94],
+      backgroundColor: [OLIVE, GOLD],
+      borderRadius: 8, borderSkipped: false
+    }]
+  },
+  options: {
+    ...barOptions(true),
+    plugins:{ legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y.toFixed(0)} kg`}}
+    }
+  }
+});
+
+new Chart(document.getElementById('c_blockHarvest2'), {
+  type: 'bar',
+  data: {
+    labels: ['M1','M2','M3'],
+    datasets: [
+      { label:'Total (kg)', data:[5572.27,5781.83,4273.88], backgroundColor:[GOLD,GOLD_L,OLIVE], borderRadius:6, borderSkipped:false }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins:{ legend:{display:false} },
+    scales:{
+      x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST}},
+      y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST}}
+    }
+  }
+});
+
+new Chart(document.getElementById('c_blockCount'), {
+  type: 'doughnut',
+  data: {
+    labels: ['M1 (361)','M2 (363)','M3 (310)'],
+    datasets: [{
+      data: [361,363,310],
+      backgroundColor: [GOLD, GOLD_L, OLIVE],
+      borderWidth: 0, hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position:'bottom', labels:{color:SAND, font:{size:12}, padding:14} }
+    }
+  }
+});
+
+/* ═══════ TAGGING CHARTS ════════════════════════════════════════════ */
+new Chart(document.getElementById('c_tagBlock2'), {
+  type: 'bar',
+  data: {
+    labels: ['M1','M2','M3','M4','M5','M6','M7','M9'],
+    datasets: [{
+      data: [1432,1735,1804,1679,1563,1128,105,3],
+      backgroundColor: [NAVY_L,NAVY_L,GOLD,NAVY_L,NAVY_L,NAVY_L,OLIVE,OLIVE],
+      borderRadius:6, borderSkipped:false
+    }]
+  },
+  options:{
+    ...barOptions(true),
+    plugins:{legend:{display:false}}
+  }
+});
+
+const tagLabels = ['White ribbon','Yellow ribbon','Red ribbon','White','Blue','Dark green','Melow','Orange','White ulisi','Blue ribbon','Light green ribbon','Red ulisi','Mellon','Orange ribbon','Black ribbon','Green','Dark green wool','Light green wool'];
+const tagVals =   [1951,771,678,599,406,666,548,500,360,586,567,268,377,230,336,214,203,189];
+const tagColors = [
+  SAND, '#d4b44a', '#c0392b', '#e0ddd8', '#3b7dd8', '#2d5a27', OLIVE, '#e07b39', '#f0ece6',
+  '#4a90d9','#5d8a4a','#c23b2e','#e8a030','#e06030','#2d2d2d','#3d6e40','#1e4d1a','#4a7a1e'
+];
+
+new Chart(document.getElementById('c_tagColour'), {
+  type: 'bar',
+  data: {
+    labels: tagLabels.slice(0,10),
+    datasets: [{
+      data: tagVals.slice(0,10),
+      backgroundColor: tagColors.slice(0,10),
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis:'y', responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST,font:{size:10}}},
+      y:{grid:{color:'none'},ticks:{color:FOREST,font:{size:10}}}
+    }
+  }
+});
+
+new Chart(document.getElementById('c_tagPie'), {
+  type: 'doughnut',
+  data: {
+    labels: tagLabels,
+    datasets: [{
+      data: tagVals,
+      backgroundColor: tagColors,
+      borderWidth: 0, hoverOffset:6
+    }]
+  },
+  options:{
+    responsive:false,
+    plugins:{ legend:{display:false} }
+  }
+});
+
+// Build legend
+const maxTag = Math.max(...tagVals);
+const sorted = tagLabels.map((l,i)=>({l,v:tagVals[i],c:tagColors[i]})).sort((a,b)=>b.v-a.v);
+const legendEl = document.getElementById('tag-legend');
+sorted.forEach(({l,v,c})=>{
+  legendEl.innerHTML += `
+    <div class="legend-row">
+      <span><span class="colour-swatch" style="background:${c}"></span>${l}</span>
+      <div class="legend-bar-bg"><div class="legend-bar-fill" style="width:${(v/maxTag*100).toFixed(1)}%;background:${c};"></div></div>
+      <span class="legend-val">${v.toLocaleString()}</span>
+    </div>`;
+});
+
+/* ═══════ PUMP CHARTS ═══════════════════════════════════════════════ */
+new Chart(document.getElementById('c_pump2year'), {
+  type: 'bar',
+  data: {
+    labels: ['2021','2022','2023','2024','2025'],
+    datasets: [{
+      label:'Hours',
+      data: [168,278,719,28,57],
+      backgroundColor:[GOLD_L,GOLD_L,GOLD,OLIVE,GOLD_L],
+      borderRadius:6, borderSkipped:false
+    }]
+  },
+  options:{
+    ...barOptions(true),
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y} hrs`}}}
+  }
+});
+
+new Chart(document.getElementById('c_pumpPie'), {
+  type:'doughnut',
+  data:{
+    labels:['Pump 2 (1,250h)','Pump 3 (58h)','Pump 4 (52h)','Pump 5 (51h)'],
+    datasets:[{
+      data:[1250,58,52,51],
+      backgroundColor:[GOLD, OLIVE, FOREST, NAVY_L],
+      borderWidth:0, hoverOffset:6
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{position:'bottom', labels:{color:FOREST,font:{size:11},padding:12}}}
+  }
+});
+
+new Chart(document.getElementById('c_pump2025'), {
+  type:'bar',
+  data:{
+    labels:['Pump 2','Pump 3','Pump 4','Pump 5'],
+    datasets:[{
+      data:[57,58,52,51],
+      backgroundColor:[GOLD,GOLD_L,OLIVE,OLIVE],
+      borderRadius:6, borderSkipped:false
+    }]
+  },
+  options:{
+    ...barOptions(true),
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y} hrs`}}}
+  }
+});
+
+/* ═══════ IRRIGATION CHARTS ═════════════════════════════════════════ */
+new Chart(document.getElementById('c_irrYear'), {
+  type:'line',
+  data:{
+    labels:['2020','2021','2022','2023','2024','2025'],
+    datasets:[{
+      data:[238.5,392.5,715.0,1136.0,38.5,327.5],
+      borderColor: GOLD, backgroundColor:'rgba(168,147,90,0.12)',
+      fill:true, tension:0.4, pointBackgroundColor:GOLD, pointRadius:5, pointHoverRadius:7
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y} L`}}},
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:SAND,font:{size:11}}},
+      y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:SAND,font:{size:11}}}
+    }
+  }
+});
+
+new Chart(document.getElementById('c_irrBlock'), {
+  type:'bar',
+  data:{
+    labels:['M2,3','M5,6','M1,M2','M3','M1','M4','M8','M9','M3,4','M7'],
+    datasets:[{
+      data:[633.5,449.0,429.0,236.0,225.5,214.5,89.5,67.0,65.0,64.5],
+      backgroundColor: [GOLD,GOLD_L,GOLD_L,OLIVE,OLIVE,OLIVE,NAVY_L,NAVY_L,NAVY_L,NAVY_L],
+      borderRadius:4, borderSkipped:false
+    }]
+  },
+  options:{
+    indexAxis:'y', responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.x} L`}}},
+    scales:{
+      x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST,font:{size:10}}},
+      y:{grid:{color:'none'},ticks:{color:FOREST,font:{size:10}}}
+    }
+  }
+});
+
+new Chart(document.getElementById('c_irrSessions'), {
+  type:'bar',
+  data:{
+    labels:['2020','2021','2022','2023','2024','2025'],
+    datasets:[{
+      data:[71,112,181,310,11,68],
+      backgroundColor:[GOLD_L,GOLD_L,GOLD_L,GOLD,OLIVE,GOLD_L],
+      borderRadius:6, borderSkipped:false
+    }]
+  },
+  options:{
+    ...barOptions(true),
+    plugins:{legend:{display:false}}
+  }
+});
+</script>
+</body>
+</html>
