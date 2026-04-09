@@ -2,7 +2,7 @@
   "name": "Elim Farms - Data Hub",
   "short_name": "Elim Farms",
   "description": "Farm data collection and management tools",
-  "start_url": "/",
+  "start_url": "",
   "display": "standalone",
   "background_color": "0d2136",
   "theme_color": "#a8935a",
