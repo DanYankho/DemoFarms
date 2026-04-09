@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Elim Farms — Mobile</title>
+
+  <!-- D3 -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Georgia:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------- Base Styles ---------- */
+    :root {
+      --accent: #1e4a1e;
+      --accent-light: #2e6b2e;
+      --high-yield: #0f5c3f;
+      --selected: #e6b800;
+      --selected-light: #ffd966;
+      --default: #2c5282;
+      --ui: #1a1e24;
+      --muted: #5a6570;
+      --mobile-padding: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #f5f7fa;
+      font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow: hidden;
+      color: var(--ui);
+      touch-action: manipulation;
+    }
+
+    /* ---------- Header ---------- */
+    .header {
+      position: absolute;
+      top: 20px;
+      left: var(--mobile-padding);
+      right: var(--mobile-padding);
+      z-index: 75;
+      pointer-events: none;
+      text-align: center;
+    }
+    
+    .header.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .header h1 {
+      margin: 0 auto;
+      padding: 12px 18px;
+      font-size: clamp(18px, 5vw, 20px);
+      color: var(--accent);
+      background: rgba(255,255,255,0.85);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      font-weight: 700;
+      pointer-events: auto;
+      display: inline-block;
+      max-width: 100%;
+      white-space: normal;
+      line-height: 1.2;
+      font-family: 'Georgia', serif;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    /* Search dropdown */
+    .search-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      border: 1px solid #ddd;
+      width: 90%;
+      max-width: 300px;
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+      padding: 12px;
+      display: none;
+      z-index: 80;
+      pointer-events: auto;
+      max-height: 60vh;
+      overflow-y: auto;
+      margin-top: 8px;
+    }
+    
+    .search-dropdown input {
+      width: 100%;
+      padding: clamp(12px, 3vh, 14px);
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: clamp(14px, 4vw, 16px);
+      margin-bottom: 12px;
+      font-family: 'Libre Franklin', sans-serif;
+    }
+    
+    .search-dropdown input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(30, 74, 30, 0.1);
+    }
+    
+    .search-results-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .search-result-item {
+      padding: clamp(10px, 2.5vh, 14px);
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      font-size: clamp(14px, 4vw, 16px);
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+    
+    .search-result-item:hover {
+      background-color: #f5f5f5;
+      transform: translateX(5px);
+    }
+    
+    .search-result-item.highlighted {
+      background-color: #e8f3e8;
+      color: var(--accent);
+    }
+
+    /* Farm info footer - RESPONSIVE */
+    .farm-info {
+      position: absolute;
+      bottom: max(20px, 8vh);
+      left: max(12px, 3vw);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      z-index: 60;
+      pointer-events: none;
+      padding: clamp(10px, 2vh, 16px) clamp(12px, 3vw, 20px);
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      max-width: min(250px, 40vw);
+    }
+
+    .farm-name {
+      font-size: clamp(16px, 4vw, 18px);
+      font-weight: 700;
+      color: var(--accent);
+      font-family: 'Georgia', serif;
+      margin: 0;
+    }
+
+    .farm-stats {
+      font-size: clamp(12px, 3vw, 14px);
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* ---------- Map Container ---------- */
+    #map-container {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      overflow: hidden;
+    }
+    
+    svg { 
+      width: 100%; 
+      height: 100%; 
+      display: block; 
+      background: linear-gradient(145deg, #f0f4f8 0%, #e6ecf0 100%);
+    }
+
+    /* Block styles */
+    .block {
+      stroke: #ffffff;
+      stroke-width: 2px;
+      cursor: pointer;
+      paint-order: stroke;
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+      transition: filter 0.2s ease;
+    }
+    
+    /* Invisible click targets with thick transparent strokes */
+    .block-click-target {
+      fill: transparent !important;
+      stroke: transparent !important;
+      pointer-events: all !important;
+      cursor: pointer !important;
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+      stroke-width: clamp(16px, 5vw, 20px) !important; /* Responsive tap target */
+    }
+    
+    .block-click-target:focus, .block-click-target:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    
+    .block.selected {
+      stroke-width: 4px;
+      stroke: #ffffff;
+      filter: drop-shadow(0 0 15px rgba(230, 184, 0, 0.7)) brightness(1.1);
+    }
+    
+    .block.faded {
+      opacity: 0.2;
+      filter: grayscale(0.5);
+    }
+
+    /* Block labels */
+    .block-label {
+      font-size: clamp(8px, 2.5vw, 10px);
+      font-weight: 600;
+      fill: #1a1e24;
+      text-anchor: middle;
+      pointer-events: none;
+      user-select: none;
+      paint-order: stroke;
+      stroke: white;
+      stroke-width: 2px;
+      stroke-opacity: 0.8;
+      font-family: 'Libre Franklin', sans-serif;
+    }
+    
+    .block-label.hidden {
+      display: none;
+    }
+
+    /* ---------- Control Buttons (Right Side) - RESPONSIVE ---------- */
+    .control-buttons {
+      position: absolute;
+      right: max(8px, 2vw);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 70;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(8px, 2vh, 16px);
+    }
+    
+    .control-button-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .button-label {
+      font-size: clamp(8px, 2.2vw, 10px);
+      color: #333;
+      text-align: center;
+      font-weight: 600;
+      background: rgba(255,255,255,0.7);
+      padding: 2px 6px;
+      border-radius: 10px;
+      backdrop-filter: blur(4px);
+    }
+    
+    .control-button {
+      width: clamp(44px, 10vw, 52px);
+      height: clamp(44px, 10vw, 52px);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(20px, 5vw, 24px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    .control-button:active {
+      transform: scale(0.92);
+      background: var(--accent);
+      color: white;
+    }
+    
+    .control-button.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .control-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ---------- Bottom Panels - RESPONSIVE ---------- */
+    .info-panel, .stats-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0;
+      background: #ffffff;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+      z-index: 90;
+      overflow: hidden;
+      padding: 0;
+      transform: translateY(100%);
+      transition: transform 0.3s ease, height 0s 0.3s;
+    }
+    
+    .info-panel.visible, .stats-panel.visible { 
+      height: min(55vh, 500px);
+      transform: translateY(0);
+      transition: transform 0.3s ease, height 0s;
+    }
+    
+    .panel-header {
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 10;
+      padding: clamp(16px, 3vh, 20px) clamp(16px, 4vw, 20px) clamp(10px, 2vh, 12px);
+      border-bottom: 1px solid #edf2f7;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .panel-content {
+      height: calc(100% - 70px);
+      overflow-y: auto;
+      padding: 0 clamp(16px, 4vw, 20px) clamp(16px, 3vh, 20px);
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .panel-title { 
+      color: var(--accent); 
+      font-weight: 700; 
+      font-size: clamp(20px, 5vw, 24px);
+      font-family: 'Georgia', serif;
+      margin: 0;
+    }
+    
+    .panel-subtitle { 
+      color: var(--muted); 
+      font-size: clamp(14px, 3.5vw, 16px);
+      font-weight: 500;
+      margin: 4px 0 0;
+    }
+    
+    /* Close button */
+    .close-button {
+      width: clamp(36px, 8vw, 44px);
+      height: clamp(36px, 8vw, 44px);
+      border-radius: 50%;
+      background: rgba(0,0,0,0.05);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(20px, 5vw, 24px);
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: all 0.2s ease;
+    }
+    
+    .close-button:active {
+      background: rgba(0,0,0,0.1);
+      transform: scale(0.92);
+    }
+
+    /* Detail rows */
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: clamp(12px, 2.5vh, 16px) 0;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      color: #4a5568;
+      font-weight: 600;
+      font-size: clamp(14px, 3.5vw, 16px);
+    }
+
+    .detail-value {
+      color: #1a202c;
+      font-weight: 700;
+      font-size: clamp(15px, 4vw, 18px);
+      font-family: 'Libre Franklin', sans-serif;
+    }
+
+    /* Density chart */
+    .density-chart {
+      width: 100%;
+      height: clamp(60px, 10vh, 80px);
+      background: #edf2f7;
+      border-radius: 12px;
+      margin: clamp(15px, 3vh, 20px) 0;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .density-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #9ae6b4, var(--accent));
+      border-radius: 12px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .chart-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #1a202c;
+      font-weight: 700;
+      font-size: clamp(13px, 3.5vw, 15px);
+      text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+      font-family: 'Georgia', serif;
+      background: rgba(255,255,255,0.9);
+      padding: 4px 12px;
+      border-radius: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    /* Stats panels */
+    .stats-title {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: clamp(20px, 5vw, 24px);
+      margin: 0;
+      font-family: 'Georgia', serif;
+    }
+    
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: clamp(14px, 3.5vw, 16px);
+    }
+    
+    .stats-table tr {
+      border-bottom: 1px solid #edf2f7;
+      height: clamp(48px, 8vh, 56px);
+    }
+    
+    .stats-table tr:last-child {
+      border-bottom: none;
+    }
+    
+    .stats-table td {
+      padding: clamp(8px, 2vh, 12px) clamp(6px, 2vw, 8px);
+      vertical-align: middle;
+    }
+    
+    .stats-table .stat-name {
+      font-weight: 600;
+      color: #4a5568;
+    }
+    
+    .stats-table .stat-value {
+      text-align: right;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    /* Help modal */
+    .help-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 85%;
+      max-width: 360px;
+      max-height: 80vh;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      z-index: 1000;
+      padding: 0;
+      overflow: hidden;
+      display: none;
+    }
+    
+    .help-panel.visible {
+      display: block;
+    }
+    
+    .help-panel-header {
+      position: relative;
+      padding: clamp(16px, 3vh, 20px) clamp(16px, 4vw, 20px) clamp(12px, 2vh, 15px);
+      border-bottom: 1px solid #edf2f7;
+      background: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .help-panel-header h2 {
+      color: var(--accent);
+      margin: 0;
+      font-size: clamp(18px, 5vw, 22px);
+      font-family: 'Georgia', serif;
+    }
+
+    .help-close-button {
+      width: clamp(36px, 8vw, 40px);
+      height: clamp(36px, 8vw, 40px);
+      border-radius: 50%;
+      background: rgba(0,0,0,0.05);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(18px, 5vw, 22px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .help-close-button:active {
+      background: rgba(0,0,0,0.1);
+      transform: scale(0.92);
+    }
+
+    .help-panel-content {
+      max-height: calc(80vh - 80px);
+      overflow-y: auto;
+      padding: 0 clamp(16px, 4vw, 20px) clamp(16px, 3vh, 20px);
+    }
+    
+    .help-item {
+      margin-bottom: clamp(12px, 2.5vh, 16px);
+      padding-bottom: clamp(12px, 2.5vh, 16px);
+      border-bottom: 1px solid #edf2f7;
+    }
+    
+    .help-item:last-child {
+      border-bottom: none;
+    }
+    
+    .help-item h3 {
+      margin: 0 0 6px 0;
+      font-size: clamp(15px, 4vw, 17px);
+      color: var(--accent);
+      font-weight: 700;
+    }
+    
+    .help-item p {
+      margin: 0;
+      font-size: clamp(13px, 3.5vw, 15px);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      display: none;
+    }
+    
+    .overlay.visible {
+      display: block;
+    }
+
+    /* Loading indicator */
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background: rgba(255,255,255,0.95);
+      padding: clamp(16px, 4vh, 20px) clamp(20px, 5vw, 24px);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: clamp(8px, 2vw, 12px);
+      backdrop-filter: blur(8px);
+    }
+    
+    .loading-spinner {
+      width: clamp(20px, 5vw, 24px);
+      height: clamp(20px, 5vw, 24px);
+      border: 3px solid rgba(30, 74, 30, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--accent);
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ---------- RESPONSIVE ADJUSTMENTS ---------- */
+    
+    /* Height-based adjustments */
+    @media (max-height: 700px) {
+      .info-panel.visible, .stats-panel.visible { 
+        height: 65vh;
+      }
+      
+      .control-buttons {
+        gap: 8px;
+      }
+    }
+
+    @media (max-height: 500px) {
+      .info-panel.visible, .stats-panel.visible { 
+        height: 75vh;
+      }
+      
+      .farm-info {
+        bottom: 10px;
+        padding: 8px 12px;
+      }
+      
+      .farm-name {
+        font-size: 16px;
+      }
+      
+      .farm-stats {
+        font-size: 12px;
+      }
+      
+      .control-button {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+    }
+
+    /* Very small screens */
+    @media (max-width: 320px) {
+      .control-button {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+      
+      .button-label {
+        font-size: 8px;
+        padding: 2px 4px;
+      }
+      
+      .header h1 {
+        font-size: 16px;
+        padding: 8px 12px;
+      }
+    }
+
+    /* Landscape orientation */
+    @media (orientation: landscape) and (max-height: 450px) {
+      .farm-info {
+        bottom: 10px;
+        left: 10px;
+        padding: 6px 10px;
+      }
+      
+      .farm-name {
+        font-size: 14px;
+      }
+      
+      .farm-stats {
+        font-size: 11px;
+      }
+      
+      .control-button {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+      }
+      
+      .button-label {
+        font-size: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header" id="header">
+    <h1 id="page-title">🍌 Elim Farms</h1>
+    <div id="searchDropdown" class="search-dropdown" role="menu" aria-hidden="true">
+      <input type="text" id="block-search" placeholder="Search blocks..." autocomplete="off" />
+      <div id="search-results" class="search-results-list"></div>
+    </div>
+  </div>
+
+  <div class="farm-info" id="farmInfo">
+    <p class="farm-name" id="farmNameDisplay">Elim Farms</p>
+    <p class="farm-stats" id="farmStatsDisplay">Loading...</p>
+  </div>
+
+  <div id="map-container">
+    <svg id="map-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
+    
+    <div class="control-buttons">
+      <div class="control-button-wrapper">
+        <button id="summary-button" class="control-button" aria-label="Show farm summary">📊</button>
+        <span class="button-label">Summary</span>
+      </div>
+      <div class="control-button-wrapper">
+        <button id="blocks-button" class="control-button" aria-label="Show all blocks">🌱</button>
+        <span class="button-label">Blocks</span>
+      </div>
+      <div class="control-button-wrapper">
+        <button id="search-button" class="control-button" aria-label="Search blocks">🔍</button>
+        <span class="button-label">Search</span>
+      </div>
+      <div class="control-button-wrapper">
+        <button id="prev-block" class="control-button" aria-label="Previous block">←</button>
+        <span class="button-label">Prev</span>
+      </div>
+      <div class="control-button-wrapper">
+        <button id="next-block" class="control-button" aria-label="Next block">→</button>
+        <span class="button-label">Next</span>
+      </div>
+      <div class="control-button-wrapper">
+        <button id="help-button" class="control-button" aria-label="Show help">❓</button>
+        <span class="button-label">Help</span>
+      </div>
+    </div>
+    
+    <!-- Bottom Panels -->
+    <div id="block-panel" class="info-panel" role="dialog" aria-hidden="true">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title" id="block-panel-title">Block Details</div>
+          <div class="panel-subtitle" id="block-panel-subtitle"></div>
+        </div>
+        <button class="close-button" aria-label="Close panel">×</button>
+      </div>
+      <div class="panel-content" id="block-panel-content"></div>
+    </div>
+    
+    <div id="summary-panel" class="stats-panel">
+      <div class="panel-header">
+        <div class="stats-title">Farm Summary</div>
+        <button class="close-button" aria-label="Close panel">×</button>
+      </div>
+      <div class="panel-content">
+        <table class="stats-table" id="summary-table"></table>
+      </div>
+    </div>
+    
+    <div id="blocks-panel" class="stats-panel">
+      <div class="panel-header">
+        <div class="stats-title">All Blocks</div>
+        <button class="close-button" aria-label="Close panel">×</button>
+      </div>
+      <div class="panel-content">
+        <table class="stats-table" id="blocks-table"></table>
+      </div>
+    </div>
+    
+    <div id="loading" class="loading" style="display: none;">
+      <div class="loading-spinner"></div>
+      <span>Loading farm data...</span>
+    </div>
+  </div>
+
+  <div id="overlay" class="overlay"></div>
+  <div id="help-panel" class="help-panel">
+    <div class="help-panel-header">
+      <h2>How to Use</h2>
+      <button class="help-close-button" aria-label="Close help">×</button>
+    </div>
+    <div class="help-panel-content">
+      <div class="help-item">
+        <h3>Exploring Blocks</h3>
+        <p>Tap any block on the map to view detailed statistics. The map will zoom in and show block-specific data.</p>
+      </div>
+      <div class="help-item">
+        <h3>Farm Summary</h3>
+        <p>Use the 📊 button to view overall farm statistics including total area, trees, and yields.</p>
+      </div>
+      <div class="help-item">
+        <h3>All Blocks</h3>
+        <p>The 🌱 button shows a complete list of all blocks with their key metrics.</p>
+      </div>
+      <div class="help-item">
+        <h3>Search</h3>
+        <p>Tap 🔍 to search for specific blocks by name. Results appear as you type.</p>
+      </div>
+      <div class="help-item">
+        <h3>Navigation</h3>
+        <p>Use ← → buttons to cycle through blocks.</p>
+      </div>
+      <div class="help-item">
+        <h3>Color Legend</h3>
+        <p><span style="color: #2c5282;">●</span> Normal · <span style="color: #e6b800;">●</span> Selected · <span style="color: #0f5c3f;">●</span> High Yield</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    // Performance optimization
+    const isSlowDevice = /(android|iphone|ipod|ipad).*os\s([0-9]+)_/i.test(navigator.userAgent) && 
+                         parseInt(RegExp.$2, 10) < 12 || 
+                         /Android [0-7]/.test(navigator.userAgent);
+
+    // ---------- CONFIG ----------
+    let showLabels = true;
+
+    // UI Elements
+    const mapContainer = document.getElementById("map-container");
+    const svg = d3.select("#map-svg");
+    let width = mapContainer.clientWidth, height = mapContainer.clientHeight;
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+    const mapGroup = svg.append("g").attr("id", "mapGroup");
+    const header = d3.select("#header");
+    const farmInfo = d3.select("#farmInfo");
+    const loadingIndicator = d3.select("#loading");
+    
+    // Buttons
+    const summaryButton = d3.select("#summary-button");
+    const blocksButton = d3.select("#blocks-button");
+    const searchButton = d3.select("#search-button");
+    const prevButton = d3.select("#prev-block");
+    const nextButton = d3.select("#next-block");
+    const helpButton = d3.select("#help-button");
+    
+    // Panels
+    const blockPanel = d3.select("#block-panel");
+    const summaryPanel = d3.select("#summary-panel");
+    const blocksPanel = d3.select("#blocks-panel");
+    const helpPanel = d3.select("#help-panel");
+    const overlay = d3.select("#overlay");
+    
+    // Search
+    const searchDropdown = d3.select("#searchDropdown");
+    const blockSearch = d3.select("#block-search");
+    const searchResults = d3.select("#search-results");
+    
+    // Panel content
+    const blockPanelTitle = d3.select("#block-panel-title");
+    const blockPanelSubtitle = d3.select("#block-panel-subtitle");
+    const blockPanelContent = d3.select("#block-panel-content");
+    const summaryTable = d3.select("#summary-table");
+    const blocksTable = d3.select("#blocks-table");
+    
+    // Farm info display
+    const farmStatsDisplay = d3.select("#farmStatsDisplay");
+
+    // Projection & path
+    const projection = d3.geoIdentity().reflectY(true);
+    const path = d3.geoPath().projection(projection);
+
+    // State
+    let geoData = null;
+    let csvData = [];
+    let dataMap = {};
+    let blocks = [];
+    let blockRanks = {};
+    let blockSelection = null;
+    let clickLayer = null;
+    let blockLabels = null;
+    let zoomBehavior = null;
+    let selectedBlock = null;
+    let selectedBlockIndex = -1;
+    let currentTransform = d3.zoomIdentity;
+    let activePanel = null;
+
+    // Configuration
+    const config = {
+      colors: {
+        default: "#2c5282",
+        selected: "#e6b800",
+        highYield: "#0f5c3f"
+      },
+      thresholds: {
+        highYield: 1000,
+        labelTruncate: 12
+      },
+      map: {
+        scale: 0.9,
+        padding: 0.05,
+        labelBaseFontSize: 11
+      },
+      animation: {
+        fast: 200,
+        normal: 400,
+        slow: 800,
+        zoomIn: 1000,
+        zoomOut: 800
+      }
+    };
+
+    // Debounce function
+    function debounce(func, wait) {
+      let timeout;
+      return function() {
+        const context = this, args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+      };
+    }
+
+    // ---------- Data Loading ----------
+    async function loadData() {
+      try {
+        loadingIndicator.style("display", "flex");
+        
+        const [geo, csv] = await Promise.all([
+          d3.json("ElimFarms.geojson"),
+          d3.csv("farm_data.csv")
+        ]);
+        
+        geoData = geo;
+        csvData = csv;
+        
+        // Build data map
+        dataMap = {};
+        blocks = [];
+        csvData.forEach(d => {
+          const blockName = d["Block Name"];
+          if (blockName) {
+            dataMap[blockName] = d;
+            blocks.push(blockName);
+          }
+        });
+        
+        // Calculate ranks
+        calculateBlockRanks();
+        
+        // Update farm info display
+        updateFarmInfo();
+        
+        // Initialize map
+        initMap();
+        
+        loadingIndicator.style("display", "none");
+        console.log("Mobile farm dashboard loaded", blocks.length, "blocks");
+        
+      } catch (error) {
+        console.error("Error loading data:", error);
+        loadingIndicator.style("display", "none");
+        alert("Error loading farm data. Please check console.");
+      }
+    }
+
+    function calculateBlockRanks() {
+      const blocksWithYield = blocks.map(blockName => {
+        const data = dataMap[blockName];
+        const plants = parseFloat(data["Plants per hectare"]) || 0;
+        const weight = parseFloat(data["Average Bunch Weight"]) || 0;
+        const yieldValue = plants * weight;
+        return { name: blockName, yield: yieldValue };
+      }).sort((a, b) => b.yield - a.yield);
+      
+      blocksWithYield.forEach((item, index) => {
+        blockRanks[item.name] = index + 1;
+      });
+    }
+
+    function updateFarmInfo() {
+      const totalArea = csvData.reduce((sum, d) => sum + (parseFloat(d["Block Size"]) || 0), 0);
+      farmStatsDisplay.text(`${blocks.length} blocks · ${totalArea.toFixed(0)} ha`);
+    }
+
+    // ---------- Map Initialization - RESPONSIVE ----------
+    function initMap() {
+      const bounds = d3.geoBounds(geoData);
+      
+      // Calculate scale to fit map with padding
+      const dx = bounds[1][0] - bounds[0][0];
+      const dy = bounds[1][1] - bounds[0][1];
+      
+      // Responsive base scale - smaller on small screens
+      const baseScale = Math.min(width, height) < 400 ? 0.065 : 0.075;
+      const scale = baseScale / Math.max(dx / width, dy / height);
+      
+      // Center the map
+      const centerX = (bounds[0][0] + bounds[1][0]) / 2;
+      const centerY = (bounds[0][1] + bounds[1][1]) / 2;
+      
+      // Responsive offsets - proportional to screen size
+      const xOffset = width * -0.03; // -3% of screen width
+      const yOffset = height * -0.25; // -25% of screen height
+      
+      projection
+        .scale(scale)
+        .translate([
+          (width/2 - scale * centerX) + xOffset,
+          (height/2 - scale * centerY) + yOffset
+        ]);
+      
+      // Draw blocks
+      blockSelection = mapGroup.append("g").attr("class", "blocks")
+        .selectAll("path")
+        .data(geoData.features)
+        .enter()
+        .append("path")
+        .attr("class", "block")
+        .attr("d", d => {
+          try {
+            return path(d);
+          } catch (e) {
+            console.warn("Error drawing block:", d.properties?.Field_Name, e);
+            return null;
+          }
+        })
+        .attr("fill", d => getBlockColor(d))
+        .style("stroke-width", "2px")
+        .style("stroke", "#ffffff");
+
+      // Add invisible click layer
+      addClickLayer();
+
+      // Initialize zoom
+      initZoom();
+
+      // Add block labels
+      addBlockLabels();
+
+      // Set up event listeners
+      setupEventListeners();
+      
+      console.log("Map initialized with scale:", scale);
+    }
+
+    function getBlockColor(feature) {
+      const fieldName = feature.properties?.Field_Name;
+      if (!fieldName) return config.colors.default;
+      
+      const blockData = dataMap[fieldName];
+      if (!blockData) return config.colors.default;
+      
+      const plants = parseFloat(blockData["Plants per hectare"]) || 0;
+      const weight = parseFloat(blockData["Average Bunch Weight"]) || 0;
+      const estimatedYield = plants * weight;
+      
+      if (fieldName === selectedBlock) {
+        return config.colors.selected;
+      } else if (estimatedYield > config.thresholds.highYield) {
+        return config.colors.highYield;
+      }
+      
+      return config.colors.default;
+    }
+
+    // ---------- Click Layer ----------
+    function addClickLayer() {
+      if (!geoData || !geoData.features) return;
+      
+      removeClickLayer();
+      
+      clickLayer = mapGroup.append("g").attr("class", "click-layer");
+
+      clickLayer.selectAll("path")
+        .data(geoData.features)
+        .enter()
+        .append("path")
+        .attr("class", "block-click-target")
+        .attr("d", d => {
+          try {
+            return path(d);
+          } catch (e) {
+            return null;
+          }
+        })
+        .style("fill", "transparent")
+        .style("stroke", "transparent")
+        .style("stroke-width", "20px")
+        .style("pointer-events", "all")
+        .style("cursor", "pointer")
+        .on("click", function(event, d) {
+          onBlockClick(event, d);
+        })
+        .on("touchstart", function(event, d) {
+          event.preventDefault();
+          onBlockClick(event, d);
+        });
+    }
+
+    function removeClickLayer() {
+      d3.selectAll(".click-layer").remove();
+      clickLayer = null;
+    }
+
+    // ---------- Block Labels ----------
+    function addBlockLabels() {
+      if (!geoData || !geoData.features) return;
+      
+      removeBlockLabels();
+      
+      const labelsGroup = mapGroup.append("g")
+        .attr("class", "block-labels");
+
+      blockLabels = labelsGroup.selectAll("text")
+        .data(geoData.features)
+        .enter()
+        .append("text")
+        .attr("class", "block-label")
+        .text(d => {
+          const name = d.properties?.Field_Name || "";
+          return name.length > 8 ? name.substring(0, 6) + "…" : name;
+        })
+        .attr("x", d => {
+          try {
+            const centroid = path.centroid(d);
+            return centroid[0];
+          } catch (e) {
+            return 0;
+          }
+        })
+        .attr("y", d => {
+          try {
+            const centroid = path.centroid(d);
+            return centroid[1];
+          } catch (e) {
+            return 0;
+          }
+        });
+    }
+
+    function removeBlockLabels() {
+      d3.selectAll(".block-labels").remove();
+      blockLabels = null;
+    }
+
+    function updateLabelPositions() {
+      if (!blockLabels) return;
+      
+      blockLabels
+        .attr("x", d => {
+          try {
+            const centroid = path.centroid(d);
+            const transformed = currentTransform.apply(centroid);
+            return transformed[0];
+          } catch (e) {
+            return 0;
+          }
+        })
+        .attr("y", d => {
+          try {
+            const centroid = path.centroid(d);
+            const transformed = currentTransform.apply(centroid);
+            return transformed[1];
+          } catch (e) {
+            return 0;
+          }
+        });
+    }
+
+    // ---------- Zoom ----------
+    function initZoom() {
+      zoomBehavior = d3.zoom()
+        .scaleExtent([1, 8])
+        .on("zoom", (event) => {
+          currentTransform = event.transform;
+          mapGroup.attr("transform", event.transform);
+          updateLabelPositions();
+        });
+      svg.call(zoomBehavior);
+    }
+
+    // ---------- Focus on Block - RESPONSIVE ----------
+    function focusOnBlock(feature) {
+      try {
+        const bounds = path.bounds(feature);
+        const dx = bounds[1][0] - bounds[0][0];
+        const dy = bounds[1][1] - bounds[0][1];
+        const x = (bounds[0][0] + bounds[1][0]) / 2;
+        const y = (bounds[0][1] + bounds[1][1]) / 2;
+        
+        // Responsive zoom level
+        const targetScale = Math.min(width, height) < 400 ? 0.9 : 0.8;
+        const scale = Math.max(1.5, Math.min(6, targetScale / Math.max(dx / (width * 0.6), dy / (height * 0.6))));
+        
+        // Responsive vertical centering
+        const verticalAnchor = height < 600 ? 0.35 : 0.4;
+        const translate = [width * 0.5 - scale * x, height * verticalAnchor - scale * y];
+
+        const newTransform = d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale);
+        currentTransform = newTransform;
+        svg.call(zoomBehavior.transform, newTransform);
+        
+        updateLabelPositions();
+      } catch (e) {
+        console.warn("Error focusing on block:", e);
+      }
+    }
+
+    function resetView() {
+      selectedBlock = null;
+      selectedBlockIndex = -1;
+      
+      currentTransform = d3.zoomIdentity;
+      svg.call(zoomBehavior.transform, currentTransform);
+      
+      if (blockSelection) {
+        blockSelection.classed("faded", false).classed("selected", false);
+        blockSelection.attr("fill", d => getBlockColor(d));
+      }
+    
+      hideAllPanels();
+      
+      header.classed("hidden", false);
+      farmInfo.classed("hidden", false);
+      
+      updateLabelPositions();
+      
+      if (blockLabels) {
+        blockLabels.classed("hidden", false);
+      }
+    }
+
+    // ---------- Block Click Handler ----------
+    function onBlockClick(event, d) {
+      const fieldName = d.properties?.Field_Name;
+      if (!fieldName) return;
+      
+      if (selectedBlock === fieldName) {
+        resetView();
+        return;
+      }
+      
+      selectedBlock = fieldName;
+      selectedBlockIndex = blocks.indexOf(fieldName);
+      
+      // Update visual state
+      blockSelection.classed("faded", dd => dd !== d);
+      blockSelection.classed("selected", dd => dd === d);
+      blockSelection.attr("fill", dd => getBlockColor(dd));
+      
+      // Hide header, show panel
+      header.classed("hidden", true);
+      farmInfo.classed("hidden", true);
+      
+      // Zoom to block
+      focusOnBlock(d);
+      
+      // Show block panel
+      showPanel(blockPanel);
+      updateBlockPanel(d);
+      
+      // Hide labels
+      if (blockLabels) {
+        blockLabels.classed("hidden", true);
+      }
+    }
+
+    function updateBlockPanel(feature) {
+      const fieldName = feature.properties?.Field_Name;
+      const data = dataMap[fieldName];
+      if (!data) return;
+      
+      blockPanelTitle.text(fieldName);
+      
+      const plants = parseFloat(data["Plants per hectare"]) || 0;
+      const weight = parseFloat(data["Average Bunch Weight"]) || 0;
+      const size = parseFloat(data["Block Size"]) || 0;
+      const totalTrees = plants * size;
+      const estimatedYield = plants * weight;
+      const rank = blockRanks[fieldName] || "—";
+      
+      let rankSuffix = "th";
+      if (rank % 10 === 1 && rank % 100 !== 11) rankSuffix = "st";
+      else if (rank % 10 === 2 && rank % 100 !== 12) rankSuffix = "nd";
+      else if (rank % 10 === 3 && rank % 100 !== 13) rankSuffix = "rd";
+      
+      const rankText = rank !== "—" ? `${rank}${rankSuffix}` : "—";
+      
+      blockPanelSubtitle.text(`Rank: #${rankText} · ${size.toFixed(1)} ha`);
+      
+      const html = `
+        <div class="detail-row">
+          <span class="detail-label">Block Size</span>
+          <span class="detail-value">${size.toFixed(1)} ha</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Plants per Hectare</span>
+          <span class="detail-value">${plants.toLocaleString()}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Total Trees</span>
+          <span class="detail-value">${Math.round(totalTrees).toLocaleString()}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Avg Bunch Weight</span>
+          <span class="detail-value">${weight} kg</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Est. Yield</span>
+          <span class="detail-value">${estimatedYield.toFixed(1)} kg/ha</span>
+        </div>
+        <div style="margin-top: 20px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span style="font-weight: 700; color: var(--accent);">Plant Density</span>
+            <span style="font-weight: 600; color: var(--accent);">${plants.toLocaleString()} plants/ha</span>
+          </div>
+          <div class="density-chart">
+            <div class="density-fill" style="width: ${calculateDensityPercent(plants)}%"></div>
+            <div class="chart-label">${calculateDensityPercent(plants)}% of max</div>
+          </div>
+        </div>
+      `;
+      
+      blockPanelContent.html(html);
+    }
+
+    function calculateDensityPercent(plants) {
+      const maxPlants = Math.max(...csvData.map(d => parseFloat(d["Plants per hectare"]) || 0));
+      return maxPlants > 0 ? Math.round((plants / maxPlants) * 100) : 0;
+    }
+
+    // ---------- Panel Management ----------
+    function showPanel(panel) {
+      hideAllPanels();
+      panel.classed("visible", true).attr("aria-hidden", "false");
+      activePanel = panel;
+    }
+    
+    function hideAllPanels() {
+      blockPanel.classed("visible", false).attr("aria-hidden", "true");
+      summaryPanel.classed("visible", false).attr("aria-hidden", "true");
+      blocksPanel.classed("visible", false).attr("aria-hidden", "true");
+      activePanel = null;
+    }
+
+    // ---------- Summary Panel ----------
+    function updateSummaryPanel() {
+      const totalArea = csvData.reduce((sum, d) => sum + (parseFloat(d["Block Size"]) || 0), 0);
+      const totalTrees = csvData.reduce((sum, d) => {
+        const plants = parseFloat(d["Plants per hectare"]) || 0;
+        const size = parseFloat(d["Block Size"]) || 0;
+        return sum + (plants * size);
+      }, 0);
+      
+      const avgDensity = totalArea > 0 ? totalTrees / totalArea : 0;
+      
+      const weightedWeight = csvData.reduce((sum, d) => {
+        const weight = parseFloat(d["Average Bunch Weight"]) || 0;
+        const size = parseFloat(d["Block Size"]) || 0;
+        return sum + (weight * size);
+      }, 0);
+      
+      const avgWeight = totalArea > 0 ? weightedWeight / totalArea : 0;
+      
+      const totalYield = csvData.reduce((sum, d) => {
+        const plants = parseFloat(d["Plants per hectare"]) || 0;
+        const weight = parseFloat(d["Average Bunch Weight"]) || 0;
+        const size = parseFloat(d["Block Size"]) || 0;
+        return sum + (plants * weight * size);
+      }, 0);
+      
+      const highYieldCount = csvData.filter(d => {
+        const plants = parseFloat(d["Plants per hectare"]) || 0;
+        const weight = parseFloat(d["Average Bunch Weight"]) || 0;
+        return (plants * weight) > config.thresholds.highYield;
+      }).length;
+      
+      const html = `
+        <tr><td class="stat-name">Total Area</td><td class="stat-value">${totalArea.toFixed(1)} ha</td></tr>
+        <tr><td class="stat-name">Total Blocks</td><td class="stat-value">${blocks.length}</td></tr>
+        <tr><td class="stat-name">Total Trees</td><td class="stat-value">${Math.round(totalTrees).toLocaleString()}</td></tr>
+        <tr><td class="stat-name">Avg Density</td><td class="stat-value">${Math.round(avgDensity).toLocaleString()}/ha</td></tr>
+        <tr><td class="stat-name">Avg Bunch Weight</td><td class="stat-value">${avgWeight.toFixed(1)} kg</td></tr>
+        <tr><td class="stat-name">Est. Total Yield</td><td class="stat-value">${Math.round(totalYield).toLocaleString()} kg</td></tr>
+        <tr><td class="stat-name">High Yield Blocks</td><td class="stat-value">${highYieldCount}</td></tr>
+      `;
+      
+      summaryTable.html(html);
+    }
+
+    // ---------- Blocks Panel ----------
+    function updateBlocksPanel() {
+      let html = '';
+      
+      blocks.forEach(blockName => {
+        const data = dataMap[blockName];
+        const size = parseFloat(data["Block Size"]) || 0;
+        const plants = parseFloat(data["Plants per hectare"]) || 0;
+        const trees = plants * size;
+        
+        html += `
+          <tr style="cursor: pointer;" data-block="${blockName}">
+            <td class="stat-name">${blockName}</td>
+            <td class="stat-value">${size.toFixed(1)} ha</td>
+            <td class="stat-value">${Math.round(trees).toLocaleString()}</td>
+          </tr>
+        `;
+      });
+      
+      blocksTable.html(html);
+      
+      // Add click handlers
+      blocksTable.selectAll("tr").on("click", function() {
+        const blockName = d3.select(this).attr("data-block");
+        const feature = geoData.features.find(f => f.properties?.Field_Name === blockName);
+        if (feature) {
+          onBlockClick({ currentTarget: null }, feature);
+          hideAllPanels();
+          showPanel(blockPanel);
+        }
+      });
+    }
+
+    // ---------- Search ----------
+    function setupSearch() {
+      searchButton.on("click", function() {
+        const expanded = searchDropdown.style("display") === "block";
+        if (expanded) hideSearchDropdown(); else showSearchDropdown();
+      });
+      
+      blockSearch.on("input", debounce(function() {
+        const query = this.value.toLowerCase().trim();
+        if (query.length < 2) {
+          searchResults.html("");
+          return;
+        }
+        
+        const matches = blocks.filter(b => b.toLowerCase().includes(query))
+          .slice(0, 10);
+        
+        searchResults.html("");
+        matches.forEach(block => {
+          searchResults.append("div")
+            .attr("class", "search-result-item")
+            .text(block)
+            .on("click", function() {
+              const feature = geoData.features.find(f => f.properties?.Field_Name === block);
+              if (feature) {
+                onBlockClick({ currentTarget: null }, feature);
+                hideSearchDropdown();
+              }
+            });
+        });
+      }, 300));
+      
+      document.addEventListener('click', function(event) {
+        if (!event.target.closest('.header')) {
+          hideSearchDropdown();
+        }
+      });
+      
+      // Keyboard navigation
+      blockSearch.on("keydown", function(event) {
+        const items = searchResults.selectAll(".search-result-item").nodes();
+        if (!items.length) return;
+        
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          const current = searchResults.select(".highlighted");
+          if (current.empty()) {
+            d3.select(items[0]).classed("highlighted", true);
+          } else {
+            const next = d3.select(current.node().nextSibling);
+            current.classed("highlighted", false);
+            if (!next.empty()) next.classed("highlighted", true);
+          }
+        } else if (event.key === "ArrowUp") {
+          event.preventDefault();
+          const current = searchResults.select(".highlighted");
+          if (!current.empty()) {
+            const prev = d3.select(current.node().previousSibling);
+            current.classed("highlighted", false);
+            if (!prev.empty()) prev.classed("highlighted", true);
+          }
+        } else if (event.key === "Enter") {
+          const highlighted = searchResults.select(".highlighted");
+          if (!highlighted.empty()) {
+            highlighted.node().click();
+          }
+        } else if (event.key === "Escape") {
+          hideSearchDropdown();
+          blockSearch.node().blur();
+        }
+      });
+    }
+
+    function showSearchDropdown() {
+      searchDropdown.style("display", "block").attr("aria-hidden", "false");
+      setTimeout(() => blockSearch.node().focus(), 100);
+    }
+    
+    function hideSearchDropdown() {
+      searchDropdown.style("display", "none").attr("aria-hidden", "true");
+      blockSearch.node().value = "";
+      searchResults.html("");
+    }
+
+    // ---------- Help ----------
+    function setupHelp() {
+      helpButton.on("click", showHelpPanel);
+      
+      d3.select("#help-panel .help-close-button").on("click", hideHelpPanel);
+      overlay.on("click", hideHelpPanel);
+      
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          hideHelpPanel();
+        }
+      });
+    }
+
+    function showHelpPanel() {
+      helpPanel.classed("visible", true);
+      overlay.classed("visible", true);
+    }
+
+    function hideHelpPanel() {
+      helpPanel.classed("visible", false);
+      overlay.classed("visible", false);
+    }
+
+    // ---------- Navigation ----------
+    function selectPreviousBlock() {
+      if (blocks.length === 0) return;
+      
+      let newIndex;
+      if (selectedBlockIndex === -1) {
+        newIndex = blocks.length - 1;
+      } else {
+        newIndex = (selectedBlockIndex - 1 + blocks.length) % blocks.length;
+      }
+      
+      navigateToBlock(newIndex);
+    }
+    
+    function selectNextBlock() {
+      if (blocks.length === 0) return;
+      
+      let newIndex;
+      if (selectedBlockIndex === -1) {
+        newIndex = 0;
+      } else {
+        newIndex = (selectedBlockIndex + 1) % blocks.length;
+      }
+      
+      navigateToBlock(newIndex);
+    }
+    
+    function navigateToBlock(index) {
+      const blockName = blocks[index];
+      const feature = geoData.features.find(f => f.properties?.Field_Name === blockName);
+      if (feature) {
+        onBlockClick({ currentTarget: null }, feature);
+      }
+    }
+
+    // ---------- Event Listeners ----------
+    function setupEventListeners() {
+      // Button handlers
+      summaryButton.on("click", function() {
+        updateSummaryPanel();
+        showPanel(summaryPanel);
+        header.classed("hidden", true);
+        farmInfo.classed("hidden", true);
+      });
+      
+      blocksButton.on("click", function() {
+        updateBlocksPanel();
+        showPanel(blocksPanel);
+        header.classed("hidden", true);
+        farmInfo.classed("hidden", true);
+      });
+      
+      prevButton.on("click", selectPreviousBlock);
+      nextButton.on("click", selectNextBlock);
+      
+      // Close buttons
+      d3.select("#block-panel .close-button").on("click", resetView);
+      d3.select("#summary-panel .close-button").on("click", resetView);
+      d3.select("#blocks-panel .close-button").on("click", resetView);
+      
+      // Search
+      setupSearch();
+      
+      // Help
+      setupHelp();
+      
+      // Background click
+      svg.on("click", (event) => {
+        const target = event.target;
+        if (target && target.tagName && target.tagName.toLowerCase() === 'svg') {
+          resetView();
+        }
+      });
+      
+      // Resize handler - RESPONSIVE
+      window.addEventListener("resize", debounce(() => {
+        width = mapContainer.clientWidth;
+        height = mapContainer.clientHeight;
+        svg.attr("viewBox", `0 0 ${width} ${height}`);
+        
+        // Recalculate projection with same responsive logic
+        const bounds = d3.geoBounds(geoData);
+        const dx = bounds[1][0] - bounds[0][0];
+        const dy = bounds[1][1] - bounds[0][1];
+        
+        const baseScale = Math.min(width, height) < 400 ? 0.065 : 0.075;
+        const scale = baseScale / Math.max(dx / width, dy / height);
+        
+        const centerX = (bounds[0][0] + bounds[1][0]) / 2;
+        const centerY = (bounds[0][1] + bounds[1][1]) / 2;
+        
+        const xOffset = width * -0.03;
+        const yOffset = height * -0.25;
+        
+        projection
+          .scale(scale)
+          .translate([
+            (width/2 - scale * centerX) + xOffset,
+            (height/2 - scale * centerY) + yOffset
+          ]);
+        
+        // Redraw everything
+        svg.selectAll("path").attr("d", d => {
+          try {
+            return path(d);
+          } catch (e) {
+            return null;
+          }
+        });
+        
+        removeClickLayer();
+        addClickLayer();
+        
+        removeBlockLabels();
+        addBlockLabels();
+        
+        if (selectedBlock) {
+          const feature = geoData.features.find(f => f.properties?.Field_Name === selectedBlock);
+          if (feature) focusOnBlock(feature);
+        }
+      }, 250));
+    }
+
+    // Start everything
+    loadData();
+  })();
+  </script>
+</body>
+</html>
