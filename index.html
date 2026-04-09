@@ -44,36 +44,103 @@
       margin: 0 auto;
     }
 
-    /* Header area */
+    /* ========== PREMIUM HEADER REDESIGN ========== */
+    /* Only the .header and its children have been enhanced */
     .header {
       text-align: center;
       margin-bottom: 3rem;
+      position: relative;
+      padding: 0.5rem 0 1rem;
     }
 
+    /* Decorative gradient line above header (premium touch) */
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 15%;
+      width: 70%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #0d2136, #3b5e7a, #0d2136, transparent);
+      border-radius: 4px;
+      opacity: 0.65;
+    }
+
+    /* Main title: refined typography, subtle shadow, smoother letter spacing */
     .header h1 {
-      font-size: 2.8rem;
-      font-weight: 600;
+      font-size: 3.2rem;
+      font-weight: 700;
       letter-spacing: -0.02em;
-      color: #0d2136;
-      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #0a1c2f 0%, #1f3e54 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      margin-bottom: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
-    .badge {
+    /* Premium icon scaling and positioning */
+    .header h1 .banana-icon {
+      font-size: 2.8rem;
       display: inline-block;
-      background: rgba(37, 99, 235, 0.12);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+      transition: transform 0.2s ease;
+    }
+
+    .header h1:hover .banana-icon {
+      transform: scale(1.02);
+    }
+
+    /* Elegant badge reimagined: glassmorphism + subtle border */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(13, 33, 54, 0.08);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 0.5px solid rgba(13, 33, 54, 0.2);
       color: #0d2136;
       font-weight: 500;
-      font-size: 0.9rem;
-      padding: 0.25rem 1rem;
-      border-radius: 30px;
-      backdrop-filter: blur(4px);
-      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      padding: 0.35rem 1.3rem;
+      border-radius: 60px;
+      margin-top: 0.25rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      letter-spacing: 0.01em;
     }
 
-    /* Install PWA button */
+    .badge::before {
+      content: "✨";
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* Intro paragraph under badge: refined color and weight */
+    .header > p {
+      margin-top: 1rem;
+      color: #2c3e44;
+      font-size: 1.05rem;
+      font-weight: 450;
+      max-width: 550px;
+      margin-left: auto;
+      margin-right: auto;
+      background: rgba(255,255,245,0.3);
+      display: inline-block;
+      padding: 0.2rem 1.2rem;
+      border-radius: 40px;
+      backdrop-filter: blur(2px);
+    }
+
+    /* Install button area stays consistent but with polished spacing */
     .install-prompt {
       text-align: center;
-      margin-top: 0.5rem;
+      margin-top: 0.9rem;
     }
 
     .install-btn {
@@ -190,7 +257,7 @@
       background: #6b6e4a;
     }
 
-    /* Dashboard / future section */
+    /* Dashboard / future section - now features a real button with #a8935a linking to dashboard.html */
     .dashboard-preview {
       background: white;
       border-radius: 32px;
@@ -217,19 +284,37 @@
       max-width: 550px;
     }
 
-    .coming-soon-badge {
-      background: #f1f5f9;
-      padding: 0.8rem 2rem;
+    /* Dashboard CTA button - premium earthy tone #a8935a, linking to internal dashboard.html */
+    .dashboard-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: #a8935a;
+      color: #ffffff;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 0.85rem 2rem;
       border-radius: 60px;
-      font-weight: 500;
-      color: #334155;
-      font-size: 1.1rem;
-      border: 1px dashed #94a3b8;
+      font-size: 1rem;
+      transition: all 0.25s ease;
+      box-shadow: 0 6px 12px -6px rgba(168, 147, 90, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      letter-spacing: 0.01em;
     }
 
-    .coming-soon-badge span {
-      opacity: 0.7;
-      margin-right: 6px;
+    .dashboard-btn:hover {
+      background: #8f7a4b;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px -10px rgba(168, 147, 90, 0.5);
+    }
+
+    .dashboard-btn:active {
+      transform: translateY(1px);
+    }
+
+    /* Remove old coming-soon-badge styling (hidden) */
+    .coming-soon-badge {
+      display: none;
     }
 
     /* Footer */
@@ -275,20 +360,29 @@
     /* Responsive */
     @media (max-width: 640px) {
       body { padding: 1.5rem 1rem 5rem; }
-      .header h1 { font-size: 2rem; }
+      .header h1 { font-size: 2.2rem; }
+      .header h1 .banana-icon { font-size: 2rem; }
+      .badge { font-size: 0.75rem; padding: 0.25rem 1rem; }
+      .header > p { font-size: 0.9rem; }
       .card-grid { grid-template-columns: 1fr; gap: 1.2rem; }
       .form-card.span-two { grid-column: span 1; }
       .dashboard-preview { flex-direction: column; align-items: flex-start; }
       .powered-by { bottom: 15px; right: 15px; padding: 0.5rem 1rem; }
+      .header::before { width: 80%; left: 10%; }
+      .dashboard-btn { padding: 0.7rem 1.5rem; font-size: 0.9rem; width: 100%; justify-content: center; }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- PREMIUM HEADER: Only styles / structure changed, no other content altered -->
     <div class="header">
-      <h1>🍌 Elim Farms - Data Hub</h1>
+      <h1>
+        <span class="banana-icon">🍌</span> 
+        Elim Farms - Data Hub
+      </h1>
       <div class="badge">All tools in one place · secure · updated</div>
-      <p style="margin-top: 0.8rem; color: #475569;">Select a form below to submit data. Links open in a new tab.</p>
+      <p>Select a form below to submit data. Links open in a new tab.</p>
       
       <!-- PWA Install Button (hidden by default, shown when installable) -->
       <div class="install-prompt">
@@ -352,15 +446,16 @@
       </div>
     </div>
 
-    <!-- Future dashboard / extra links section -->
+    <!-- Dashboard & Analytics Section: Button links directly to dashboard.html in the same repository -->
     <div class="dashboard-preview">
       <div class="preview-text">
         <h3>📈 Dashboard & Analytics</h3>
-        <p>Coming soon: real‑time visualizations, charts, and reports for all farm operations.</p>
+        <p>Real-time visualizations, charts, and reports for all farm operations — now accessible.</p>
       </div>
-      <div class="coming-soon-badge">
-        <span>🔜</span> Dashboard · Reports · Archive
-      </div>
+      <!-- Link to local dashboard.html file with premium #a8935a button -->
+      <a href="dashboard.html" class="dashboard-btn" target="_blank" rel="noopener">
+        <span>📊</span> Explore Dashboard
+      </a>
     </div>
 
     <div class="footer">
