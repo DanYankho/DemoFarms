@@ -8,7 +8,7 @@
   <!-- D3 -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Georgia:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600:700&family=Georgia:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     /* ---------- Base Styles ---------- */
@@ -22,6 +22,7 @@
       --ui: #1a1e24;
       --muted: #5a6570;
       --mobile-padding: 16px;
+      --click-target-stroke: clamp(16px, 5vw, 24px);
     }
 
     * {
@@ -81,6 +82,7 @@
     .search-dropdown {
       position: absolute;
       top: 100%;
+      bottom: auto;
       left: 50%;
       transform: translateX(-50%);
       background: #fff;
@@ -93,9 +95,16 @@
       display: none;
       z-index: 80;
       pointer-events: auto;
-      max-height: 60vh;
+      max-height: 50vh;
       overflow-y: auto;
       margin-top: 8px;
+    }
+    
+    .search-dropdown.flipped {
+      top: auto;
+      bottom: 100%;
+      margin-top: 0;
+      margin-bottom: 8px;
     }
     
     .search-dropdown input {
@@ -142,7 +151,7 @@
       color: var(--accent);
     }
 
-    /* Farm info footer - RESPONSIVE */
+    /* Farm info footer */
     .farm-info {
       position: absolute;
       bottom: max(20px, 8vh);
@@ -204,7 +213,6 @@
       transition: filter 0.2s ease;
     }
     
-    /* Invisible click targets with thick transparent strokes */
     .block-click-target {
       fill: transparent !important;
       stroke: transparent !important;
@@ -212,7 +220,7 @@
       cursor: pointer !important;
       outline: none !important;
       -webkit-tap-highlight-color: transparent !important;
-      stroke-width: clamp(16px, 5vw, 20px) !important; /* Responsive tap target */
+      stroke-width: var(--click-target-stroke) !important;
     }
     
     .block-click-target:focus, .block-click-target:active {
@@ -229,6 +237,12 @@
     .block.faded {
       opacity: 0.2;
       filter: grayscale(0.5);
+    }
+    
+    .block.high-yield-pattern {
+      stroke-dasharray: 4 2;
+      stroke-width: 3px;
+      stroke: rgba(255,255,255,0.9);
     }
 
     /* Block labels */
@@ -250,7 +264,7 @@
       display: none;
     }
 
-    /* ---------- Control Buttons (Right Side) - RESPONSIVE ---------- */
+    /* ---------- Control Buttons ---------- */
     .control-buttons {
       position: absolute;
       right: max(8px, 2vw);
@@ -314,7 +328,7 @@
       transform: none;
     }
 
-    /* ---------- Bottom Panels - RESPONSIVE ---------- */
+    /* ---------- Bottom Panels ---------- */
     .info-panel, .stats-panel {
       position: fixed;
       bottom: 0;
@@ -372,7 +386,6 @@
       margin: 4px 0 0;
     }
     
-    /* Close button */
     .close-button {
       width: clamp(36px, 8vw, 44px);
       height: clamp(36px, 8vw, 44px);
@@ -629,87 +642,31 @@
     }
 
     /* ---------- RESPONSIVE ADJUSTMENTS ---------- */
-    
-    /* Height-based adjustments */
     @media (max-height: 700px) {
-      .info-panel.visible, .stats-panel.visible { 
-        height: 65vh;
-      }
-      
-      .control-buttons {
-        gap: 8px;
-      }
+      .info-panel.visible, .stats-panel.visible { height: 65vh; }
+      .control-buttons { gap: 8px; }
     }
 
     @media (max-height: 500px) {
-      .info-panel.visible, .stats-panel.visible { 
-        height: 75vh;
-      }
-      
-      .farm-info {
-        bottom: 10px;
-        padding: 8px 12px;
-      }
-      
-      .farm-name {
-        font-size: 16px;
-      }
-      
-      .farm-stats {
-        font-size: 12px;
-      }
-      
-      .control-button {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-      }
+      .info-panel.visible, .stats-panel.visible { height: 75vh; }
+      .farm-info { bottom: 10px; padding: 8px 12px; }
+      .farm-name { font-size: 16px; }
+      .farm-stats { font-size: 12px; }
+      .control-button { width: 40px; height: 40px; font-size: 18px; }
     }
 
-    /* Very small screens */
     @media (max-width: 320px) {
-      .control-button {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-      }
-      
-      .button-label {
-        font-size: 8px;
-        padding: 2px 4px;
-      }
-      
-      .header h1 {
-        font-size: 16px;
-        padding: 8px 12px;
-      }
+      .control-button { width: 40px; height: 40px; font-size: 18px; }
+      .button-label { font-size: 8px; padding: 2px 4px; }
+      .header h1 { font-size: 16px; padding: 8px 12px; }
     }
 
-    /* Landscape orientation */
     @media (orientation: landscape) and (max-height: 450px) {
-      .farm-info {
-        bottom: 10px;
-        left: 10px;
-        padding: 6px 10px;
-      }
-      
-      .farm-name {
-        font-size: 14px;
-      }
-      
-      .farm-stats {
-        font-size: 11px;
-      }
-      
-      .control-button {
-        width: 38px;
-        height: 38px;
-        font-size: 16px;
-      }
-      
-      .button-label {
-        font-size: 8px;
-      }
+      .farm-info { bottom: 10px; left: 10px; padding: 6px 10px; }
+      .farm-name { font-size: 14px; }
+      .farm-stats { font-size: 11px; }
+      .control-button { width: 38px; height: 38px; font-size: 16px; }
+      .button-label { font-size: 8px; }
     }
   </style>
 </head>
@@ -717,9 +674,9 @@
 <body>
   <div class="header" id="header">
     <h1 id="page-title">🍌 Elim Farms</h1>
-    <div id="searchDropdown" class="search-dropdown" role="menu" aria-hidden="true">
-      <input type="text" id="block-search" placeholder="Search blocks..." autocomplete="off" />
-      <div id="search-results" class="search-results-list"></div>
+    <div id="searchDropdown" class="search-dropdown" role="search" aria-hidden="true">
+      <input type="text" id="block-search" placeholder="Search blocks..." autocomplete="off" aria-label="Search blocks by name" />
+      <div id="search-results" class="search-results-list" role="listbox"></div>
     </div>
   </div>
 
@@ -729,7 +686,13 @@
   </div>
 
   <div id="map-container">
-    <svg id="map-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
+    <svg id="map-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <pattern id="highYieldPattern" patternUnits="userSpaceOnUse" width="8" height="8">
+          <circle cx="4" cy="4" r="2" fill="rgba(255,255,255,0.85)" />
+        </pattern>
+      </defs>
+    </svg>
     
     <div class="control-buttons">
       <div class="control-button-wrapper">
@@ -759,7 +722,7 @@
     </div>
     
     <!-- Bottom Panels -->
-    <div id="block-panel" class="info-panel" role="dialog" aria-hidden="true">
+    <div id="block-panel" class="info-panel" role="dialog" aria-modal="true" aria-hidden="true">
       <div class="panel-header">
         <div>
           <div class="panel-title" id="block-panel-title">Block Details</div>
@@ -770,7 +733,7 @@
       <div class="panel-content" id="block-panel-content"></div>
     </div>
     
-    <div id="summary-panel" class="stats-panel">
+    <div id="summary-panel" class="stats-panel" role="dialog" aria-modal="true" aria-hidden="true">
       <div class="panel-header">
         <div class="stats-title">Farm Summary</div>
         <button class="close-button" aria-label="Close panel">×</button>
@@ -780,7 +743,7 @@
       </div>
     </div>
     
-    <div id="blocks-panel" class="stats-panel">
+    <div id="blocks-panel" class="stats-panel" role="dialog" aria-modal="true" aria-hidden="true">
       <div class="panel-header">
         <div class="stats-title">All Blocks</div>
         <button class="close-button" aria-label="Close panel">×</button>
@@ -796,8 +759,8 @@
     </div>
   </div>
 
-  <div id="overlay" class="overlay"></div>
-  <div id="help-panel" class="help-panel">
+  <div id="overlay" class="overlay" aria-hidden="true"></div>
+  <div id="help-panel" class="help-panel" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="help-panel-header">
       <h2>How to Use</h2>
       <button class="help-close-button" aria-label="Close help">×</button>
@@ -825,20 +788,20 @@
       </div>
       <div class="help-item">
         <h3>Color Legend</h3>
-        <p><span style="color: #2c5282;">●</span> Normal · <span style="color: #e6b800;">●</span> Selected · <span style="color: #0f5c3f;">●</span> High Yield</p>
+        <p><span style="color: #2c5282;">●</span> Normal · <span style="color: #e6b800;">●</span> Selected · <span style="color: #0f5c3f;">●</span> High Yield <span style="font-size:0.8em">(dotted border)</span></p>
       </div>
     </div>
   </div>
 
   <script>
   (function(){
-    // Performance optimization
     const isSlowDevice = /(android|iphone|ipod|ipad).*os\s([0-9]+)_/i.test(navigator.userAgent) && 
                          parseInt(RegExp.$2, 10) < 12 || 
                          /Android [0-7]/.test(navigator.userAgent);
 
     // ---------- CONFIG ----------
     let showLabels = true;
+    let cachedMaxPlants = null;
 
     // UI Elements
     const mapContainer = document.getElementById("map-container");
@@ -851,7 +814,6 @@
     const farmInfo = d3.select("#farmInfo");
     const loadingIndicator = d3.select("#loading");
     
-    // Buttons
     const summaryButton = d3.select("#summary-button");
     const blocksButton = d3.select("#blocks-button");
     const searchButton = d3.select("#search-button");
@@ -859,33 +821,27 @@
     const nextButton = d3.select("#next-block");
     const helpButton = d3.select("#help-button");
     
-    // Panels
     const blockPanel = d3.select("#block-panel");
     const summaryPanel = d3.select("#summary-panel");
     const blocksPanel = d3.select("#blocks-panel");
     const helpPanel = d3.select("#help-panel");
     const overlay = d3.select("#overlay");
     
-    // Search
     const searchDropdown = d3.select("#searchDropdown");
     const blockSearch = d3.select("#block-search");
     const searchResults = d3.select("#search-results");
     
-    // Panel content
     const blockPanelTitle = d3.select("#block-panel-title");
     const blockPanelSubtitle = d3.select("#block-panel-subtitle");
     const blockPanelContent = d3.select("#block-panel-content");
     const summaryTable = d3.select("#summary-table");
     const blocksTable = d3.select("#blocks-table");
     
-    // Farm info display
     const farmStatsDisplay = d3.select("#farmStatsDisplay");
 
-    // Projection & path
     const projection = d3.geoIdentity().reflectY(true);
     const path = d3.geoPath().projection(projection);
 
-    // State
     let geoData = null;
     let csvData = [];
     let dataMap = {};
@@ -899,8 +855,9 @@
     let selectedBlockIndex = -1;
     let currentTransform = d3.zoomIdentity;
     let activePanel = null;
+    let lastFocusedElement = null;
 
-    // Configuration
+    // 🔧 CONFIGURATION - ZOOM & OFFSET SETTINGS
     const config = {
       colors: {
         default: "#2c5282",
@@ -914,7 +871,11 @@
       map: {
         scale: 0.9,
         padding: 0.05,
-        labelBaseFontSize: 11
+        labelBaseFontSize: 11,
+        // ✅ NEW: Zoom & movement settings
+        initialZoomFactor: 0.85,  // 0.85 = 15% zoom out (lower = more zoom out)
+        offsetX: 30,               // Horizontal shift: negative = left, positive = right
+        offsetY: 100              // Vertical shift: negative = UP, positive = DOWN (SVG Y-axis!)
       },
       animation: {
         fast: 200,
@@ -925,7 +886,6 @@
       }
     };
 
-    // Debounce function
     function debounce(func, wait) {
       let timeout;
       return function() {
@@ -935,7 +895,42 @@
       };
     }
 
-    // ---------- Data Loading ----------
+    function trapFocus(element) {
+      const focusableSelectors = [
+        'button', '[href]', 'input', 'select', 'textarea', '[tabindex]:not([tabindex="-1"])'
+      ].join(',');
+      const focusableElements = element.querySelectorAll(focusableSelectors);
+      const firstFocusable = focusableElements[0];
+      const lastFocusable = focusableElements[focusableElements.length - 1];
+
+      function handleKeyDown(e) {
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey) {
+          if (document.activeElement === firstFocusable) {
+            e.preventDefault();
+            lastFocusable.focus();
+          }
+        } else {
+          if (document.activeElement === lastFocusable) {
+            e.preventDefault();
+            firstFocusable.focus();
+          }
+        }
+      }
+
+      element.addEventListener('keydown', handleKeyDown);
+      if (firstFocusable) firstFocusable.focus();
+      
+      return () => element.removeEventListener('keydown', handleKeyDown);
+    }
+
+    // ✅ Helper: Apply zoom + offset to projection
+    function applyMapTransform() {
+      projection.scale(projection.scale() * config.map.initialZoomFactor);
+      const t = projection.translate();
+      projection.translate([t[0] + config.map.offsetX, t[1] + config.map.offsetY]);
+    }
+
     async function loadData() {
       try {
         loadingIndicator.style("display", "flex");
@@ -948,7 +943,6 @@
         geoData = geo;
         csvData = csv;
         
-        // Build data map
         dataMap = {};
         blocks = [];
         csvData.forEach(d => {
@@ -959,13 +953,9 @@
           }
         });
         
-        // Calculate ranks
         calculateBlockRanks();
-        
-        // Update farm info display
+        cachedMaxPlants = Math.max(...csvData.map(d => parseFloat(d["Plants per hectare"]) || 0), 1);
         updateFarmInfo();
-        
-        // Initialize map
         initMap();
         
         loadingIndicator.style("display", "none");
@@ -983,8 +973,7 @@
         const data = dataMap[blockName];
         const plants = parseFloat(data["Plants per hectare"]) || 0;
         const weight = parseFloat(data["Average Bunch Weight"]) || 0;
-        const yieldValue = plants * weight;
-        return { name: blockName, yield: yieldValue };
+        return { name: blockName, yield: plants * weight };
       }).sort((a, b) => b.yield - a.yield);
       
       blocksWithYield.forEach((item, index) => {
@@ -997,34 +986,10 @@
       farmStatsDisplay.text(`${blocks.length} blocks · ${totalArea.toFixed(0)} ha`);
     }
 
-    // ---------- Map Initialization - RESPONSIVE ----------
     function initMap() {
-      const bounds = d3.geoBounds(geoData);
+      projection.fitSize([width, height], geoData);
+      applyMapTransform(); // ✅ Apply zoom + offset here
       
-      // Calculate scale to fit map with padding
-      const dx = bounds[1][0] - bounds[0][0];
-      const dy = bounds[1][1] - bounds[0][1];
-      
-      // Responsive base scale - smaller on small screens
-      const baseScale = Math.min(width, height) < 400 ? 0.065 : 0.075;
-      const scale = baseScale / Math.max(dx / width, dy / height);
-      
-      // Center the map
-      const centerX = (bounds[0][0] + bounds[1][0]) / 2;
-      const centerY = (bounds[0][1] + bounds[1][1]) / 2;
-      
-      // Responsive offsets - proportional to screen size
-      const xOffset = width * -0.03; // -3% of screen width
-      const yOffset = height * -0.25; // -25% of screen height
-      
-      projection
-        .scale(scale)
-        .translate([
-          (width/2 - scale * centerX) + xOffset,
-          (height/2 - scale * centerY) + yOffset
-        ]);
-      
-      // Draw blocks
       blockSelection = mapGroup.append("g").attr("class", "blocks")
         .selectAll("path")
         .data(geoData.features)
@@ -1032,30 +997,18 @@
         .append("path")
         .attr("class", "block")
         .attr("d", d => {
-          try {
-            return path(d);
-          } catch (e) {
-            console.warn("Error drawing block:", d.properties?.Field_Name, e);
-            return null;
-          }
+          try { return path(d); } catch (e) { console.warn("Error drawing block:", d.properties?.Field_Name, e); return null; }
         })
         .attr("fill", d => getBlockColor(d))
         .style("stroke-width", "2px")
         .style("stroke", "#ffffff");
 
-      // Add invisible click layer
       addClickLayer();
-
-      // Initialize zoom
       initZoom();
-
-      // Add block labels
       addBlockLabels();
-
-      // Set up event listeners
       setupEventListeners();
       
-      console.log("Map initialized with scale:", scale);
+      console.log("Map initialized with zoom:", config.map.initialZoomFactor, "offset:", [config.map.offsetX, config.map.offsetY]);
     }
 
     function getBlockColor(feature) {
@@ -1069,20 +1022,24 @@
       const weight = parseFloat(blockData["Average Bunch Weight"]) || 0;
       const estimatedYield = plants * weight;
       
-      if (fieldName === selectedBlock) {
-        return config.colors.selected;
-      } else if (estimatedYield > config.thresholds.highYield) {
-        return config.colors.highYield;
+      const blockEl = d3.select(`.block[data-field="${fieldName}"]`);
+      if (estimatedYield > config.thresholds.highYield && fieldName !== selectedBlock) {
+        blockEl.classed("high-yield-pattern", true);
+      } else {
+        blockEl.classed("high-yield-pattern", false);
       }
       
+      if (fieldName === selectedBlock) return config.colors.selected;
+      if (estimatedYield > config.thresholds.highYield) return config.colors.highYield;
       return config.colors.default;
     }
 
-    // ---------- Click Layer ----------
     function addClickLayer() {
       if (!geoData || !geoData.features) return;
-      
       removeClickLayer();
+      
+      const strokeValue = getComputedStyle(document.documentElement)
+        .getPropertyValue('--click-target-stroke').trim() || '20px';
       
       clickLayer = mapGroup.append("g").attr("class", "click-layer");
 
@@ -1091,25 +1048,15 @@
         .enter()
         .append("path")
         .attr("class", "block-click-target")
-        .attr("d", d => {
-          try {
-            return path(d);
-          } catch (e) {
-            return null;
-          }
-        })
+        .attr("d", d => { try { return path(d); } catch (e) { return null; } })
+        .attr("data-field", d => d.properties?.Field_Name || "")
         .style("fill", "transparent")
         .style("stroke", "transparent")
-        .style("stroke-width", "20px")
+        .style("stroke-width", strokeValue)
         .style("pointer-events", "all")
         .style("cursor", "pointer")
-        .on("click", function(event, d) {
-          onBlockClick(event, d);
-        })
-        .on("touchstart", function(event, d) {
-          event.preventDefault();
-          onBlockClick(event, d);
-        });
+        .on("click", (event, d) => onBlockClick(event, d))
+        .on("touchstart", (event, d) => { event.preventDefault(); onBlockClick(event, d); });
     }
 
     function removeClickLayer() {
@@ -1117,40 +1064,24 @@
       clickLayer = null;
     }
 
-    // ---------- Block Labels ----------
     function addBlockLabels() {
       if (!geoData || !geoData.features) return;
-      
       removeBlockLabels();
       
-      const labelsGroup = mapGroup.append("g")
-        .attr("class", "block-labels");
+      const labelsGroup = mapGroup.append("g").attr("class", "block-labels");
 
       blockLabels = labelsGroup.selectAll("text")
         .data(geoData.features)
         .enter()
         .append("text")
         .attr("class", "block-label")
+        .attr("data-field", d => d.properties?.Field_Name || "")
         .text(d => {
           const name = d.properties?.Field_Name || "";
           return name.length > 8 ? name.substring(0, 6) + "…" : name;
         })
-        .attr("x", d => {
-          try {
-            const centroid = path.centroid(d);
-            return centroid[0];
-          } catch (e) {
-            return 0;
-          }
-        })
-        .attr("y", d => {
-          try {
-            const centroid = path.centroid(d);
-            return centroid[1];
-          } catch (e) {
-            return 0;
-          }
-        });
+        .attr("x", d => { try { return path.centroid(d)[0]; } catch (e) { return 0; } })
+        .attr("y", d => { try { return path.centroid(d)[1]; } catch (e) { return 0; } });
     }
 
     function removeBlockLabels() {
@@ -1160,29 +1091,11 @@
 
     function updateLabelPositions() {
       if (!blockLabels) return;
-      
       blockLabels
-        .attr("x", d => {
-          try {
-            const centroid = path.centroid(d);
-            const transformed = currentTransform.apply(centroid);
-            return transformed[0];
-          } catch (e) {
-            return 0;
-          }
-        })
-        .attr("y", d => {
-          try {
-            const centroid = path.centroid(d);
-            const transformed = currentTransform.apply(centroid);
-            return transformed[1];
-          } catch (e) {
-            return 0;
-          }
-        });
+        .attr("x", d => { try { return currentTransform.apply(path.centroid(d))[0]; } catch (e) { return 0; } })
+        .attr("y", d => { try { return currentTransform.apply(path.centroid(d))[1]; } catch (e) { return 0; } });
     }
 
-    // ---------- Zoom ----------
     function initZoom() {
       zoomBehavior = d3.zoom()
         .scaleExtent([1, 8])
@@ -1194,7 +1107,6 @@
       svg.call(zoomBehavior);
     }
 
-    // ---------- Focus on Block - RESPONSIVE ----------
     function focusOnBlock(feature) {
       try {
         const bounds = path.bounds(feature);
@@ -1203,18 +1115,14 @@
         const x = (bounds[0][0] + bounds[1][0]) / 2;
         const y = (bounds[0][1] + bounds[1][1]) / 2;
         
-        // Responsive zoom level
-        const targetScale = Math.min(width, height) < 400 ? 0.9 : 0.8;
-        const scale = Math.max(1.5, Math.min(6, targetScale / Math.max(dx / (width * 0.6), dy / (height * 0.6))));
-        
-        // Responsive vertical centering
+        const targetScale = Math.min(width, height) < 400 ? 0.75 : 0.65;
+        const scale = Math.max(1.2, Math.min(5, targetScale / Math.max(dx / (width * 0.65), dy / (height * 0.65))));
         const verticalAnchor = height < 600 ? 0.35 : 0.4;
         const translate = [width * 0.5 - scale * x, height * verticalAnchor - scale * y];
 
         const newTransform = d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale);
         currentTransform = newTransform;
         svg.call(zoomBehavior.transform, newTransform);
-        
         updateLabelPositions();
       } catch (e) {
         console.warn("Error focusing on block:", e);
@@ -1224,7 +1132,6 @@
     function resetView() {
       selectedBlock = null;
       selectedBlockIndex = -1;
-      
       currentTransform = d3.zoomIdentity;
       svg.call(zoomBehavior.transform, currentTransform);
       
@@ -1232,52 +1139,32 @@
         blockSelection.classed("faded", false).classed("selected", false);
         blockSelection.attr("fill", d => getBlockColor(d));
       }
-    
       hideAllPanels();
-      
       header.classed("hidden", false);
       farmInfo.classed("hidden", false);
-      
       updateLabelPositions();
-      
-      if (blockLabels) {
-        blockLabels.classed("hidden", false);
-      }
+      if (blockLabels) blockLabels.classed("hidden", false);
     }
 
-    // ---------- Block Click Handler ----------
     function onBlockClick(event, d) {
       const fieldName = d.properties?.Field_Name;
       if (!fieldName) return;
       
-      if (selectedBlock === fieldName) {
-        resetView();
-        return;
-      }
+      if (selectedBlock === fieldName) { resetView(); return; }
       
       selectedBlock = fieldName;
       selectedBlockIndex = blocks.indexOf(fieldName);
       
-      // Update visual state
       blockSelection.classed("faded", dd => dd !== d);
       blockSelection.classed("selected", dd => dd === d);
       blockSelection.attr("fill", dd => getBlockColor(dd));
       
-      // Hide header, show panel
       header.classed("hidden", true);
       farmInfo.classed("hidden", true);
-      
-      // Zoom to block
       focusOnBlock(d);
-      
-      // Show block panel
       showPanel(blockPanel);
       updateBlockPanel(d);
-      
-      // Hide labels
-      if (blockLabels) {
-        blockLabels.classed("hidden", true);
-      }
+      if (blockLabels) blockLabels.classed("hidden", true);
     }
 
     function updateBlockPanel(feature) {
@@ -1298,32 +1185,16 @@
       if (rank % 10 === 1 && rank % 100 !== 11) rankSuffix = "st";
       else if (rank % 10 === 2 && rank % 100 !== 12) rankSuffix = "nd";
       else if (rank % 10 === 3 && rank % 100 !== 13) rankSuffix = "rd";
-      
       const rankText = rank !== "—" ? `${rank}${rankSuffix}` : "—";
       
       blockPanelSubtitle.text(`Rank: #${rankText} · ${size.toFixed(1)} ha`);
       
       const html = `
-        <div class="detail-row">
-          <span class="detail-label">Block Size</span>
-          <span class="detail-value">${size.toFixed(1)} ha</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Plants per Hectare</span>
-          <span class="detail-value">${plants.toLocaleString()}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Total Trees</span>
-          <span class="detail-value">${Math.round(totalTrees).toLocaleString()}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Avg Bunch Weight</span>
-          <span class="detail-value">${weight} kg</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Est. Yield</span>
-          <span class="detail-value">${estimatedYield.toFixed(1)} kg/ha</span>
-        </div>
+        <div class="detail-row"><span class="detail-label">Block Size</span><span class="detail-value">${size.toFixed(1)} ha</span></div>
+        <div class="detail-row"><span class="detail-label">Plants per Hectare</span><span class="detail-value">${plants.toLocaleString()}</span></div>
+        <div class="detail-row"><span class="detail-label">Total Trees</span><span class="detail-value">${Math.round(totalTrees).toLocaleString()}</span></div>
+        <div class="detail-row"><span class="detail-label">Avg Bunch Weight</span><span class="detail-value">${weight} kg</span></div>
+        <div class="detail-row"><span class="detail-label">Est. Yield</span><span class="detail-value">${estimatedYield.toFixed(1)} kg/ha</span></div>
         <div style="margin-top: 20px;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
             <span style="font-weight: 700; color: var(--accent);">Plant Density</span>
@@ -1335,30 +1206,37 @@
           </div>
         </div>
       `;
-      
       blockPanelContent.html(html);
     }
 
     function calculateDensityPercent(plants) {
-      const maxPlants = Math.max(...csvData.map(d => parseFloat(d["Plants per hectare"]) || 0));
+      const maxPlants = cachedMaxPlants || 1;
       return maxPlants > 0 ? Math.round((plants / maxPlants) * 100) : 0;
     }
 
-    // ---------- Panel Management ----------
     function showPanel(panel) {
       hideAllPanels();
       panel.classed("visible", true).attr("aria-hidden", "false");
       activePanel = panel;
+      if (panel.node().id === 'help-panel') {
+        lastFocusedElement = document.activeElement;
+        window.focusTrapCleanup = trapFocus(panel.node());
+      }
     }
     
     function hideAllPanels() {
       blockPanel.classed("visible", false).attr("aria-hidden", "true");
       summaryPanel.classed("visible", false).attr("aria-hidden", "true");
       blocksPanel.classed("visible", false).attr("aria-hidden", "true");
+      
+      if (activePanel?.node()?.id === 'help-panel' && window.focusTrapCleanup) {
+        window.focusTrapCleanup();
+        window.focusTrapCleanup = null;
+        if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
+      }
       activePanel = null;
     }
 
-    // ---------- Summary Panel ----------
     function updateSummaryPanel() {
       const totalArea = csvData.reduce((sum, d) => sum + (parseFloat(d["Block Size"]) || 0), 0);
       const totalTrees = csvData.reduce((sum, d) => {
@@ -1366,24 +1244,19 @@
         const size = parseFloat(d["Block Size"]) || 0;
         return sum + (plants * size);
       }, 0);
-      
       const avgDensity = totalArea > 0 ? totalTrees / totalArea : 0;
-      
       const weightedWeight = csvData.reduce((sum, d) => {
         const weight = parseFloat(d["Average Bunch Weight"]) || 0;
         const size = parseFloat(d["Block Size"]) || 0;
         return sum + (weight * size);
       }, 0);
-      
       const avgWeight = totalArea > 0 ? weightedWeight / totalArea : 0;
-      
       const totalYield = csvData.reduce((sum, d) => {
         const plants = parseFloat(d["Plants per hectare"]) || 0;
         const weight = parseFloat(d["Average Bunch Weight"]) || 0;
         const size = parseFloat(d["Block Size"]) || 0;
         return sum + (plants * weight * size);
       }, 0);
-      
       const highYieldCount = csvData.filter(d => {
         const plants = parseFloat(d["Plants per hectare"]) || 0;
         const weight = parseFloat(d["Average Bunch Weight"]) || 0;
@@ -1399,275 +1272,170 @@
         <tr><td class="stat-name">Est. Total Yield</td><td class="stat-value">${Math.round(totalYield).toLocaleString()} kg</td></tr>
         <tr><td class="stat-name">High Yield Blocks</td><td class="stat-value">${highYieldCount}</td></tr>
       `;
-      
       summaryTable.html(html);
     }
 
-    // ---------- Blocks Panel ----------
     function updateBlocksPanel() {
       let html = '';
-      
       blocks.forEach(blockName => {
         const data = dataMap[blockName];
         const size = parseFloat(data["Block Size"]) || 0;
         const plants = parseFloat(data["Plants per hectare"]) || 0;
         const trees = plants * size;
-        
-        html += `
-          <tr style="cursor: pointer;" data-block="${blockName}">
-            <td class="stat-name">${blockName}</td>
-            <td class="stat-value">${size.toFixed(1)} ha</td>
-            <td class="stat-value">${Math.round(trees).toLocaleString()}</td>
-          </tr>
-        `;
+        html += `<tr style="cursor: pointer;" data-block="${blockName}" role="option">
+          <td class="stat-name">${blockName}</td>
+          <td class="stat-value">${size.toFixed(1)} ha</td>
+          <td class="stat-value">${Math.round(trees).toLocaleString()}</td>
+        </tr>`;
       });
-      
       blocksTable.html(html);
-      
-      // Add click handlers
       blocksTable.selectAll("tr").on("click", function() {
         const blockName = d3.select(this).attr("data-block");
         const feature = geoData.features.find(f => f.properties?.Field_Name === blockName);
-        if (feature) {
-          onBlockClick({ currentTarget: null }, feature);
-          hideAllPanels();
-          showPanel(blockPanel);
-        }
+        if (feature) { onBlockClick({ currentTarget: null }, feature); hideAllPanels(); showPanel(blockPanel); }
       });
     }
 
-    // ---------- Search ----------
     function setupSearch() {
       searchButton.on("click", function() {
         const expanded = searchDropdown.style("display") === "block";
-        if (expanded) hideSearchDropdown(); else showSearchDropdown();
+        if (expanded) hideSearchDropdown(); else { showSearchDropdown(); adjustSearchDropdownPosition(); }
       });
       
       blockSearch.on("input", debounce(function() {
         const query = this.value.toLowerCase().trim();
-        if (query.length < 2) {
-          searchResults.html("");
-          return;
-        }
-        
-        const matches = blocks.filter(b => b.toLowerCase().includes(query))
-          .slice(0, 10);
-        
+        if (query.length < 2) { searchResults.html(""); return; }
+        const matches = blocks.filter(b => b.toLowerCase().includes(query)).slice(0, 10);
         searchResults.html("");
         matches.forEach(block => {
           searchResults.append("div")
             .attr("class", "search-result-item")
+            .attr("role", "option")
             .text(block)
             .on("click", function() {
               const feature = geoData.features.find(f => f.properties?.Field_Name === block);
-              if (feature) {
-                onBlockClick({ currentTarget: null }, feature);
-                hideSearchDropdown();
-              }
+              if (feature) { onBlockClick({ currentTarget: null }, feature); hideSearchDropdown(); }
             });
         });
       }, 300));
       
-      document.addEventListener('click', function(event) {
-        if (!event.target.closest('.header')) {
-          hideSearchDropdown();
-        }
-      });
+      document.addEventListener('click', e => { if (!e.target.closest('.header')) hideSearchDropdown(); });
+      window.addEventListener('resize', debounce(adjustSearchDropdownPosition, 150));
       
-      // Keyboard navigation
       blockSearch.on("keydown", function(event) {
         const items = searchResults.selectAll(".search-result-item").nodes();
         if (!items.length) return;
-        
         if (event.key === "ArrowDown") {
           event.preventDefault();
           const current = searchResults.select(".highlighted");
-          if (current.empty()) {
-            d3.select(items[0]).classed("highlighted", true);
-          } else {
-            const next = d3.select(current.node().nextSibling);
-            current.classed("highlighted", false);
-            if (!next.empty()) next.classed("highlighted", true);
-          }
+          if (current.empty()) d3.select(items[0]).classed("highlighted", true);
+          else { const next = d3.select(current.node().nextSibling); current.classed("highlighted", false); if (!next.empty()) next.classed("highlighted", true); }
         } else if (event.key === "ArrowUp") {
           event.preventDefault();
           const current = searchResults.select(".highlighted");
-          if (!current.empty()) {
-            const prev = d3.select(current.node().previousSibling);
-            current.classed("highlighted", false);
-            if (!prev.empty()) prev.classed("highlighted", true);
-          }
+          if (!current.empty()) { const prev = d3.select(current.node().previousSibling); current.classed("highlighted", false); if (!prev.empty()) prev.classed("highlighted", true); }
         } else if (event.key === "Enter") {
           const highlighted = searchResults.select(".highlighted");
-          if (!highlighted.empty()) {
-            highlighted.node().click();
-          }
-        } else if (event.key === "Escape") {
-          hideSearchDropdown();
-          blockSearch.node().blur();
-        }
+          if (!highlighted.empty()) highlighted.node().click();
+        } else if (event.key === "Escape") { hideSearchDropdown(); blockSearch.node().blur(); }
       });
+    }
+    
+    function adjustSearchDropdownPosition() {
+      const dropdown = searchDropdown.node();
+      if (!dropdown || searchDropdown.style("display") === "none") return;
+      const rect = dropdown.getBoundingClientRect();
+      if (rect.bottom > window.innerHeight - 20) searchDropdown.classed("flipped", true);
+      else searchDropdown.classed("flipped", false);
     }
 
     function showSearchDropdown() {
       searchDropdown.style("display", "block").attr("aria-hidden", "false");
-      setTimeout(() => blockSearch.node().focus(), 100);
+      setTimeout(() => { blockSearch.node().focus(); adjustSearchDropdownPosition(); }, 100);
     }
     
     function hideSearchDropdown() {
       searchDropdown.style("display", "none").attr("aria-hidden", "true");
+      searchDropdown.classed("flipped", false);
       blockSearch.node().value = "";
       searchResults.html("");
     }
 
-    // ---------- Help ----------
     function setupHelp() {
       helpButton.on("click", showHelpPanel);
-      
       d3.select("#help-panel .help-close-button").on("click", hideHelpPanel);
       overlay.on("click", hideHelpPanel);
-      
-      document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-          hideHelpPanel();
-        }
-      });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') hideHelpPanel(); });
     }
 
     function showHelpPanel() {
+      lastFocusedElement = document.activeElement;
       helpPanel.classed("visible", true);
-      overlay.classed("visible", true);
+      overlay.classed("visible", true).attr("aria-hidden", "false");
+      window.focusTrapCleanup = trapFocus(helpPanel.node());
     }
 
     function hideHelpPanel() {
+      if (window.focusTrapCleanup) { window.focusTrapCleanup(); window.focusTrapCleanup = null; }
       helpPanel.classed("visible", false);
-      overlay.classed("visible", false);
+      overlay.classed("visible", false).attr("aria-hidden", "true");
+      if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
+      lastFocusedElement = null;
     }
 
-    // ---------- Navigation ----------
     function selectPreviousBlock() {
       if (blocks.length === 0) return;
-      
-      let newIndex;
-      if (selectedBlockIndex === -1) {
-        newIndex = blocks.length - 1;
-      } else {
-        newIndex = (selectedBlockIndex - 1 + blocks.length) % blocks.length;
-      }
-      
+      const newIndex = selectedBlockIndex === -1 ? blocks.length - 1 : (selectedBlockIndex - 1 + blocks.length) % blocks.length;
       navigateToBlock(newIndex);
     }
     
     function selectNextBlock() {
       if (blocks.length === 0) return;
-      
-      let newIndex;
-      if (selectedBlockIndex === -1) {
-        newIndex = 0;
-      } else {
-        newIndex = (selectedBlockIndex + 1) % blocks.length;
-      }
-      
+      const newIndex = selectedBlockIndex === -1 ? 0 : (selectedBlockIndex + 1) % blocks.length;
       navigateToBlock(newIndex);
     }
     
     function navigateToBlock(index) {
       const blockName = blocks[index];
       const feature = geoData.features.find(f => f.properties?.Field_Name === blockName);
-      if (feature) {
-        onBlockClick({ currentTarget: null }, feature);
-      }
+      if (feature) onBlockClick({ currentTarget: null }, feature);
     }
 
-    // ---------- Event Listeners ----------
     function setupEventListeners() {
-      // Button handlers
-      summaryButton.on("click", function() {
-        updateSummaryPanel();
-        showPanel(summaryPanel);
-        header.classed("hidden", true);
-        farmInfo.classed("hidden", true);
-      });
-      
-      blocksButton.on("click", function() {
-        updateBlocksPanel();
-        showPanel(blocksPanel);
-        header.classed("hidden", true);
-        farmInfo.classed("hidden", true);
-      });
-      
+      summaryButton.on("click", () => { updateSummaryPanel(); showPanel(summaryPanel); header.classed("hidden", true); farmInfo.classed("hidden", true); });
+      blocksButton.on("click", () => { updateBlocksPanel(); showPanel(blocksPanel); header.classed("hidden", true); farmInfo.classed("hidden", true); });
       prevButton.on("click", selectPreviousBlock);
       nextButton.on("click", selectNextBlock);
-      
-      // Close buttons
       d3.select("#block-panel .close-button").on("click", resetView);
       d3.select("#summary-panel .close-button").on("click", resetView);
       d3.select("#blocks-panel .close-button").on("click", resetView);
-      
-      // Search
       setupSearch();
-      
-      // Help
       setupHelp();
+      svg.on("click", (event) => { if (event.target?.tagName?.toLowerCase() === 'svg') resetView(); });
       
-      // Background click
-      svg.on("click", (event) => {
-        const target = event.target;
-        if (target && target.tagName && target.tagName.toLowerCase() === 'svg') {
-          resetView();
-        }
-      });
-      
-      // Resize handler - RESPONSIVE
       window.addEventListener("resize", debounce(() => {
         width = mapContainer.clientWidth;
         height = mapContainer.clientHeight;
         svg.attr("viewBox", `0 0 ${width} ${height}`);
         
-        // Recalculate projection with same responsive logic
-        const bounds = d3.geoBounds(geoData);
-        const dx = bounds[1][0] - bounds[0][0];
-        const dy = bounds[1][1] - bounds[0][1];
-        
-        const baseScale = Math.min(width, height) < 400 ? 0.065 : 0.075;
-        const scale = baseScale / Math.max(dx / width, dy / height);
-        
-        const centerX = (bounds[0][0] + bounds[1][0]) / 2;
-        const centerY = (bounds[0][1] + bounds[1][1]) / 2;
-        
-        const xOffset = width * -0.03;
-        const yOffset = height * -0.25;
-        
-        projection
-          .scale(scale)
-          .translate([
-            (width/2 - scale * centerX) + xOffset,
-            (height/2 - scale * centerY) + yOffset
-          ]);
-        
-        // Redraw everything
-        svg.selectAll("path").attr("d", d => {
-          try {
-            return path(d);
-          } catch (e) {
-            return null;
+        if (geoData) {
+          projection.fitSize([width, height], geoData);
+          applyMapTransform(); // ✅ Re-apply zoom + offset on resize
+          
+          svg.selectAll("path.block, path.block-click-target").attr("d", d => {
+            try { return path(d); } catch (e) { return null; }
+          });
+          removeClickLayer(); addClickLayer();
+          removeBlockLabels(); addBlockLabels();
+          if (selectedBlock) {
+            const feature = geoData.features.find(f => f.properties?.Field_Name === selectedBlock);
+            if (feature) focusOnBlock(feature);
           }
-        });
-        
-        removeClickLayer();
-        addClickLayer();
-        
-        removeBlockLabels();
-        addBlockLabels();
-        
-        if (selectedBlock) {
-          const feature = geoData.features.find(f => f.properties?.Field_Name === selectedBlock);
-          if (feature) focusOnBlock(feature);
         }
+        if (searchDropdown.style("display") === "block") adjustSearchDropdownPosition();
       }, 250));
     }
 
-    // Start everything
     loadData();
   })();
   </script>
