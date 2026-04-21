@@ -1,800 +1,1443 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Elim Farms — Operations Dashboard</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<style>
-  :root {
-    --navy:    #0d2136;
-    --gold:    #a8935a;
-    --cream:   #f4f2ef;
-    --sand:    #d8d0c6;
-    --olive:   #81845a;
-    --forest:  #2f3527;
-    --navy-lt: #152d47;
-    --gold-lt: #c4ac74;
-    --gold-dim:#7a6b41;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Elim Farms — Mobile</title>
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <!-- D3 -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600:700&family=Georgia:wght@400;700&display=swap" rel="stylesheet">
 
-  body {
-    background: var(--cream);
-    color: var(--navy);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-  }
-
-  /* ── HEADER ───────────────────────────────────────── */
-  header {
-    background: var(--navy);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    border-bottom: 3px solid var(--gold);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    min-height: 64px;
-  }
-  .logo-group { display: flex; align-items: center; gap: 12px; }
-  .logo-icon {
-    width: 38px; height: 38px;
-    background: var(--gold);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-  }
-  .logo-text h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(14px, 3vw, 20px);
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.2;
-    white-space: nowrap;
-  }
-  .logo-text span {
-    font-size: 11px;
-    color: var(--sand);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-  .header-meta {
-    font-size: 12px;
-    color: var(--sand);
-    text-align: right;
-    line-height: 1.5;
-  }
-  .header-meta strong { color: var(--gold); }
-
-  /* ── TAB NAV ──────────────────────────────────────── */
-  nav {
-    background: var(--navy-lt);
-    padding: 0 16px;
-    display: flex;
-    gap: 2px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    border-bottom: 1px solid rgba(168,147,90,0.2);
-  }
-  nav::-webkit-scrollbar { display: none; }
-  .tab-btn {
-    padding: 12px 18px;
-    background: none;
-    border: none;
-    color: var(--sand);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
-    border-bottom: 3px solid transparent;
-    transition: color .2s, border-color .2s;
-  }
-  .tab-btn:hover { color: var(--gold-lt); }
-  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
-
-  /* ── MAIN ─────────────────────────────────────────── */
-  main { padding: 20px 16px 40px; max-width: 1280px; margin: 0 auto; }
-
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; animation: fadeIn .3s ease; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
-
-  /* ── SECTION TITLE ────────────────────────────────── */
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(18px, 4vw, 26px);
-    color: var(--navy);
-    margin-bottom: 4px;
-  }
-  .section-sub {
-    font-size: 13px;
-    color: var(--olive);
-    margin-bottom: 20px;
-    letter-spacing: 0.04em;
-  }
-
-  /* ── KPI CARDS ────────────────────────────────────── */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 14px;
-    margin-bottom: 24px;
-  }
-  .kpi-card {
-    background: var(--navy);
-    border-radius: 12px;
-    padding: 18px 16px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(168,147,90,0.15);
-  }
-  .kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--gold);
-  }
-  .kpi-card .icon {
-    font-size: 22px;
-    margin-bottom: 10px;
-    display: block;
-  }
-  .kpi-card .value {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(22px, 4vw, 30px);
-    font-weight: 700;
-    color: var(--gold);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .kpi-card .label {
-    font-size: 11px;
-    color: var(--sand);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    line-height: 1.4;
-  }
-  .kpi-card .sub {
-    font-size: 12px;
-    color: var(--olive);
-    margin-top: 6px;
-  }
-  .kpi-card.accent { background: var(--gold); }
-  .kpi-card.accent::before { background: var(--navy); }
-  .kpi-card.accent .value { color: var(--navy); }
-  .kpi-card.accent .label { color: var(--navy); opacity: 0.7; }
-  .kpi-card.accent .sub { color: var(--forest); }
-
-  /* ── CHART GRID ───────────────────────────────────── */
-  .chart-grid {
-    display: grid;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .chart-grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-  .chart-grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-  .chart-grid.cols-1-2 { grid-template-columns: 1fr; }
-
-  .chart-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    border: 1px solid var(--sand);
-    box-shadow: 0 2px 8px rgba(13,33,54,0.06);
-  }
-  .chart-card.dark {
-    background: var(--navy);
-    border-color: rgba(168,147,90,0.2);
-  }
-  .chart-card.span-2 { grid-column: 1 / -1; }
-  .chart-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 15px;
-    color: var(--navy);
-    margin-bottom: 4px;
-  }
-  .chart-card.dark .chart-title { color: var(--gold); }
-  .chart-sub {
-    font-size: 12px;
-    color: var(--olive);
-    margin-bottom: 16px;
-  }
-  .chart-card.dark .chart-sub { color: var(--sand); opacity: 0.7; }
-  .chart-wrap { position: relative; }
-
-  /* ── TABLE ────────────────────────────────────────── */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th {
-    background: var(--navy);
-    color: var(--gold);
-    padding: 10px 14px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    white-space: nowrap;
-  }
-  td {
-    padding: 9px 14px;
-    border-bottom: 1px solid var(--sand);
-    color: var(--forest);
-    white-space: nowrap;
-  }
-  tr:hover td { background: rgba(168,147,90,0.06); }
-  tr:last-child td { border-bottom: none; }
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .badge-gold  { background: rgba(168,147,90,0.15); color: var(--gold-dim); }
-  .badge-navy  { background: rgba(13,33,54,0.1);    color: var(--navy); }
-  .badge-olive { background: rgba(129,132,90,0.15);  color: var(--olive); }
-
-  /* ── COLOUR SWATCH ────────────────────────────────── */
-  .colour-swatch {
-    display: inline-block;
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    vertical-align: middle;
-    margin-right: 6px;
-    border: 1px solid rgba(0,0,0,.15);
-  }
-
-  /* ── LEGEND BAR ───────────────────────────────────── */
-  .legend-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 7px 0;
-    border-bottom: 1px solid var(--sand);
-    font-size: 13px;
-    gap: 8px;
-  }
-  .legend-row:last-child { border-bottom: none; }
-  .legend-bar-bg {
-    flex: 1;
-    height: 6px;
-    background: var(--sand);
-    border-radius: 3px;
-    margin: 0 10px;
-    overflow: hidden;
-  }
-  .legend-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    background: var(--gold);
-    transition: width .6s ease;
-  }
-  .legend-val { font-weight: 600; color: var(--navy); min-width: 40px; text-align: right; font-size: 12px; }
-
-  /* ── DIVIDER ──────────────────────────────────────── */
-  .divider { height: 1px; background: var(--sand); margin: 24px 0; }
-
-  /* ── LOADING OVERLAY ─────────────────────────────── */
-  #loading-overlay {
-    position: fixed; top:0; left:0; right:0; bottom:0;
-    background: rgba(244,242,239,0.85);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 999;
-    backdrop-filter: blur(2px);
-  }
-  .spinner {
-    width: 40px; height: 40px;
-    border: 3px solid var(--sand);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ── RESPONSIVE ───────────────────────────────────── */
-  @media (max-width: 600px) {
-    main { padding: 16px 12px 32px; }
-    .chart-card { padding: 14px; }
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-</style>
-</head>
-<body>
-
-<!-- Loading Overlay -->
-<div id="loading-overlay"><div class="spinner"></div></div>
-
-<header>
-  <div class="logo-group">
-    <div class="logo-icon">🍌</div>
-    <div class="logo-text">
-      <h1>Elim Farms</h1>
-      <span>Operations Dashboard</span>
-    </div>
-  </div>
-  <div class="header-meta">
-    <strong id="data-status">Loading data...</strong><br>
-    <span id="data-timestamp">--:--</span>
-  </div>
-</header>
-
-<nav>
-  <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
-  <button class="tab-btn" onclick="showTab('harvest')">Harvesting</button>
-  <button class="tab-btn" onclick="showTab('tagging')">Tagging</button>
-  <button class="tab-btn" onclick="showTab('pump')">Pump Log</button>
-  <button class="tab-btn" onclick="showTab('irrigation')">Irrigation</button>
-</nav>
-
-<main>
-
-<!-- ══ OVERVIEW ══════════════════════════════════════════════════════ -->
-<div id="tab-overview" class="tab-panel active">
-  <p class="section-title">Farm Operations Overview</p>
-  <p class="section-sub">Consolidated summary across Harvesting, Tagging, Pump and Irrigation records</p>
-
-  <div class="kpi-grid" id="kpi-overview">
-    <!-- Populated dynamically -->
-  </div>
-
-  <div class="chart-grid cols-2">
-    <div class="chart-card dark">
-      <div class="chart-title">Harvest by Block</div>
-      <div class="chart-sub">Total weight (kg) per block</div>
-      <div class="chart-wrap"><canvas id="c_blockHarvest" height="200"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Mats Tagged by Block</div>
-      <div class="chart-sub">Total mats tagged per block</div>
-      <div class="chart-wrap"><canvas id="c_tagBlock" height="200"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Pump Hours by Year</div>
-      <div class="chart-sub">Cumulative operating hours across all pumps</div>
-      <div class="chart-wrap"><canvas id="c_pumpYear_ov" height="200"></canvas></div>
-    </div>
-    <div class="chart-card dark">
-      <div class="chart-title">Irrigation Fuel by Year</div>
-      <div class="chart-sub">Total litres consumed per year</div>
-      <div class="chart-wrap"><canvas id="c_irrYear_ov" height="200"></canvas></div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ HARVEST ════════════════════════════════════════════════════════ -->
-<div id="tab-harvest" class="tab-panel">
-  <p class="section-title">Harvesting Data</p>
-  <p class="section-sub">Bunch weights recorded across all blocks</p>
-
-  <div class="kpi-grid" id="kpi-harvest"></div>
-
-  <div class="chart-grid cols-2">
-    <div class="chart-card dark span-2">
-      <div class="chart-title">Monthly Harvest Totals</div>
-      <div class="chart-sub">Weight harvested per month across all blocks</div>
-      <div class="chart-wrap"><canvas id="c_monthlyHarvest" height="160"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Harvest Weight by Block</div>
-      <div class="chart-sub">Comparison across blocks</div>
-      <div class="chart-wrap"><canvas id="c_blockHarvest2" height="220"></canvas></div>
-    </div>
-    <div class="chart-card dark">
-      <div class="chart-title">Bunch Count by Block</div>
-      <div class="chart-sub">Number of bunches per block</div>
-      <div class="chart-wrap"><canvas id="c_blockCount" height="220"></canvas></div>
-    </div>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-title">Block Performance Summary</div>
-    <div class="chart-sub">Harvest weight, count and average per block</div>
-    <div class="table-wrap">
-      <table id="table-harvest">
-        <thead>
-          <tr><th>Block</th><th>Total (kg)</th><th>Bunches</th><th>Avg (kg)</th><th>Share</th></tr>
-        </thead>
-        <tbody><!-- Dynamic --></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ══ TAGGING ═══════════════════════════════════════════════════════ -->
-<div id="tab-tagging" class="tab-panel">
-  <p class="section-title">Tagging Data</p>
-  <p class="section-sub">Mat tagging records across blocks</p>
-
-  <div class="kpi-grid" id="kpi-tagging"></div>
-
-  <div class="chart-grid cols-2">
-    <div class="chart-card dark span-2">
-      <div class="chart-title">Mats Tagged by Block</div>
-      <div class="chart-sub">Total mats per block across all tag rounds</div>
-      <div class="chart-wrap"><canvas id="c_tagBlock2" height="160"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Top Tag Colours by Volume</div>
-      <div class="chart-sub">Number of mats per tag colour</div>
-      <div class="chart-wrap"><canvas id="c_tagColour" height="260"></canvas></div>
-    </div>
-    <div class="chart-card dark">
-      <div class="chart-title">Tag Colour Distribution</div>
-      <div class="chart-sub">Proportional share of all tags</div>
-      <div class="chart-wrap" style="display:flex;justify-content:center;"><canvas id="c_tagPie" width="260" height="260"></canvas></div>
-    </div>
-  </div>
-
-  <div class="chart-card" style="margin-top:0;">
-    <div class="chart-title">Tag Volume by Colour — Detail</div>
-    <div class="chart-sub">All tag types ranked by mat count</div>
-    <div id="tag-legend"></div>
-  </div>
-</div>
-
-<!-- ══ PUMP ═══════════════════════════════════════════════════════════ -->
-<div id="tab-pump" class="tab-panel">
-  <p class="section-title">Pump Log</p>
-  <p class="section-sub">Operating hours and maintenance events</p>
-
-  <div class="kpi-grid" id="kpi-pump"></div>
-
-  <div class="chart-grid cols-2">
-    <div class="chart-card dark span-2">
-      <div class="chart-title">Pump 2 — Operating Hours by Year</div>
-      <div class="chart-sub">Longest operational history</div>
-      <div class="chart-wrap"><canvas id="c_pump2year" height="160"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Hours Distribution by Pump</div>
-      <div class="chart-sub">All-time hours per pump</div>
-      <div class="chart-wrap"><canvas id="c_pumpPie" height="220"></canvas></div>
-    </div>
-    <div class="chart-card dark">
-      <div class="chart-title">2025 Pump Comparison</div>
-      <div class="chart-sub">Hours logged per pump in 2025</div>
-      <div class="chart-wrap"><canvas id="c_pump2025" height="220"></canvas></div>
-    </div>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-title">Pump Hours Summary</div>
-    <div class="chart-sub">By pump and year</div>
-    <div class="table-wrap">
-      <table id="table-pump">
-        <thead><tr><th>Pump</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>Total</th></tr></thead>
-        <tbody><!-- Dynamic --></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ══ IRRIGATION ═════════════════════════════════════════════════════ -->
-<div id="tab-irrigation" class="tab-panel">
-  <p class="section-title">Irrigation Records</p>
-  <p class="section-sub">Irrigation sessions and fuel consumption across all blocks</p>
-
-  <div class="kpi-grid" id="kpi-irrigation"></div>
-
-  <div class="chart-grid cols-2">
-    <div class="chart-card dark span-2">
-      <div class="chart-title">Annual Fuel Consumption</div>
-      <div class="chart-sub">Total irrigation fuel used per year (litres)</div>
-      <div class="chart-wrap"><canvas id="c_irrYear" height="160"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Top 10 Blocks by Fuel Consumed</div>
-      <div class="chart-sub">Aggregated across all years</div>
-      <div class="chart-wrap"><canvas id="c_irrBlock" height="260"></canvas></div>
-    </div>
-    <div class="chart-card dark">
-      <div class="chart-title">Session Count by Year</div>
-      <div class="chart-sub">Number of irrigation runs per year</div>
-      <div class="chart-wrap"><canvas id="c_irrSessions" height="260"></canvas></div>
-    </div>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-title">Annual Irrigation Summary</div>
-    <div class="chart-sub">Fuel used and sessions per year</div>
-    <div class="table-wrap">
-      <table id="table-irrigation">
-        <thead><tr><th>Year</th><th>Sessions</th><th>Fuel (L)</th><th>Avg L/Session</th><th>Fuel Share</th></tr></thead>
-        <tbody><!-- Dynamic --></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-</main>
-
-<script>
-/* ── CONFIG ───────────────────────────────────────── */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz9pOhzndbXiD30_hABa6qqJrinmeH-nEXEqMmV5q8ZvooFRq2MTFkD34mgKk5coqtl/exec'; // 🔑 REPLACE THIS
-const REFRESH_INTERVAL_MINUTES = 60;
-
-/* ── GLOBAL CHART DEFAULTS & PALETTE ──────────────── */
-Chart.defaults.font.family = "'DM Sans', sans-serif";
-Chart.defaults.color = '#7a7a7a';
-const NAVY = '#0d2136', GOLD = '#a8935a', SAND = '#d8d0c6', OLIVE = '#81845a';
-const FOREST = '#2f3527', GOLD_L = '#c4ac74', NAVY_L = '#1a3352';
-let charts = {};
-
-/* ── TAB LOGIC ────────────────────────────────────── */
-function showTab(id) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  event.currentTarget.classList.add('active');
-}
-
-/* ── UTILITIES ────────────────────────────────────── */
-function parseDate(str) {
-  if (!str) return null;
-  const d = new Date(str);
-  return isNaN(d.getTime()) ? null : d;
-}
-
-function agg(arr, key, valKey, op = 'sum') {
-  return arr.reduce((acc, r) => {
-    const k = r[key], v = parseFloat(r[valKey]) || 0;
-    if (op === 'count') acc[k] = (acc[k] || 0) + 1;
-    else acc[k] = (acc[k] || 0) + v;
-    return acc;
-  }, {});
-}
-
-function sortObj(obj, desc = true) {
-  return Object.entries(obj).sort((a,b) => desc ? b[1]-a[1] : a[1]-b[1]).reduce((o,[k,v])=>({...o,[k]:v}),{});
-}
-
-function fmt(n, dec=0) { return Number(n).toLocaleString(undefined, {minimumFractionDigits:dec, maximumFractionDigits:dec}); }
-
-function createChart(id, cfg) {
-  const c = document.getElementById(id);
-  if (!c) return null;
-  if (charts[id]) charts[id].destroy();
-  charts[id] = new Chart(c, cfg);
-  return charts[id];
-}
-
-function barOpts(dark=false, horiz=false) {
-  return {
-    responsive: true, indexAxis: horiz?'y':'x',
-    plugins:{legend:{display:false}},
-    scales:{
-      x:{grid:{color:dark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},ticks:{color:dark?SAND:FOREST,font:{size:11}}},
-      y:{grid:{color:dark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},ticks:{color:dark?SAND:FOREST,font:{size:11}}}
+  <style>
+    /* ---------- Base Styles ---------- */
+    :root {
+      --accent: #1e4a1e;
+      --accent-light: #2e6b2e;
+      --high-yield: #0f5c3f;
+      --selected: #e6b800;
+      --selected-light: #ffd966;
+      --default: #2c5282;
+      --ui: #1a1e24;
+      --muted: #5a6570;
+      --mobile-padding: 16px;
+      --click-target-stroke: clamp(16px, 5vw, 24px);
     }
-  };
-}
 
-/* ── DATA FETCHER & NORMALIZER ────────────────────── */
-async function fetchDashboardData() {
-  try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?tab=all`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const raw = await res.json();
-    if (raw.error) throw new Error(raw.error);
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-    // Normalize irrigation multi-blocks
-    raw.irrigation = raw.irrigation.flatMap(r => {
-      const blocks = (r['BLOCK']||'').split(',').map(b=>b.trim()).filter(Boolean);
-      const fuel = parseFloat(r['FUEL (litres)'])||0;
-      const date = parseDate(r['DATE']);
-      return blocks.length > 0 ? blocks.map(b => ({
-        year: date?.getFullYear()||0,
-        block: b,
-        fuel: blocks.length>1 ? fuel/blocks.length : fuel,
-        sessions: 1
-      })) : [];
-    });
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #f5f7fa;
+      font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow: hidden;
+      color: var(--ui);
+      touch-action: manipulation;
+    }
 
-    // Normalize pump hours
-    raw.pump = raw.pump.map(r => {
-      const open = parseFloat(r['OPENING HOURS'])||0;
-      const close = parseFloat(r['CLOSING HOURS'])||0;
-      const date = parseDate(r['DATE']);
-      return {
-        year: date?.getFullYear()||0,
-        pumpId: `Pump ${r['PUMP No.']}`,
-        hours: Math.max(0, close - open),
-        maintenance: r['LUBRICANT / BREAKDOWN']?.trim()||null
+    /* ---------- Header ---------- */
+    .header {
+      position: absolute;
+      top: 20px;
+      left: var(--mobile-padding);
+      right: var(--mobile-padding);
+      z-index: 75;
+      pointer-events: none;
+      text-align: center;
+    }
+    
+    .header.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .header h1 {
+      margin: 0 auto;
+      padding: 12px 18px;
+      font-size: clamp(18px, 5vw, 20px);
+      color: var(--accent);
+      background: rgba(255,255,255,0.85);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      font-weight: 700;
+      pointer-events: auto;
+      display: inline-block;
+      max-width: 100%;
+      white-space: normal;
+      line-height: 1.2;
+      font-family: 'Georgia', serif;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    /* Search dropdown */
+    .search-dropdown {
+      position: absolute;
+      top: 100%;
+      bottom: auto;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      border: 1px solid #ddd;
+      width: 90%;
+      max-width: 300px;
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+      padding: 12px;
+      display: none;
+      z-index: 80;
+      pointer-events: auto;
+      max-height: 50vh;
+      overflow-y: auto;
+      margin-top: 8px;
+    }
+    
+    .search-dropdown.flipped {
+      top: auto;
+      bottom: 100%;
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    
+    .search-dropdown input {
+      width: 100%;
+      padding: clamp(12px, 3vh, 14px);
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: clamp(14px, 4vw, 16px);
+      margin-bottom: 12px;
+      font-family: 'Libre Franklin', sans-serif;
+    }
+    
+    .search-dropdown input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(30, 74, 30, 0.1);
+    }
+    
+    .search-results-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .search-result-item {
+      padding: clamp(10px, 2.5vh, 14px);
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      font-size: clamp(14px, 4vw, 16px);
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+    
+    .search-result-item:hover {
+      background-color: #f5f5f5;
+      transform: translateX(5px);
+    }
+    
+    .search-result-item.highlighted {
+      background-color: #e8f3e8;
+      color: var(--accent);
+    }
+
+    /* Farm info footer */
+    .farm-info {
+      position: absolute;
+      bottom: max(20px, 8vh);
+      left: max(12px, 3vw);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      z-index: 60;
+      pointer-events: none;
+      padding: clamp(10px, 2vh, 16px) clamp(12px, 3vw, 20px);
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      max-width: min(250px, 40vw);
+    }
+
+    .farm-name {
+      font-size: clamp(16px, 4vw, 18px);
+      font-weight: 700;
+      color: var(--accent);
+      font-family: 'Georgia', serif;
+      margin: 0;
+    }
+
+    .farm-stats {
+      font-size: clamp(12px, 3vw, 14px);
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* ---------- Map Container ---------- */
+    #map-container {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      overflow: hidden;
+    }
+    
+    svg { 
+      width: 100%; 
+      height: 100%; 
+      display: block; 
+      background: linear-gradient(145deg, #f0f4f8 0%, #e6ecf0 100%);
+    }
+
+    /* Block styles */
+    .block {
+      stroke: #ffffff;
+      stroke-width: 2px;
+      cursor: pointer;
+      paint-order: stroke;
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+      transition: filter 0.2s ease;
+    }
+    
+    .block-click-target {
+      fill: transparent !important;
+      stroke: transparent !important;
+      pointer-events: all !important;
+      cursor: pointer !important;
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+      stroke-width: var(--click-target-stroke) !important;
+    }
+    
+    .block-click-target:focus, .block-click-target:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    
+    .block.selected {
+      stroke-width: 4px;
+      stroke: #ffffff;
+      filter: drop-shadow(0 0 15px rgba(230, 184, 0, 0.7)) brightness(1.1);
+    }
+    
+    .block.faded {
+      opacity: 0.2;
+      filter: grayscale(0.5);
+    }
+    
+    .block.high-yield-pattern {
+      stroke-dasharray: 4 2;
+      stroke-width: 3px;
+      stroke: rgba(255,255,255,0.9);
+    }
+
+    /* Block labels */
+    .block-label {
+      font-size: clamp(8px, 2.5vw, 10px);
+      font-weight: 600;
+      fill: #1a1e24;
+      text-anchor: middle;
+      pointer-events: none;
+      user-select: none;
+      paint-order: stroke;
+      stroke: white;
+      stroke-width: 2px;
+      stroke-opacity: 0.8;
+      font-family: 'Libre Franklin', sans-serif;
+    }
+    
+    .block-label.hidden {
+      display: none;
+    }
+
+    /* ---------- Control Buttons ---------- */
+    .control-buttons {
+      position: absolute;
+      right: max(8px, 2vw);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 70;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(8px, 2vh, 16px);
+    }
+    
+    .control-button-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .button-label {
+      font-size: clamp(8px, 2.2vw, 10px);
+      color: #333;
+      text-align: center;
+      font-weight: 600;
+      background: rgba(255,255,255,0.7);
+      padding: 2px 6px;
+      border-radius: 10px;
+      backdrop-filter: blur(4px);
+    }
+    
+    .control-button {
+      width: clamp(44px, 10vw, 52px);
+      height: clamp(44px, 10vw, 52px);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(20px, 5vw, 24px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    .control-button:active {
+      transform: scale(0.92);
+      background: var(--accent);
+      color: white;
+    }
+    
+    .control-button.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .control-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ---------- Bottom Panels ---------- */
+    .info-panel, .stats-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0;
+      background: #ffffff;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+      z-index: 90;
+      overflow: hidden;
+      padding: 0;
+      transform: translateY(100%);
+      transition: transform 0.3s ease, height 0s 0.3s;
+    }
+    
+    .info-panel.visible, .stats-panel.visible { 
+      height: min(55vh, 500px);
+      transform: translateY(0);
+      transition: transform 0.3s ease, height 0s;
+    }
+    
+    .panel-header {
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 10;
+      padding: clamp(16px, 3vh, 20px) clamp(16px, 4vw, 20px) clamp(10px, 2vh, 12px);
+      border-bottom: 1px solid #edf2f7;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .panel-content {
+      height: calc(100% - 70px);
+      overflow-y: auto;
+      padding: 0 clamp(16px, 4vw, 20px) clamp(16px, 3vh, 20px);
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .panel-title { 
+      color: var(--accent); 
+      font-weight: 700; 
+      font-size: clamp(20px, 5vw, 24px);
+      font-family: 'Georgia', serif;
+      margin: 0;
+    }
+    
+    .panel-subtitle { 
+      color: var(--muted); 
+      font-size: clamp(14px, 3.5vw, 16px);
+      font-weight: 500;
+      margin: 4px 0 0;
+    }
+    
+    .close-button {
+      width: clamp(36px, 8vw, 44px);
+      height: clamp(36px, 8vw, 44px);
+      border-radius: 50%;
+      background: rgba(0,0,0,0.05);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(20px, 5vw, 24px);
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: all 0.2s ease;
+    }
+    
+    .close-button:active {
+      background: rgba(0,0,0,0.1);
+      transform: scale(0.92);
+    }
+
+    /* Detail rows */
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: clamp(12px, 2.5vh, 16px) 0;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      color: #4a5568;
+      font-weight: 600;
+      font-size: clamp(14px, 3.5vw, 16px);
+    }
+
+    .detail-value {
+      color: #1a202c;
+      font-weight: 700;
+      font-size: clamp(15px, 4vw, 18px);
+      font-family: 'Libre Franklin', sans-serif;
+    }
+
+    /* Density chart */
+    .density-chart {
+      width: 100%;
+      height: clamp(60px, 10vh, 80px);
+      background: #edf2f7;
+      border-radius: 12px;
+      margin: clamp(15px, 3vh, 20px) 0;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .density-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #9ae6b4, var(--accent));
+      border-radius: 12px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .chart-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #1a202c;
+      font-weight: 700;
+      font-size: clamp(13px, 3.5vw, 15px);
+      text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+      font-family: 'Georgia', serif;
+      background: rgba(255,255,255,0.9);
+      padding: 4px 12px;
+      border-radius: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    /* Stats panels */
+    .stats-title {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: clamp(20px, 5vw, 24px);
+      margin: 0;
+      font-family: 'Georgia', serif;
+    }
+    
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: clamp(14px, 3.5vw, 16px);
+    }
+    
+    .stats-table tr {
+      border-bottom: 1px solid #edf2f7;
+      height: clamp(48px, 8vh, 56px);
+    }
+    
+    .stats-table tr:last-child {
+      border-bottom: none;
+    }
+    
+    .stats-table td {
+      padding: clamp(8px, 2vh, 12px) clamp(6px, 2vw, 8px);
+      vertical-align: middle;
+    }
+    
+    .stats-table .stat-name {
+      font-weight: 600;
+      color: #4a5568;
+    }
+    
+    .stats-table .stat-value {
+      text-align: right;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    /* Help modal */
+    .help-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 85%;
+      max-width: 360px;
+      max-height: 80vh;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      z-index: 1000;
+      padding: 0;
+      overflow: hidden;
+      display: none;
+    }
+    
+    .help-panel.visible {
+      display: block;
+    }
+    
+    .help-panel-header {
+      position: relative;
+      padding: clamp(16px, 3vh, 20px) clamp(16px, 4vw, 20px) clamp(12px, 2vh, 15px);
+      border-bottom: 1px solid #edf2f7;
+      background: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .help-panel-header h2 {
+      color: var(--accent);
+      margin: 0;
+      font-size: clamp(18px, 5vw, 22px);
+      font-family: 'Georgia', serif;
+    }
+
+    .help-close-button {
+      width: clamp(36px, 8vw, 40px);
+      height: clamp(36px, 8vw, 40px);
+      border-radius: 50%;
+      background: rgba(0,0,0,0.05);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(18px, 5vw, 22px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .help-close-button:active {
+      background: rgba(0,0,0,0.1);
+      transform: scale(0.92);
+    }
+
+    .help-panel-content {
+      max-height: calc(80vh - 80px);
+      overflow-y: auto;
+      padding: 0 clamp(16px, 4vw, 20px) clamp(16px, 3vh, 20px);
+    }
+    
+    .help-item {
+      margin-bottom: clamp(12px, 2.5vh, 16px);
+      padding-bottom: clamp(12px, 2.5vh, 16px);
+      border-bottom: 1px solid #edf2f7;
+    }
+    
+    .help-item:last-child {
+      border-bottom: none;
+    }
+    
+    .help-item h3 {
+      margin: 0 0 6px 0;
+      font-size: clamp(15px, 4vw, 17px);
+      color: var(--accent);
+      font-weight: 700;
+    }
+    
+    .help-item p {
+      margin: 0;
+      font-size: clamp(13px, 3.5vw, 15px);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      display: none;
+    }
+    
+    .overlay.visible {
+      display: block;
+    }
+
+    /* Loading indicator */
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background: rgba(255,255,255,0.95);
+      padding: clamp(16px, 4vh, 20px) clamp(20px, 5vw, 24px);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: clamp(8px, 2vw, 12px);
+      backdrop-filter: blur(8px);
+    }
+    
+    .loading-spinner {
+      width: clamp(20px, 5vw, 24px);
+      height: clamp(20px, 5vw, 24px);
+      border: 3px solid rgba(30, 74, 30, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--accent);
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ---------- RESPONSIVE ADJUSTMENTS ---------- */
+    @media (max-height: 700px) {
+      .info-panel.visible, .stats-panel.visible { height: 65vh; }
+      .control-buttons { gap: 8px; }
+    }
+
+    @media (max-height: 500px) {
+      .info-panel.visible, .stats-panel.visible { height: 75vh; }
+      .farm-info { bottom: 10px; padding: 8px 12px; }
+      .farm-name { font-size: 16px; }
+      .farm-stats { font-size: 12px; }
+      .control-button { width: 40px; height: 40px; font-size: 18px; }
+    }
+
+    @media (max-width: 320px) {
+      .control-button { width: 40px; height: 40px; font-size: 18px; }
+      .button-label { font-size: 8px; padding: 2px 4px; }
+      .header h1 { font-size: 16px; padding: 8px 12px; }
+    }
+
+    @media (orientation: landscape) and (max-height: 450px) {
+      .farm-info { bottom: 10px; left: 10px; padding: 6px 10px; }
+      .farm-name { font-size: 14px; }
+      .farm-stats { font-size: 11px; }
+      .control-button { width: 38px; height: 38px; font-size: 16px; }
+      .button-label { font-size: 8px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header" id="header">
+    <h1 id="page-title">🍌 Elim Farms</h1>
+    <div id="searchDropdown" class="search-dropdown" role="search" aria-hidden="true">
+      <input type="text" id="block-search" placeholder="Search blocks..." autocomplete="off" aria-label="Search blocks by name" />
+      <div id="search-results" class="search-results-list" role="listbox"></div>
+    </div>
+  </div>
+
+  <div class="farm-info" id="farmInfo">
+    <p class="farm-name" id="farmNameDisplay">Elim Farms</p>
+    <p class="farm-stats" id="farmStatsDisplay">Loading...</p>
+  </div>
+
+  <div id="map-container">
+    <svg id="map-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <pattern id="highYieldPattern" patternUnits="userSpaceOnUse" width="8" height="8">
+          <circle cx="4" cy="4" r="2" fill="rgba(255,255,255,0.85)" />
+        </pattern>
+      </defs>
+    </svg>
+    
+    <div class="control-buttons">
+      <div class="control-button-wrapper">
+        <button id="summary-button" class="control-button" aria-label="Show farm summary">📊</button>
+        <span class="button-label">Summary</span>
+      </div>
+      <div class="control-button-wrapper">
+        <button id="blocks-button" class="control-button" aria-label="Show all blocks">🌱</button>
+        <span class="button-label">Blocks</span>
+      </div>
+      <div class="control-button-wrapper">
+        <button id="search-button" class="control-button" aria-label="Search blocks">🔍</button>
+        <span class="button-label">Search</span>
+      </div>
+      <div class="control-button-wrapper">
+        <button id="prev-block" class="control-button" aria-label="Previous block">←</button>
+        <span class="button-label">Prev</span>
+      </div>
+      <div class="control-button-wrapper">
+        <button id="next-block" class="control-button" aria-label="Next block">→</button>
+        <span class="button-label">Next</span>
+      </div>
+      <div class="control-button-wrapper">
+        <button id="help-button" class="control-button" aria-label="Show help">❓</button>
+        <span class="button-label">Help</span>
+      </div>
+    </div>
+    
+    <!-- Bottom Panels -->
+    <div id="block-panel" class="info-panel" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title" id="block-panel-title">Block Details</div>
+          <div class="panel-subtitle" id="block-panel-subtitle"></div>
+        </div>
+        <button class="close-button" aria-label="Close panel">×</button>
+      </div>
+      <div class="panel-content" id="block-panel-content"></div>
+    </div>
+    
+    <div id="summary-panel" class="stats-panel" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="panel-header">
+        <div class="stats-title">Farm Summary</div>
+        <button class="close-button" aria-label="Close panel">×</button>
+      </div>
+      <div class="panel-content">
+        <table class="stats-table" id="summary-table"></table>
+      </div>
+    </div>
+    
+    <div id="blocks-panel" class="stats-panel" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="panel-header">
+        <div class="stats-title">All Blocks</div>
+        <button class="close-button" aria-label="Close panel">×</button>
+      </div>
+      <div class="panel-content">
+        <table class="stats-table" id="blocks-table"></table>
+      </div>
+    </div>
+    
+    <div id="loading" class="loading" style="display: none;">
+      <div class="loading-spinner"></div>
+      <span>Loading farm data...</span>
+    </div>
+  </div>
+
+  <div id="overlay" class="overlay" aria-hidden="true"></div>
+  <div id="help-panel" class="help-panel" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="help-panel-header">
+      <h2>How to Use</h2>
+      <button class="help-close-button" aria-label="Close help">×</button>
+    </div>
+    <div class="help-panel-content">
+      <div class="help-item">
+        <h3>Exploring Blocks</h3>
+        <p>Tap any block on the map to view detailed statistics. The map will zoom in and show block-specific data.</p>
+      </div>
+      <div class="help-item">
+        <h3>Farm Summary</h3>
+        <p>Use the 📊 button to view overall farm statistics including total area, trees, and yields.</p>
+      </div>
+      <div class="help-item">
+        <h3>All Blocks</h3>
+        <p>The 🌱 button shows a complete list of all blocks with their key metrics.</p>
+      </div>
+      <div class="help-item">
+        <h3>Search</h3>
+        <p>Tap 🔍 to search for specific blocks by name. Results appear as you type.</p>
+      </div>
+      <div class="help-item">
+        <h3>Navigation</h3>
+        <p>Use ← → buttons to cycle through blocks.</p>
+      </div>
+      <div class="help-item">
+        <h3>Color Legend</h3>
+        <p><span style="color: #2c5282;">●</span> Normal · <span style="color: #e6b800;">●</span> Selected · <span style="color: #0f5c3f;">●</span> High Yield <span style="font-size:0.8em">(dotted border)</span></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const isSlowDevice = /(android|iphone|ipod|ipad).*os\s([0-9]+)_/i.test(navigator.userAgent) && 
+                         parseInt(RegExp.$2, 10) < 12 || 
+                         /Android [0-7]/.test(navigator.userAgent);
+
+    // ---------- CONFIG ----------
+    let showLabels = true;
+    let cachedMaxPlants = null;
+
+    // UI Elements
+    const mapContainer = document.getElementById("map-container");
+    const svg = d3.select("#map-svg");
+    let width = mapContainer.clientWidth, height = mapContainer.clientHeight;
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+    const mapGroup = svg.append("g").attr("id", "mapGroup");
+    const header = d3.select("#header");
+    const farmInfo = d3.select("#farmInfo");
+    const loadingIndicator = d3.select("#loading");
+    
+    const summaryButton = d3.select("#summary-button");
+    const blocksButton = d3.select("#blocks-button");
+    const searchButton = d3.select("#search-button");
+    const prevButton = d3.select("#prev-block");
+    const nextButton = d3.select("#next-block");
+    const helpButton = d3.select("#help-button");
+    
+    const blockPanel = d3.select("#block-panel");
+    const summaryPanel = d3.select("#summary-panel");
+    const blocksPanel = d3.select("#blocks-panel");
+    const helpPanel = d3.select("#help-panel");
+    const overlay = d3.select("#overlay");
+    
+    const searchDropdown = d3.select("#searchDropdown");
+    const blockSearch = d3.select("#block-search");
+    const searchResults = d3.select("#search-results");
+    
+    const blockPanelTitle = d3.select("#block-panel-title");
+    const blockPanelSubtitle = d3.select("#block-panel-subtitle");
+    const blockPanelContent = d3.select("#block-panel-content");
+    const summaryTable = d3.select("#summary-table");
+    const blocksTable = d3.select("#blocks-table");
+    
+    const farmStatsDisplay = d3.select("#farmStatsDisplay");
+
+    const projection = d3.geoIdentity().reflectY(true);
+    const path = d3.geoPath().projection(projection);
+
+    let geoData = null;
+    let csvData = [];
+    let dataMap = {};
+    let blocks = [];
+    let blockRanks = {};
+    let blockSelection = null;
+    let clickLayer = null;
+    let blockLabels = null;
+    let zoomBehavior = null;
+    let selectedBlock = null;
+    let selectedBlockIndex = -1;
+    let currentTransform = d3.zoomIdentity;
+    let activePanel = null;
+    let lastFocusedElement = null;
+
+    // 🔧 CONFIGURATION - ZOOM & OFFSET SETTINGS
+    const config = {
+      colors: {
+        default: "#2c5282",
+        selected: "#e6b800",
+        highYield: "#0f5c3f"
+      },
+      thresholds: {
+        highYield: 1000,
+        labelTruncate: 12
+      },
+      map: {
+        scale: 0.9,
+        padding: 0.05,
+        labelBaseFontSize: 11,
+        // ✅ NEW: Zoom & movement settings
+        initialZoomFactor: 0.85,  // 0.85 = 15% zoom out (lower = more zoom out)
+        offsetX: 30,               // Horizontal shift: negative = left, positive = right
+        offsetY: 100              // Vertical shift: negative = UP, positive = DOWN (SVG Y-axis!)
+      },
+      animation: {
+        fast: 200,
+        normal: 400,
+        slow: 800,
+        zoomIn: 1000,
+        zoomOut: 800
+      }
+    };
+
+    function debounce(func, wait) {
+      let timeout;
+      return function() {
+        const context = this, args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
       };
-    }).filter(r => r.hours > 0 || r.maintenance);
+    }
 
-    // Normalize harvest
-    raw.harvest = raw.harvest.map(r => {
-      const date = parseDate(r['DATE OF HARVESTING']);
-      return {
-        year: date?.getFullYear()||0,
-        monthKey: date ? `${date.toLocaleString('en',{month:'short'})} ${date.getFullYear()}` : 'Unknown',
-        block: r['BLOCK'],
-        bunches: 1,
-        weight: parseFloat(r['QUANTITY HARVESTED (KG)']) || parseFloat(r['BUNCH WEIGHT (KG)']) || 0
-      };
-    });
+    function trapFocus(element) {
+      const focusableSelectors = [
+        'button', '[href]', 'input', 'select', 'textarea', '[tabindex]:not([tabindex="-1"])'
+      ].join(',');
+      const focusableElements = element.querySelectorAll(focusableSelectors);
+      const firstFocusable = focusableElements[0];
+      const lastFocusable = focusableElements[focusableElements.length - 1];
 
-    // Normalize tagging
-    raw.tagging = raw.tagging.map(r => ({
-      year: parseDate(r['DATE OF TAGGING'])?.getFullYear()||0,
-      block: r['BLOCK'],
-      tagColour: r['TAG COLOUR'],
-      mats: 1
-    }));
+      function handleKeyDown(e) {
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey) {
+          if (document.activeElement === firstFocusable) {
+            e.preventDefault();
+            lastFocusable.focus();
+          }
+        } else {
+          if (document.activeElement === lastFocusable) {
+            e.preventDefault();
+            firstFocusable.focus();
+          }
+        }
+      }
 
-    raw._meta = raw._meta || { timestamp: new Date().toISOString() };
-    return raw;
-  } catch(e) {
-    console.error('Fetch failed:', e);
-    return null;
-  }
-}
+      element.addEventListener('keydown', handleKeyDown);
+      if (firstFocusable) firstFocusable.focus();
+      
+      return () => element.removeEventListener('keydown', handleKeyDown);
+    }
 
-/* ── DASHBOARD RENDERER ───────────────────────────── */
-async function renderDashboard(data) {
-  if (!data) return;
-  const D = data;
+    // ✅ Helper: Apply zoom + offset to projection
+    function applyMapTransform() {
+      projection.scale(projection.scale() * config.map.initialZoomFactor);
+      const t = projection.translate();
+      projection.translate([t[0] + config.map.offsetX, t[1] + config.map.offsetY]);
+    }
 
-  // ── HEADER ──
-  const ts = new Date(D._meta.timestamp).toLocaleTimeString();
-  document.getElementById('data-status').textContent = `Live Data`;
-  document.getElementById('data-timestamp').textContent = `Updated ${ts}`;
+    async function loadData() {
+      try {
+        loadingIndicator.style("display", "flex");
+        
+        const [geo, csv] = await Promise.all([
+          d3.json("ElimFarms.geojson"),
+          d3.csv("farm_data.csv")
+        ]);
+        
+        geoData = geo;
+        csvData = csv;
+        
+        dataMap = {};
+        blocks = [];
+        csvData.forEach(d => {
+          const blockName = d["Block Name"];
+          if (blockName) {
+            dataMap[blockName] = d;
+            blocks.push(blockName);
+          }
+        });
+        
+        calculateBlockRanks();
+        cachedMaxPlants = Math.max(...csvData.map(d => parseFloat(d["Plants per hectare"]) || 0), 1);
+        updateFarmInfo();
+        initMap();
+        
+        loadingIndicator.style("display", "none");
+        console.log("Mobile farm dashboard loaded", blocks.length, "blocks");
+        
+      } catch (error) {
+        console.error("Error loading data:", error);
+        loadingIndicator.style("display", "none");
+        alert("Error loading farm data. Please check console.");
+      }
+    }
 
-  // ── OVERVIEW ──
-  const hByBlock = agg(D.harvest, 'block', 'weight');
-  const tByBlock = agg(D.tagging, 'block', 'mats');
-  const pByYear = agg(D.pump, 'year', 'hours');
-  const iByYear = agg(D.irrigation, 'year', 'fuel');
+    function calculateBlockRanks() {
+      const blocksWithYield = blocks.map(blockName => {
+        const data = dataMap[blockName];
+        const plants = parseFloat(data["Plants per hectare"]) || 0;
+        const weight = parseFloat(data["Average Bunch Weight"]) || 0;
+        return { name: blockName, yield: plants * weight };
+      }).sort((a, b) => b.yield - a.yield);
+      
+      blocksWithYield.forEach((item, index) => {
+        blockRanks[item.name] = index + 1;
+      });
+    }
 
-  const kpiOv = document.getElementById('kpi-overview');
-  kpiOv.innerHTML = `
-    <div class="kpi-card accent"><span class="icon">🍌</span><div class="value">${fmt(Object.values(hByBlock).reduce((a,b)=>a+b,0))}<small style="font-size:14px"> kg</small></div><div class="label">Total Harvest Weight</div><div class="sub">${D.harvest.length} bunches recorded</div></div>
-    <div class="kpi-card"><span class="icon">🏷️</span><div class="value">${fmt(D.tagging.length)}</div><div class="label">Mats Tagged</div><div class="sub">${Object.keys(tByBlock).length} blocks active</div></div>
-    <div class="kpi-card"><span class="icon">⚙️</span><div class="value">${fmt(Object.values(pByYear).reduce((a,b)=>a+b,0))}<small style="font-size:14px"> hrs</small></div><div class="label">Total Pump Hours</div><div class="sub">${Object.keys(agg(D.pump,'pumpId','hours')).length} pumps tracked</div></div>
-    <div class="kpi-card"><span class="icon">💧</span><div class="value">${fmt(Object.values(iByYear).reduce((a,b)=>a+b,0),1)}<small style="font-size:14px"> L</small></div><div class="label">Irrigation Fuel Used</div><div class="sub">${D.irrigation.length} sessions</div></div>
-    <div class="kpi-card"><span class="icon">📏</span><div class="value">${fmt(D.harvest.reduce((a,r)=>a+r.weight,0)/D.harvest.length, 1)}<small style="font-size:14px"> kg</small></div><div class="label">Avg Bunch Weight</div><div class="sub">All blocks combined</div></div>
-    <div class="kpi-card"><span class="icon">🗺️</span><div class="value">${Object.keys(hByBlock).length + Object.keys(tByBlock).length}</div><div class="label">Blocks Tracked</div><div class="sub">Harvest & Tagging</div></div>
-  `;
+    function updateFarmInfo() {
+      const totalArea = csvData.reduce((sum, d) => sum + (parseFloat(d["Block Size"]) || 0), 0);
+      farmStatsDisplay.text(`${blocks.length} blocks · ${totalArea.toFixed(0)} ha`);
+    }
 
-  createChart('c_blockHarvest', {type:'bar', data:{labels:Object.keys(hByBlock), datasets:[{data:Object.values(hByBlock), backgroundColor:[GOLD,GOLD_L,OLIVE], borderRadius:6}]}, options:{...barOpts(true), plugins:{tooltip:{callbacks:{label:c=>` ${c.parsed.y.toFixed(0)} kg`}}}}});
-  
-  createChart('c_tagBlock', {type:'bar', data:{labels:Object.keys(tByBlock), datasets:[{data:Object.values(tByBlock), backgroundColor:Object.keys(tByBlock).map(b=>b==='M3'?GOLD:NAVY_L), borderRadius:5}]}, options:barOpts(false)});
-  
-  createChart('c_pumpYear_ov', {type:'line', data:{labels:['2021','2022','2023','2024','2025'], datasets:[{data:[2021,2022,2023,2024,2025].map(y=>pByYear[y]||0), borderColor:GOLD, backgroundColor:'rgba(168,147,90,0.12)', fill:true, tension:0.4, pointRadius:4}]}, options:{responsive:true, plugins:{legend:{display:false}}, scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST}}, y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST}}}}});
-  
-  createChart('c_irrYear_ov', {type:'bar', data:{labels:['2020','2021','2022','2023','2024','2025'], datasets:[{data:[2020,2021,2022,2023,2024,2025].map(y=>iByYear[y]||0), backgroundColor:[GOLD_L,GOLD_L,GOLD,GOLD_L,OLIVE,GOLD_L], borderRadius:5}]}, options:{...barOpts(true), plugins:{tooltip:{callbacks:{label:c=>` ${c.parsed.y} L`}}}}});
+    function initMap() {
+      projection.fitSize([width, height], geoData);
+      applyMapTransform(); // ✅ Apply zoom + offset here
+      
+      blockSelection = mapGroup.append("g").attr("class", "blocks")
+        .selectAll("path")
+        .data(geoData.features)
+        .enter()
+        .append("path")
+        .attr("class", "block")
+        .attr("d", d => {
+          try { return path(d); } catch (e) { console.warn("Error drawing block:", d.properties?.Field_Name, e); return null; }
+        })
+        .attr("fill", d => getBlockColor(d))
+        .style("stroke-width", "2px")
+        .style("stroke", "#ffffff");
 
-  // ── HARVEST TAB ──
-  const hByMonth = sortObj(agg(D.harvest, 'monthKey', 'weight'));
-  document.getElementById('kpi-harvest').innerHTML = `
-    <div class="kpi-card accent"><span class="icon">⚖️</span><div class="value">${fmt(D.harvest.reduce((a,r)=>a+r.weight,0))}<small style="font-size:13px"> kg</small></div><div class="label">Total Harvested</div></div>
-    <div class="kpi-card"><span class="icon">📦</span><div class="value">${D.harvest.length}</div><div class="label">Bunches Recorded</div></div>
-    <div class="kpi-card"><span class="icon">📐</span><div class="value">${fmt(D.harvest.reduce((a,r)=>a+r.weight,0)/D.harvest.length, 1)}<small style="font-size:13px"> kg</small></div><div class="label">Avg Bunch Weight</div></div>
-    <div class="kpi-card"><span class="icon">🏆</span><div class="value">${Object.entries(hByBlock).sort((a,b)=>b[1]-a[1])[0]?.[0]||'-'}</div><div class="label">Top Block</div></div>
-  `;
+      addClickLayer();
+      initZoom();
+      addBlockLabels();
+      setupEventListeners();
+      
+      console.log("Map initialized with zoom:", config.map.initialZoomFactor, "offset:", [config.map.offsetX, config.map.offsetY]);
+    }
 
-  createChart('c_monthlyHarvest', {type:'bar', data:{labels:Object.keys(hByMonth), datasets:[{data:Object.values(hByMonth), backgroundColor:Object.keys(hByMonth).map((_,i)=>i%2?GOLD:OLIVE), borderRadius:8}]}, options:{...barOpts(true), plugins:{tooltip:{callbacks:{label:c=>` ${c.parsed.y.toFixed(0)} kg`}}}}});
-  createChart('c_blockHarvest2', {type:'bar', data:{labels:Object.keys(hByBlock), datasets:[{data:Object.values(hByBlock), backgroundColor:[GOLD,GOLD_L,OLIVE], borderRadius:6}]}, options:{responsive:true, plugins:{legend:{display:false}}, scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST}}, y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST}}}}});
-  createChart('c_blockCount', {type:'doughnut', data:{labels:Object.entries(agg(D.harvest,'block','bunches')).map(([b,c])=>`${b} (${c})`), datasets:[{data:Object.values(agg(D.harvest,'block','bunches')), backgroundColor:[GOLD,GOLD_L,OLIVE], borderWidth:0, hoverOffset:8}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:SAND, font:{size:12}, padding:14}}}}});
+    function getBlockColor(feature) {
+      const fieldName = feature.properties?.Field_Name;
+      if (!fieldName) return config.colors.default;
+      
+      const blockData = dataMap[fieldName];
+      if (!blockData) return config.colors.default;
+      
+      const plants = parseFloat(blockData["Plants per hectare"]) || 0;
+      const weight = parseFloat(blockData["Average Bunch Weight"]) || 0;
+      const estimatedYield = plants * weight;
+      
+      const blockEl = d3.select(`.block[data-field="${fieldName}"]`);
+      if (estimatedYield > config.thresholds.highYield && fieldName !== selectedBlock) {
+        blockEl.classed("high-yield-pattern", true);
+      } else {
+        blockEl.classed("high-yield-pattern", false);
+      }
+      
+      if (fieldName === selectedBlock) return config.colors.selected;
+      if (estimatedYield > config.thresholds.highYield) return config.colors.highYield;
+      return config.colors.default;
+    }
 
-  // Harvest Table
-  const hStats = Object.entries(hByBlock).map(([b,w])=>({block:b, weight:w, count: agg(D.harvest,'block','bunches')[b]||0}));
-  hStats.forEach(s => s.avg = s.count ? (s.weight/s.count) : 0);
-  hStats.forEach(s => s.share = s.weight / D.harvest.reduce((a,r)=>a+r.weight,0) * 100);
-  document.querySelector('#table-harvest tbody').innerHTML = hStats.map(s=>`
-    <tr><td><span class="badge badge-gold">${s.block}</span></td><td>${fmt(s.weight,1)}</td><td>${s.count}</td><td>${fmt(s.avg,2)}</td><td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:${s.share.toFixed(1)}%;height:100%;background:var(--gold);border-radius:3px;"></div></div><span style="font-size:12px;color:var(--olive);">${s.share.toFixed(1)}%</span></div></td></tr>
-  `).join('');
+    function addClickLayer() {
+      if (!geoData || !geoData.features) return;
+      removeClickLayer();
+      
+      const strokeValue = getComputedStyle(document.documentElement)
+        .getPropertyValue('--click-target-stroke').trim() || '20px';
+      
+      clickLayer = mapGroup.append("g").attr("class", "click-layer");
 
-  // ── TAGGING TAB ──
-  const tByColour = sortObj(agg(D.tagging, 'tagColour', 'mats'));
-  const topColours = Object.entries(tByColour).slice(0,10);
-  const tagColors = [SAND,'#d4b44a','#c0392b','#e0ddd8','#3b7dd8','#2d5a27',OLIVE,'#e07b39','#f0ece6','#4a90d9'];
-  
-  document.getElementById('kpi-tagging').innerHTML = `
-    <div class="kpi-card accent"><span class="icon">🏷️</span><div class="value">${fmt(D.tagging.length)}</div><div class="label">Total Mats Tagged</div></div>
-    <div class="kpi-card"><span class="icon">🎨</span><div class="value">${Object.keys(tByColour).length}</div><div class="label">Tag Colours Used</div></div>
-    <div class="kpi-card"><span class="icon">🗺️</span><div class="value">${Object.keys(tByBlock).length}</div><div class="label">Blocks Tagged</div></div>
-    <div class="kpi-card"><span class="icon">🏆</span><div class="value">${Object.entries(tByBlock).sort((a,b)=>b[1]-a[1])[0]?.[0]||'-'}</div><div class="label">Top Tagged Block</div></div>
-  `;
+      clickLayer.selectAll("path")
+        .data(geoData.features)
+        .enter()
+        .append("path")
+        .attr("class", "block-click-target")
+        .attr("d", d => { try { return path(d); } catch (e) { return null; } })
+        .attr("data-field", d => d.properties?.Field_Name || "")
+        .style("fill", "transparent")
+        .style("stroke", "transparent")
+        .style("stroke-width", strokeValue)
+        .style("pointer-events", "all")
+        .style("cursor", "pointer")
+        .on("click", (event, d) => onBlockClick(event, d))
+        .on("touchstart", (event, d) => { event.preventDefault(); onBlockClick(event, d); });
+    }
 
-  createChart('c_tagBlock2', {type:'bar', data:{labels:Object.keys(tByBlock), datasets:[{data:Object.values(tByBlock), backgroundColor:Object.keys(tByBlock).map(b=>b==='M3'?GOLD:NAVY_L), borderRadius:6}]}, options:{...barOpts(true), plugins:{legend:{display:false}}}});
-  createChart('c_tagColour', {type:'bar', data:{labels:topColours.map(c=>c[0]), datasets:[{data:topColours.map(c=>c[1]), backgroundColor:tagColors, borderRadius:4}]}, options:{indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST,font:{size:10}}}, y:{grid:{color:'none'},ticks:{color:FOREST,font:{size:10}}}}}});
-  createChart('c_tagPie', {type:'doughnut', data:{labels:Object.keys(tByColour), datasets:[{data:Object.values(tByColour), backgroundColor:Object.keys(tByColour).map((_,i)=>tagColors[i%tagColors.length]), borderWidth:0, hoverOffset:6}]}, options:{responsive:false, plugins:{legend:{display:false}}}});
-  
-  const maxT = Math.max(...Object.values(tByColour));
-  document.getElementById('tag-legend').innerHTML = Object.entries(sortObj(tByColour)).map(([c,v],i)=>`
-    <div class="legend-row"><span><span class="colour-swatch" style="background:${tagColors[i%tagColors.length]}"></span>${c}</span><div class="legend-bar-bg"><div class="legend-bar-fill" style="width:${(v/maxT*100).toFixed(1)}%;background:${tagColors[i%tagColors.length]};"></div></div><span class="legend-val">${fmt(v)}</span></div>
-  `).join('');
+    function removeClickLayer() {
+      d3.selectAll(".click-layer").remove();
+      clickLayer = null;
+    }
 
-  // ── PUMP TAB ──
-  const pByPump = sortObj(agg(D.pump, 'pumpId', 'hours'));
-  const p2ByYear = agg(D.pump.filter(r=>r.pumpId==='Pump 2'), 'year', 'hours');
-  const p2025 = agg(D.pump.filter(r=>r.year===2025), 'pumpId', 'hours');
+    function addBlockLabels() {
+      if (!geoData || !geoData.features) return;
+      removeBlockLabels();
+      
+      const labelsGroup = mapGroup.append("g").attr("class", "block-labels");
 
-  document.getElementById('kpi-pump').innerHTML = `
-    <div class="kpi-card accent"><span class="icon">⚙️</span><div class="value">${fmt(D.pump.reduce((a,r)=>a+r.hours,0))}<small style="font-size:13px"> hrs</small></div><div class="label">Total Operating Hours</div></div>
-    <div class="kpi-card"><span class="icon">🔢</span><div class="value">${Object.keys(pByPump).length}</div><div class="label">Active Pumps</div></div>
-    <div class="kpi-card"><span class="icon">📋</span><div class="value">${D.pump.length}</div><div class="label">Log Entries</div></div>
-    <div class="kpi-card"><span class="icon">⚠️</span><div class="value">${D.pump.filter(r=>r.maintenance).length}</div><div class="label">Maintenance Events</div></div>
-  `;
+      blockLabels = labelsGroup.selectAll("text")
+        .data(geoData.features)
+        .enter()
+        .append("text")
+        .attr("class", "block-label")
+        .attr("data-field", d => d.properties?.Field_Name || "")
+        .text(d => {
+          const name = d.properties?.Field_Name || "";
+          return name.length > 8 ? name.substring(0, 6) + "…" : name;
+        })
+        .attr("x", d => { try { return path.centroid(d)[0]; } catch (e) { return 0; } })
+        .attr("y", d => { try { return path.centroid(d)[1]; } catch (e) { return 0; } });
+    }
 
-  createChart('c_pump2year', {type:'bar', data:{labels:['2021','2022','2023','2024','2025'], datasets:[{data:[2021,2022,2023,2024,2025].map(y=>p2ByYear[y]||0), backgroundColor:[GOLD_L,GOLD_L,GOLD,OLIVE,GOLD_L], borderRadius:6}]}, options:{...barOpts(true), plugins:{tooltip:{callbacks:{label:c=>` ${c.parsed.y} hrs`}}}}});
-  createChart('c_pumpPie', {type:'doughnut', data:{labels:Object.entries(pByPump).map(([p,h])=>`${p} (${fmt(h)}h)`), datasets:[{data:Object.values(pByPump), backgroundColor:[GOLD,OLIVE,FOREST,NAVY_L], borderWidth:0, hoverOffset:6}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:FOREST,font:{size:11},padding:12}}}}});
-  createChart('c_pump2025', {type:'bar', data:{labels:Object.keys(p2025), datasets:[{data:Object.values(p2025), backgroundColor:[GOLD,GOLD_L,OLIVE,OLIVE], borderRadius:6}]}, options:{...barOpts(true), plugins:{tooltip:{callbacks:{label:c=>` ${c.parsed.y} hrs`}}}}});
+    function removeBlockLabels() {
+      d3.selectAll(".block-labels").remove();
+      blockLabels = null;
+    }
 
-  // Pump Table
-  const pumps = Object.keys(pByPump);
-  const years = [2021,2022,2023,2024,2025];
-  const matrix = {}; pumps.forEach(p=>matrix[p]={}); 
-  years.forEach(y=>{ matrix[p].forEach?.(); pumps.forEach(p=>matrix[p][y]=agg(D.pump.filter(r=>r.pumpId===p&&r.year===y),'pumpId','hours')['Pump '+p.split(' ')[1]]||0); });
-  // Simplified matrix fill:
-  years.forEach(y => {
-    pumps.forEach(p => {
-      matrix[p][y] = D.pump.filter(r=>r.pumpId===p && r.year===y).reduce((s,r)=>s+r.hours,0);
-    });
-  });
-  const totalsRow = {}; years.forEach(y=>totalsRow[y]=pumps.reduce((s,p)=>s+matrix[p][y],0)); totalsRow['Total']=Object.values(totalsRow).reduce((a,b)=>a+b,0);
-  
-  document.querySelector('#table-pump tbody').innerHTML = pumps.map(p=>`
-    <tr><td><span class="badge badge-gold">${p}</span></td>${years.map(y=>`<td>${matrix[p][y]||'—'}</td>`).join('')}<td><strong>${Object.values(matrix[p]).reduce((a,b)=>a+b,0)}</strong></td></tr>
-  `).join('') + `<tr style="background:rgba(168,147,90,0.05);"><td><strong>Total</strong></td>${years.map(y=>`<td>${totalsRow[y]||'—'}</td>`).join('')}<td><strong>${totalsRow['Total']}</strong></td></tr>`;
+    function updateLabelPositions() {
+      if (!blockLabels) return;
+      blockLabels
+        .attr("x", d => { try { return currentTransform.apply(path.centroid(d))[0]; } catch (e) { return 0; } })
+        .attr("y", d => { try { return currentTransform.apply(path.centroid(d))[1]; } catch (e) { return 0; } });
+    }
 
-  // ── IRRIGATION TAB ──
-  const iByBlock = sortObj(agg(D.irrigation, 'block', 'fuel'));
-  const iSessionsByYear = agg(D.irrigation, 'year', 'sessions');
-  const totalFuel = Object.values(iByYear).reduce((a,b)=>a+b,0);
+    function initZoom() {
+      zoomBehavior = d3.zoom()
+        .scaleExtent([1, 8])
+        .on("zoom", (event) => {
+          currentTransform = event.transform;
+          mapGroup.attr("transform", event.transform);
+          updateLabelPositions();
+        });
+      svg.call(zoomBehavior);
+    }
 
-  document.getElementById('kpi-irrigation').innerHTML = `
-    <div class="kpi-card accent"><span class="icon">💧</span><div class="value">${fmt(totalFuel,1)}<small style="font-size:13px"> L</small></div><div class="label">Total Fuel Used</div></div>
-    <div class="kpi-card"><span class="icon">📅</span><div class="value">${D.irrigation.length}</div><div class="label">Irrigation Sessions</div></div>
-    <div class="kpi-card"><span class="icon">📈</span><div class="value">${Object.entries(iByYear).sort((a,b)=>b[1]-a[1])[0]?.[0]||'-'}</div><div class="label">Peak Fuel Year</div></div>
-    <div class="kpi-card"><span class="icon">🗺️</span><div class="value">${fmt(totalFuel/D.irrigation.length,1)}<small style="font-size:13px"> L</small></div><div class="label">Avg Fuel / Session</div></div>
-  `;
+    function focusOnBlock(feature) {
+      try {
+        const bounds = path.bounds(feature);
+        const dx = bounds[1][0] - bounds[0][0];
+        const dy = bounds[1][1] - bounds[0][1];
+        const x = (bounds[0][0] + bounds[1][0]) / 2;
+        const y = (bounds[0][1] + bounds[1][1]) / 2;
+        
+        const targetScale = Math.min(width, height) < 400 ? 0.75 : 0.65;
+        const scale = Math.max(1.2, Math.min(5, targetScale / Math.max(dx / (width * 0.65), dy / (height * 0.65))));
+        const verticalAnchor = height < 600 ? 0.35 : 0.4;
+        const translate = [width * 0.5 - scale * x, height * verticalAnchor - scale * y];
 
-  createChart('c_irrYear', {type:'line', data:{labels:['2020','2021','2022','2023','2024','2025'], datasets:[{data:[2020,2021,2022,2023,2024,2025].map(y=>iByYear[y]||0), borderColor:GOLD, backgroundColor:'rgba(168,147,90,0.12)', fill:true, tension:0.4, pointRadius:5, pointHoverRadius:7}]}, options:{responsive:true, plugins:{tooltip:{callbacks:{label:c=>` ${c.parsed.y} L`}}}, scales:{x:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:SAND}}, y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:SAND}}}}});
-  createChart('c_irrBlock', {type:'bar', data:{labels:Object.keys(iByBlock).slice(0,10), datasets:[{data:Object.values(iByBlock).slice(0,10), backgroundColor:[GOLD,GOLD_L,GOLD_L,OLIVE,OLIVE,OLIVE,NAVY_L,NAVY_L,NAVY_L,NAVY_L], borderRadius:4}]}, options:{indexAxis:'y', responsive:true, plugins:{tooltip:{callbacks:{label:c=>` ${c.parsed.x} L`}}}, scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST,font:{size:10}}}, y:{grid:{color:'none'},ticks:{color:FOREST,font:{size:10}}}}}});
-  createChart('c_irrSessions', {type:'bar', data:{labels:['2020','2021','2022','2023','2024','2025'], datasets:[{data:[2020,2021,2022,2023,2024,2025].map(y=>iSessionsByYear[y]||0), backgroundColor:[GOLD_L,GOLD_L,GOLD_L,GOLD,OLIVE,GOLD_L], borderRadius:6}]}, options:barOpts(true)});
+        const newTransform = d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale);
+        currentTransform = newTransform;
+        svg.call(zoomBehavior.transform, newTransform);
+        updateLabelPositions();
+      } catch (e) {
+        console.warn("Error focusing on block:", e);
+      }
+    }
 
-  // Irrigation Table
-  document.querySelector('#table-irrigation tbody').innerHTML = years.map(y=>{
-    const fuel = iByYear[y]||0, sess = iSessionsByYear[y]||0, avg = sess?fuel/sess:0, share = totalFuel?(fuel/totalFuel*100):0;
-    return `<tr><td>${y}</td><td>${sess}</td><td>${fmt(fuel,1)}</td><td>${fmt(avg,1)}</td><td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:${share.toFixed(1)}%;height:100%;background:${y===2023?OLIVE:GOLD};border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">${share.toFixed(1)}%</span></div></td></tr>`;
-  }).join('');
+    function resetView() {
+      selectedBlock = null;
+      selectedBlockIndex = -1;
+      currentTransform = d3.zoomIdentity;
+      svg.call(zoomBehavior.transform, currentTransform);
+      
+      if (blockSelection) {
+        blockSelection.classed("faded", false).classed("selected", false);
+        blockSelection.attr("fill", d => getBlockColor(d));
+      }
+      hideAllPanels();
+      header.classed("hidden", false);
+      farmInfo.classed("hidden", false);
+      updateLabelPositions();
+      if (blockLabels) blockLabels.classed("hidden", false);
+    }
 
-  // Hide loader
-  document.getElementById('loading-overlay').style.display = 'none';
-}
+    function onBlockClick(event, d) {
+      const fieldName = d.properties?.Field_Name;
+      if (!fieldName) return;
+      
+      if (selectedBlock === fieldName) { resetView(); return; }
+      
+      selectedBlock = fieldName;
+      selectedBlockIndex = blocks.indexOf(fieldName);
+      
+      blockSelection.classed("faded", dd => dd !== d);
+      blockSelection.classed("selected", dd => dd === d);
+      blockSelection.attr("fill", dd => getBlockColor(dd));
+      
+      header.classed("hidden", true);
+      farmInfo.classed("hidden", true);
+      focusOnBlock(d);
+      showPanel(blockPanel);
+      updateBlockPanel(d);
+      if (blockLabels) blockLabels.classed("hidden", true);
+    }
 
-/* ── INIT & AUTO-REFRESH ──────────────────────────── */
-async function initDashboard() {
-  document.getElementById('loading-overlay').style.display = 'flex';
-  const data = await fetchDashboardData();
-  if (data) await renderDashboard(data);
-  else document.getElementById('data-status').textContent = 'Failed to load';
-}
+    function updateBlockPanel(feature) {
+      const fieldName = feature.properties?.Field_Name;
+      const data = dataMap[fieldName];
+      if (!data) return;
+      
+      blockPanelTitle.text(fieldName);
+      
+      const plants = parseFloat(data["Plants per hectare"]) || 0;
+      const weight = parseFloat(data["Average Bunch Weight"]) || 0;
+      const size = parseFloat(data["Block Size"]) || 0;
+      const totalTrees = plants * size;
+      const estimatedYield = plants * weight;
+      const rank = blockRanks[fieldName] || "—";
+      
+      let rankSuffix = "th";
+      if (rank % 10 === 1 && rank % 100 !== 11) rankSuffix = "st";
+      else if (rank % 10 === 2 && rank % 100 !== 12) rankSuffix = "nd";
+      else if (rank % 10 === 3 && rank % 100 !== 13) rankSuffix = "rd";
+      const rankText = rank !== "—" ? `${rank}${rankSuffix}` : "—";
+      
+      blockPanelSubtitle.text(`Rank: #${rankText} · ${size.toFixed(1)} ha`);
+      
+      const html = `
+        <div class="detail-row"><span class="detail-label">Block Size</span><span class="detail-value">${size.toFixed(1)} ha</span></div>
+        <div class="detail-row"><span class="detail-label">Plants per Hectare</span><span class="detail-value">${plants.toLocaleString()}</span></div>
+        <div class="detail-row"><span class="detail-label">Total Trees</span><span class="detail-value">${Math.round(totalTrees).toLocaleString()}</span></div>
+        <div class="detail-row"><span class="detail-label">Avg Bunch Weight</span><span class="detail-value">${weight} kg</span></div>
+        <div class="detail-row"><span class="detail-label">Est. Yield</span><span class="detail-value">${estimatedYield.toFixed(1)} kg/ha</span></div>
+        <div style="margin-top: 20px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span style="font-weight: 700; color: var(--accent);">Plant Density</span>
+            <span style="font-weight: 600; color: var(--accent);">${plants.toLocaleString()} plants/ha</span>
+          </div>
+          <div class="density-chart">
+            <div class="density-fill" style="width: ${calculateDensityPercent(plants)}%"></div>
+            <div class="chart-label">${calculateDensityPercent(plants)}% of max</div>
+          </div>
+        </div>
+      `;
+      blockPanelContent.html(html);
+    }
 
-function startAutoRefresh() {
-  setInterval(async () => {
-    console.log('🔄 Auto-refreshing dashboard...');
-    const data = await fetchDashboardData();
-    if (data) await renderDashboard(data);
-  }, REFRESH_INTERVAL_MINUTES * 60 * 1000);
-}
+    function calculateDensityPercent(plants) {
+      const maxPlants = cachedMaxPlants || 1;
+      return maxPlants > 0 ? Math.round((plants / maxPlants) * 100) : 0;
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
-  initDashboard();
-  startAutoRefresh();
-});
-</script>
+    function showPanel(panel) {
+      hideAllPanels();
+      panel.classed("visible", true).attr("aria-hidden", "false");
+      activePanel = panel;
+      if (panel.node().id === 'help-panel') {
+        lastFocusedElement = document.activeElement;
+        window.focusTrapCleanup = trapFocus(panel.node());
+      }
+    }
+    
+    function hideAllPanels() {
+      blockPanel.classed("visible", false).attr("aria-hidden", "true");
+      summaryPanel.classed("visible", false).attr("aria-hidden", "true");
+      blocksPanel.classed("visible", false).attr("aria-hidden", "true");
+      
+      if (activePanel?.node()?.id === 'help-panel' && window.focusTrapCleanup) {
+        window.focusTrapCleanup();
+        window.focusTrapCleanup = null;
+        if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
+      }
+      activePanel = null;
+    }
+
+    function updateSummaryPanel() {
+      const totalArea = csvData.reduce((sum, d) => sum + (parseFloat(d["Block Size"]) || 0), 0);
+      const totalTrees = csvData.reduce((sum, d) => {
+        const plants = parseFloat(d["Plants per hectare"]) || 0;
+        const size = parseFloat(d["Block Size"]) || 0;
+        return sum + (plants * size);
+      }, 0);
+      const avgDensity = totalArea > 0 ? totalTrees / totalArea : 0;
+      const weightedWeight = csvData.reduce((sum, d) => {
+        const weight = parseFloat(d["Average Bunch Weight"]) || 0;
+        const size = parseFloat(d["Block Size"]) || 0;
+        return sum + (weight * size);
+      }, 0);
+      const avgWeight = totalArea > 0 ? weightedWeight / totalArea : 0;
+      const totalYield = csvData.reduce((sum, d) => {
+        const plants = parseFloat(d["Plants per hectare"]) || 0;
+        const weight = parseFloat(d["Average Bunch Weight"]) || 0;
+        const size = parseFloat(d["Block Size"]) || 0;
+        return sum + (plants * weight * size);
+      }, 0);
+      const highYieldCount = csvData.filter(d => {
+        const plants = parseFloat(d["Plants per hectare"]) || 0;
+        const weight = parseFloat(d["Average Bunch Weight"]) || 0;
+        return (plants * weight) > config.thresholds.highYield;
+      }).length;
+      
+      const html = `
+        <tr><td class="stat-name">Total Area</td><td class="stat-value">${totalArea.toFixed(1)} ha</td></tr>
+        <tr><td class="stat-name">Total Blocks</td><td class="stat-value">${blocks.length}</td></tr>
+        <tr><td class="stat-name">Total Trees</td><td class="stat-value">${Math.round(totalTrees).toLocaleString()}</td></tr>
+        <tr><td class="stat-name">Avg Density</td><td class="stat-value">${Math.round(avgDensity).toLocaleString()}/ha</td></tr>
+        <tr><td class="stat-name">Avg Bunch Weight</td><td class="stat-value">${avgWeight.toFixed(1)} kg</td></tr>
+        <tr><td class="stat-name">Est. Total Yield</td><td class="stat-value">${Math.round(totalYield).toLocaleString()} kg</td></tr>
+        <tr><td class="stat-name">High Yield Blocks</td><td class="stat-value">${highYieldCount}</td></tr>
+      `;
+      summaryTable.html(html);
+    }
+
+    function updateBlocksPanel() {
+      let html = '';
+      blocks.forEach(blockName => {
+        const data = dataMap[blockName];
+        const size = parseFloat(data["Block Size"]) || 0;
+        const plants = parseFloat(data["Plants per hectare"]) || 0;
+        const trees = plants * size;
+        html += `<tr style="cursor: pointer;" data-block="${blockName}" role="option">
+          <td class="stat-name">${blockName}</td>
+          <td class="stat-value">${size.toFixed(1)} ha</td>
+          <td class="stat-value">${Math.round(trees).toLocaleString()}</td>
+        </tr>`;
+      });
+      blocksTable.html(html);
+      blocksTable.selectAll("tr").on("click", function() {
+        const blockName = d3.select(this).attr("data-block");
+        const feature = geoData.features.find(f => f.properties?.Field_Name === blockName);
+        if (feature) { onBlockClick({ currentTarget: null }, feature); hideAllPanels(); showPanel(blockPanel); }
+      });
+    }
+
+    function setupSearch() {
+      searchButton.on("click", function() {
+        const expanded = searchDropdown.style("display") === "block";
+        if (expanded) hideSearchDropdown(); else { showSearchDropdown(); adjustSearchDropdownPosition(); }
+      });
+      
+      blockSearch.on("input", debounce(function() {
+        const query = this.value.toLowerCase().trim();
+        if (query.length < 2) { searchResults.html(""); return; }
+        const matches = blocks.filter(b => b.toLowerCase().includes(query)).slice(0, 10);
+        searchResults.html("");
+        matches.forEach(block => {
+          searchResults.append("div")
+            .attr("class", "search-result-item")
+            .attr("role", "option")
+            .text(block)
+            .on("click", function() {
+              const feature = geoData.features.find(f => f.properties?.Field_Name === block);
+              if (feature) { onBlockClick({ currentTarget: null }, feature); hideSearchDropdown(); }
+            });
+        });
+      }, 300));
+      
+      document.addEventListener('click', e => { if (!e.target.closest('.header')) hideSearchDropdown(); });
+      window.addEventListener('resize', debounce(adjustSearchDropdownPosition, 150));
+      
+      blockSearch.on("keydown", function(event) {
+        const items = searchResults.selectAll(".search-result-item").nodes();
+        if (!items.length) return;
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          const current = searchResults.select(".highlighted");
+          if (current.empty()) d3.select(items[0]).classed("highlighted", true);
+          else { const next = d3.select(current.node().nextSibling); current.classed("highlighted", false); if (!next.empty()) next.classed("highlighted", true); }
+        } else if (event.key === "ArrowUp") {
+          event.preventDefault();
+          const current = searchResults.select(".highlighted");
+          if (!current.empty()) { const prev = d3.select(current.node().previousSibling); current.classed("highlighted", false); if (!prev.empty()) prev.classed("highlighted", true); }
+        } else if (event.key === "Enter") {
+          const highlighted = searchResults.select(".highlighted");
+          if (!highlighted.empty()) highlighted.node().click();
+        } else if (event.key === "Escape") { hideSearchDropdown(); blockSearch.node().blur(); }
+      });
+    }
+    
+    function adjustSearchDropdownPosition() {
+      const dropdown = searchDropdown.node();
+      if (!dropdown || searchDropdown.style("display") === "none") return;
+      const rect = dropdown.getBoundingClientRect();
+      if (rect.bottom > window.innerHeight - 20) searchDropdown.classed("flipped", true);
+      else searchDropdown.classed("flipped", false);
+    }
+
+    function showSearchDropdown() {
+      searchDropdown.style("display", "block").attr("aria-hidden", "false");
+      setTimeout(() => { blockSearch.node().focus(); adjustSearchDropdownPosition(); }, 100);
+    }
+    
+    function hideSearchDropdown() {
+      searchDropdown.style("display", "none").attr("aria-hidden", "true");
+      searchDropdown.classed("flipped", false);
+      blockSearch.node().value = "";
+      searchResults.html("");
+    }
+
+    function setupHelp() {
+      helpButton.on("click", showHelpPanel);
+      d3.select("#help-panel .help-close-button").on("click", hideHelpPanel);
+      overlay.on("click", hideHelpPanel);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') hideHelpPanel(); });
+    }
+
+    function showHelpPanel() {
+      lastFocusedElement = document.activeElement;
+      helpPanel.classed("visible", true);
+      overlay.classed("visible", true).attr("aria-hidden", "false");
+      window.focusTrapCleanup = trapFocus(helpPanel.node());
+    }
+
+    function hideHelpPanel() {
+      if (window.focusTrapCleanup) { window.focusTrapCleanup(); window.focusTrapCleanup = null; }
+      helpPanel.classed("visible", false);
+      overlay.classed("visible", false).attr("aria-hidden", "true");
+      if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
+      lastFocusedElement = null;
+    }
+
+    function selectPreviousBlock() {
+      if (blocks.length === 0) return;
+      const newIndex = selectedBlockIndex === -1 ? blocks.length - 1 : (selectedBlockIndex - 1 + blocks.length) % blocks.length;
+      navigateToBlock(newIndex);
+    }
+    
+    function selectNextBlock() {
+      if (blocks.length === 0) return;
+      const newIndex = selectedBlockIndex === -1 ? 0 : (selectedBlockIndex + 1) % blocks.length;
+      navigateToBlock(newIndex);
+    }
+    
+    function navigateToBlock(index) {
+      const blockName = blocks[index];
+      const feature = geoData.features.find(f => f.properties?.Field_Name === blockName);
+      if (feature) onBlockClick({ currentTarget: null }, feature);
+    }
+
+    function setupEventListeners() {
+      summaryButton.on("click", () => { updateSummaryPanel(); showPanel(summaryPanel); header.classed("hidden", true); farmInfo.classed("hidden", true); });
+      blocksButton.on("click", () => { updateBlocksPanel(); showPanel(blocksPanel); header.classed("hidden", true); farmInfo.classed("hidden", true); });
+      prevButton.on("click", selectPreviousBlock);
+      nextButton.on("click", selectNextBlock);
+      d3.select("#block-panel .close-button").on("click", resetView);
+      d3.select("#summary-panel .close-button").on("click", resetView);
+      d3.select("#blocks-panel .close-button").on("click", resetView);
+      setupSearch();
+      setupHelp();
+      svg.on("click", (event) => { if (event.target?.tagName?.toLowerCase() === 'svg') resetView(); });
+      
+      window.addEventListener("resize", debounce(() => {
+        width = mapContainer.clientWidth;
+        height = mapContainer.clientHeight;
+        svg.attr("viewBox", `0 0 ${width} ${height}`);
+        
+        if (geoData) {
+          projection.fitSize([width, height], geoData);
+          applyMapTransform(); // ✅ Re-apply zoom + offset on resize
+          
+          svg.selectAll("path.block, path.block-click-target").attr("d", d => {
+            try { return path(d); } catch (e) { return null; }
+          });
+          removeClickLayer(); addClickLayer();
+          removeBlockLabels(); addBlockLabels();
+          if (selectedBlock) {
+            const feature = geoData.features.find(f => f.properties?.Field_Name === selectedBlock);
+            if (feature) focusOnBlock(feature);
+          }
+        }
+        if (searchDropdown.style("display") === "block") adjustSearchDropdownPosition();
+      }, 250));
+    }
+
+    loadData();
+  })();
+  </script>
 </body>
 </html>
