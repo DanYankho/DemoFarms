@@ -2,706 +2,807 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Elim Farms — Operations Dashboard</title>
+
+<!-- ═══ PWA MANIFEST + FULL-SCREEN META ═══════════════════════════ -->
+<link rel="manifest" href="manifest.json"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Elim Farms"/>
+<meta name="theme-color" content="#a8935a"/>
+<meta name="format-detection" content="telephone=no"/>
+<meta name="msapplication-TileColor" content="#0d2136"/>
+<meta name="msapplication-TileImage" content="browser.png"/>
+<link rel="apple-touch-icon" href="browser.png"/>
+<link rel="icon" type="image/png" href="browser.png"/>
+
+<!-- ═══ FONTS + CHARTING ══════════════════════════════════════════ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
 <style>
-  :root {
-    --navy:    #0d2136;
-    --gold:    #a8935a;
-    --cream:   #f4f2ef;
-    --sand:    #d8d0c6;
-    --olive:   #81845a;
-    --forest:  #2f3527;
-    --navy-lt: #152d47;
-    --gold-lt: #c4ac74;
-    --gold-dim:#7a6b41;
-  }
+:root {
+  --navy:    #0d2136;
+  --gold:    #a8935a;
+  --cream:   #f4f2ef;
+  --sand:    #d8d0c6;
+  --olive:   #81845a;
+  --forest:  #2f3527;
+  --navy-lt: #152d47;
+  --navy-2:  #1a3352;
+  --gold-lt: #c4ac74;
+  --gold-dim:#7a6b41;
+  --sat: env(safe-area-inset-top,    0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overscroll-behavior: none; }
+body {
+  background: var(--cream); color: var(--navy);
+  font-family: 'DM Sans', sans-serif; min-height: 100vh;
+  padding-top: var(--sat); padding-bottom: var(--sab);
+}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── LOADING ──────────────────────────────────── */
+#loading-screen {
+  position: fixed; inset: 0; background: var(--navy);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+  z-index: 9999; transition: opacity .5s ease, visibility .5s ease;
+}
+#loading-screen.hidden { opacity: 0; visibility: hidden; }
+.loading-logo {
+  width: 64px; height: 64px; background: var(--gold); border-radius: 16px;
+  display: flex; align-items: center; justify-content: center; font-size: 34px;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { transform: scale(1);     box-shadow: 0 0 0 0    rgba(168,147,90,.4); }
+  50%      { transform: scale(1.06); box-shadow: 0 0 0 14px rgba(168,147,90,0);  }
+}
+.loading-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:#fff; letter-spacing:.02em; }
+.loading-sub   { font-size:12px; color:var(--sand); letter-spacing:.12em; text-transform:uppercase; }
+.loading-bar-wrap { width:180px; height:3px; background:rgba(255,255,255,.1); border-radius:2px; overflow:hidden; }
+.loading-bar { height:100%; background:var(--gold); border-radius:2px; animation:loadBar 2s ease-in-out infinite; }
+@keyframes loadBar {
+  0%   { width:0%;  margin-left:0;    }
+  50%  { width:70%; margin-left:0;    }
+  100% { width:0%;  margin-left:100%; }
+}
 
-  body {
-    background: var(--cream);
-    color: var(--navy);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-  }
+/* ── HEADER ────────────────────────────────── */
+header {
+  background: var(--navy); padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  border-bottom: 3px solid var(--gold);
+  position: sticky; top: 0; z-index: 100; min-height: 60px;
+}
+.logo-group { display:flex; align-items:center; gap:12px; }
+.logo-icon {
+  width:36px; height:36px; background:var(--gold); border-radius:8px;
+  display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0;
+}
+.logo-text h1 {
+  font-family:'Playfair Display',serif; font-size:clamp(14px,3vw,19px);
+  font-weight:700; color:#fff; line-height:1.2; white-space:nowrap;
+}
+.logo-text span { font-size:10px; color:var(--sand); letter-spacing:.12em; text-transform:uppercase; }
+.header-right   { display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.header-meta    { font-size:11px; color:var(--sand); text-align:right; line-height:1.6; }
+.header-meta strong { color:var(--gold); }
+.btn-refresh {
+  width:32px; height:32px; background:rgba(168,147,90,.15);
+  border:1px solid rgba(168,147,90,.3); border-radius:8px;
+  color:var(--gold); font-size:15px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .2s; flex-shrink:0;
+}
+.btn-refresh:hover  { background:rgba(168,147,90,.25); }
+.btn-refresh.spinning { animation:spin 1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
 
-  /* ── HEADER ───────────────────────────────────────── */
-  header {
-    background: var(--navy);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    border-bottom: 3px solid var(--gold);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    min-height: 64px;
-  }
-  .logo-group { display: flex; align-items: center; gap: 12px; }
-  .logo-icon {
-    width: 38px; height: 38px;
-    background: var(--gold);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-  }
-  .logo-text h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(14px, 3vw, 20px);
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.2;
-    white-space: nowrap;
-  }
-  .logo-text span {
-    font-size: 11px;
-    color: var(--sand);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-  .header-meta {
-    font-size: 12px;
-    color: var(--sand);
-    text-align: right;
-    line-height: 1.5;
-  }
-  .header-meta strong { color: var(--gold); }
+/* ── NAV ──────────────────────────────────────── */
+nav {
+  background:var(--navy-lt); padding:0 14px;
+  display:flex; overflow-x:auto; scrollbar-width:none;
+  border-bottom:1px solid rgba(168,147,90,.2);
+}
+nav::-webkit-scrollbar { display:none; }
+.tab-btn {
+  padding:11px 16px; background:none; border:none; color:var(--sand);
+  font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500;
+  cursor:pointer; white-space:nowrap;
+  border-bottom:3px solid transparent; transition:color .2s,border-color .2s;
+}
+.tab-btn:hover  { color:var(--gold-lt); }
+.tab-btn.active { color:var(--gold); border-bottom-color:var(--gold); }
 
-  /* ── TAB NAV ──────────────────────────────────────── */
-  nav {
-    background: var(--navy-lt);
-    padding: 0 16px;
-    display: flex;
-    gap: 2px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    border-bottom: 1px solid rgba(168,147,90,0.2);
-  }
-  nav::-webkit-scrollbar { display: none; }
-  .tab-btn {
-    padding: 12px 18px;
-    background: none;
-    border: none;
-    color: var(--sand);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
-    border-bottom: 3px solid transparent;
-    transition: color .2s, border-color .2s;
-  }
-  .tab-btn:hover { color: var(--gold-lt); }
-  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+/* ── MAIN ────────────────────────────────────── */
+main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; animation:fadeUp .3s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+.section-title { font-family:'Playfair Display',serif; font-size:clamp(18px,4vw,26px); color:var(--navy); margin-bottom:4px; }
+.section-sub   { font-size:12px; color:var(--olive); margin-bottom:20px; letter-spacing:.04em; }
 
-  /* ── MAIN ─────────────────────────────────────────── */
-  main { padding: 20px 16px 40px; max-width: 1280px; margin: 0 auto; }
+/* ── KPI CARDS ────────────────────────────────── */
+.kpi-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px; margin-bottom:22px;
+}
+.kpi-card {
+  background:var(--navy); border-radius:12px; padding:16px 14px;
+  position:relative; overflow:hidden; border:1px solid rgba(168,147,90,.15);
+  transition:transform .2s,box-shadow .2s;
+}
+.kpi-card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(13,33,54,.25); }
+.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--gold); }
+.kpi-card .icon  { font-size:20px; margin-bottom:8px; display:block; }
+.kpi-card .value { font-family:'Playfair Display',serif; font-size:clamp(20px,4vw,28px); font-weight:700; color:var(--gold); line-height:1; margin-bottom:4px; }
+.kpi-card .label { font-size:10px; color:var(--sand); text-transform:uppercase; letter-spacing:.08em; line-height:1.4; }
+.kpi-card .sub   { font-size:11px; color:var(--olive); margin-top:5px; }
+.kpi-card.accent { background:var(--gold); }
+.kpi-card.accent::before { background:var(--navy); }
+.kpi-card.accent .value  { color:var(--navy); }
+.kpi-card.accent .label  { color:var(--navy); opacity:.7; }
+.kpi-card.accent .sub    { color:var(--forest); }
 
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; animation: fadeIn .3s ease; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+/* ── CHARTS ───────────────────────────────────── */
+.chart-grid { display:grid; gap:14px; margin-bottom:22px; }
+.chart-grid.cols-2 { grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); }
+.chart-grid.cols-3 { grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); }
+.chart-card {
+  background:#fff; border-radius:12px; padding:18px;
+  border:1px solid var(--sand); box-shadow:0 2px 8px rgba(13,33,54,.05);
+}
+.chart-card.dark  { background:var(--navy); border-color:rgba(168,147,90,.2); }
+.chart-card.span-2 { grid-column:1/-1; }
+.chart-title { font-family:'Playfair Display',serif; font-size:14px; color:var(--navy); margin-bottom:3px; }
+.chart-card.dark .chart-title { color:var(--gold); }
+.chart-sub { font-size:11px; color:var(--olive); margin-bottom:14px; }
+.chart-card.dark .chart-sub   { color:var(--sand); opacity:.7; }
+.chart-wrap { 
+  position:relative; 
+  max-height: 220px;
+  overflow: hidden;
+}
+.chart-wrap canvas {
+  max-height: 200px !important;
+}
 
-  /* ── SECTION TITLE ────────────────────────────────── */
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(18px, 4vw, 26px);
-    color: var(--navy);
-    margin-bottom: 4px;
-  }
-  .section-sub {
-    font-size: 13px;
-    color: var(--olive);
-    margin-bottom: 20px;
-    letter-spacing: 0.04em;
-  }
+/* ── BLOCK GRID VISUALIZATION ────────────────── */
+.block-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+.block-card {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
+  border: 2px solid var(--gold);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.block-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gold);
+}
+.block-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(168,147,90,0.3);
+}
+.block-card .block-id {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.block-card .block-size {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.block-card .block-label {
+  font-size: 10px;
+  color: var(--sand);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.block-card .block-bar {
+  margin-top: 10px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.block-card .block-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
 
-  /* ── KPI CARDS ────────────────────────────────────── */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 14px;
-    margin-bottom: 24px;
-  }
-  .kpi-card {
-    background: var(--navy);
-    border-radius: 12px;
-    padding: 18px 16px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(168,147,90,0.15);
-  }
-  .kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--gold);
-  }
-  .kpi-card .icon {
-    font-size: 22px;
-    margin-bottom: 10px;
-    display: block;
-  }
-  .kpi-card .value {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(22px, 4vw, 30px);
-    font-weight: 700;
-    color: var(--gold);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .kpi-card .label {
-    font-size: 11px;
-    color: var(--sand);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    line-height: 1.4;
-  }
-  .kpi-card .sub {
-    font-size: 12px;
-    color: var(--olive);
-    margin-top: 6px;
-  }
-  .kpi-card.accent { background: var(--gold); }
-  .kpi-card.accent::before { background: var(--navy); }
-  .kpi-card.accent .value { color: var(--navy); }
-  .kpi-card.accent .label { color: var(--navy); opacity: 0.7; }
-  .kpi-card.accent .sub { color: var(--forest); }
+/* ── EXPECTED HARVEST TABLE ─────────────────── */
+.expected-harvest-table {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid var(--sand);
+  margin-top: 14px;
+  overflow-x: auto;
+}
+.expected-harvest-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 500px;
+}
+.expected-harvest-table th {
+  background: var(--navy);
+  color: var(--gold);
+  padding: 9px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+.expected-harvest-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--sand);
+  color: var(--forest);
+  white-space: nowrap;
+}
+.expected-harvest-table tr:hover td {
+  background: rgba(168,147,90,.06);
+}
+.expected-harvest-table tr:last-child td {
+  border-bottom: none;
+}
+.expected-harvest-table .badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.expected-harvest-table .badge-gold {
+  background: rgba(168,147,90,.15);
+  color: var(--gold-dim);
+}
+.expected-harvest-table .future-date {
+  color: var(--gold-dim);
+  font-weight: 600;
+}
+.expected-harvest-table .past-date {
+  color: var(--olive);
+  font-style: italic;
+}
+.expected-harvest-empty {
+  text-align: center;
+  color: var(--olive);
+  padding: 24px;
+  font-size: 13px;
+}
 
-  /* ── CHART GRID ───────────────────────────────────── */
-  .chart-grid {
-    display: grid;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .chart-grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-  .chart-grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-  .chart-grid.cols-1-2 { grid-template-columns: 1fr; }
+/* ── TABLES ───────────────────────────────────── */
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th { background:var(--navy); color:var(--gold); padding:9px 12px; text-align:left; font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:.07em; white-space:nowrap; }
+td { padding:8px 12px; border-bottom:1px solid var(--sand); color:var(--forest); white-space:nowrap; }
+tr:hover td { background:rgba(168,147,90,.06); }
+tr:last-child td { border-bottom:none; }
+.badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; }
+.badge-gold  { background:rgba(168,147,90,.15); color:var(--gold-dim); }
+.badge-olive { background:rgba(129,132,90,.15); color:var(--olive); }
 
-  .chart-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    border: 1px solid var(--sand);
-    box-shadow: 0 2px 8px rgba(13,33,54,0.06);
-  }
-  .chart-card.dark {
-    background: var(--navy);
-    border-color: rgba(168,147,90,0.2);
-  }
-  .chart-card.span-2 { grid-column: 1 / -1; }
-  .chart-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 15px;
-    color: var(--navy);
-    margin-bottom: 4px;
-  }
-  .chart-card.dark .chart-title { color: var(--gold); }
-  .chart-sub {
-    font-size: 12px;
-    color: var(--olive);
-    margin-bottom: 16px;
-  }
-  .chart-card.dark .chart-sub { color: var(--sand); opacity: 0.7; }
-  .chart-wrap { position: relative; }
+/* ── LEGEND ───────────────────────────────────── */
+.colour-swatch { display:inline-block; width:11px; height:11px; border-radius:50%; vertical-align:middle; margin-right:6px; border:1px solid rgba(0,0,0,.12); }
+.legend-row { display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--sand); font-size:12px; gap:8px; }
+.legend-row:last-child { border-bottom:none; }
+.legend-bar-bg   { flex:1; height:5px; background:var(--sand); border-radius:3px; margin:0 10px; overflow:hidden; }
+.legend-bar-fill { height:100%; border-radius:3px; background:var(--gold); transition:width .6s ease; }
+.legend-val      { font-weight:600; color:var(--navy); min-width:38px; text-align:right; font-size:11px; }
 
-  /* ── TABLE ────────────────────────────────────────── */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th {
-    background: var(--navy);
-    color: var(--gold);
-    padding: 10px 14px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    white-space: nowrap;
-  }
-  td {
-    padding: 9px 14px;
-    border-bottom: 1px solid var(--sand);
-    color: var(--forest);
-    white-space: nowrap;
-  }
-  tr:hover td { background: rgba(168,147,90,0.06); }
-  tr:last-child td { border-bottom: none; }
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .badge-gold  { background: rgba(168,147,90,0.15); color: var(--gold-dim); }
-  .badge-navy  { background: rgba(13,33,54,0.1);    color: var(--navy); }
-  .badge-olive { background: rgba(129,132,90,0.15);  color: var(--olive); }
+/* ── FORECAST TIMELINE ────────────────────────── */
+.forecast-timeline {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid var(--sand);
+  margin-top: 14px;
+}
+.timeline-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+.timeline-label {
+  min-width: 80px;
+  font-size: 11px;
+  color: var(--forest);
+  font-weight: 500;
+}
+.timeline-track {
+  flex: 1;
+  height: 28px;
+  background: var(--cream);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.timeline-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-lt) 100%);
+  border-radius: 6px;
+  transition: width 0.6s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--navy);
+}
 
-  /* ── COLOUR SWATCH ────────────────────────────────── */
-  .colour-swatch {
-    display: inline-block;
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    vertical-align: middle;
-    margin-right: 6px;
-    border: 1px solid rgba(0,0,0,.15);
-  }
+/* ── TOAST ────────────────────────────────────── */
+#toast {
+  position:fixed; bottom:calc(20px + var(--sab)); left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--navy); color:#fff; padding:10px 20px; border-radius:24px;
+  font-size:12px; border:1px solid rgba(168,147,90,.3);
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  z-index:500; white-space:nowrap;
+}
+#toast.show { transform:translateX(-50%) translateY(0); }
 
-  /* ── LEGEND BAR ───────────────────────────────────── */
-  .legend-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 7px 0;
-    border-bottom: 1px solid var(--sand);
-    font-size: 13px;
-    gap: 8px;
-  }
-  .legend-row:last-child { border-bottom: none; }
-  .legend-bar-bg {
-    flex: 1;
-    height: 6px;
-    background: var(--sand);
-    border-radius: 3px;
-    margin: 0 10px;
-    overflow: hidden;
-  }
-  .legend-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    background: var(--gold);
-    transition: width .6s ease;
-  }
-  .legend-val { font-weight: 600; color: var(--navy); min-width: 40px; text-align: right; font-size: 12px; }
-
-  /* ── DIVIDER ──────────────────────────────────────── */
-  .divider { height: 1px; background: var(--sand); margin: 24px 0; }
-
-  /* ── RESPONSIVE ───────────────────────────────────── */
-  @media (max-width: 600px) {
-    main { padding: 16px 12px 32px; }
-    .chart-card { padding: 14px; }
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  }
+/* ── RESPONSIVE ───────────────────────────────── */
+@media (max-width:600px) {
+  main { padding:14px 10px 40px; }
+  .chart-card { padding:12px; }
+  .kpi-grid   { grid-template-columns:repeat(2,1fr); gap:10px; }
+  .header-meta { display:none; }
+  .chart-wrap { max-height: 180px; }
+  .block-grid { grid-template-columns: repeat(2, 1fr); }
+  .expected-harvest-table table { font-size: 11px; }
+  .expected-harvest-table th,
+  .expected-harvest-table td { padding: 6px 8px; }
+}
 </style>
 </head>
 <body>
 
+<div id="loading-screen">
+  <div class="loading-logo">🍌</div>
+  <div class="loading-title">Elim Farms</div>
+  <div class="loading-sub">Operations Dashboard</div>
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+</div>
+
+<div id="toast"></div>
+
 <header>
   <div class="logo-group">
     <div class="logo-icon">🍌</div>
-    <div class="logo-text">
-      <h1>Elim Farms</h1>
-      <span>Operations Dashboard</span>
-    </div>
+    <div class="logo-text"><h1>Elim Farms</h1><span>Operations Dashboard</span></div>
   </div>
-  <div class="header-meta">
-    <strong>Data up to 2025</strong><br>
-    3 Sheets · Multi-year Records
+  <div class="header-right">
+    <div class="header-meta">
+      <strong>Live Data</strong><br>
+      <span id="data-status">Connecting…</span>
+    </div>
+    <button class="btn-refresh" id="btn-refresh" onclick="manualRefresh()" title="Refresh">↻</button>
   </div>
 </header>
 
 <nav>
-  <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
-  <button class="tab-btn" onclick="showTab('harvest')">Harvesting</button>
-  <button class="tab-btn" onclick="showTab('tagging')">Tagging</button>
-  <button class="tab-btn" onclick="showTab('pump')">Pump Log</button>
-  <button class="tab-btn" onclick="showTab('irrigation')">Irrigation</button>
+  <button class="tab-btn active" onclick="showTab('overview',   this)">Overview</button>
+  <button class="tab-btn"        onclick="showTab('harvest',    this)">Harvesting</button>
+  <button class="tab-btn"        onclick="showTab('tagging',    this)">Tagging</button>
+  <button class="tab-btn"        onclick="showTab('pump',       this)">Pump Log</button>
+  <button class="tab-btn"        onclick="showTab('irrigation', this)">Irrigation</button>
+  <button class="tab-btn"        onclick="showTab('land',       this)">Land</button>
 </nav>
 
 <main>
 
-<!-- ══ OVERVIEW ══════════════════════════════════════════════════════ -->
+<!-- ══ OVERVIEW ══════════════════════════════════════════════════ -->
 <div id="tab-overview" class="tab-panel active">
   <p class="section-title">Farm Operations Overview</p>
   <p class="section-sub">Consolidated summary across Harvesting, Tagging, Pump and Irrigation records</p>
-
   <div class="kpi-grid">
     <div class="kpi-card accent">
       <span class="icon">🍌</span>
-      <div class="value">15,628<small style="font-size:14px"> kg</small></div>
+      <div class="value" id="kpi-ov-harvest">—</div>
       <div class="label">Total Harvest Weight</div>
-      <div class="sub">1,034 bunches · 2021</div>
+      <div class="sub"  id="kpi-ov-harvest-sub">—</div>
     </div>
     <div class="kpi-card">
       <span class="icon">🏷️</span>
-      <div class="value">9,449</div>
+      <div class="value" id="kpi-ov-tags">—</div>
       <div class="label">Mats Tagged</div>
-      <div class="sub">Jan – Nov 2025</div>
+      <div class="sub"  id="kpi-ov-tags-sub">—</div>
     </div>
     <div class="kpi-card">
       <span class="icon">⚙️</span>
-      <div class="value">1,411<small style="font-size:14px"> hrs</small></div>
+      <div class="value" id="kpi-ov-pumph">—</div>
       <div class="label">Total Pump Hours</div>
-      <div class="sub">4 pumps · 2021–2025</div>
+      <div class="sub"  id="kpi-ov-pump-sub">—</div>
     </div>
     <div class="kpi-card">
       <span class="icon">💧</span>
-      <div class="value">2,857<small style="font-size:14px"> L</small></div>
+      <div class="value" id="kpi-ov-fuel">—</div>
       <div class="label">Irrigation Fuel Used</div>
-      <div class="sub">753 sessions · 2020–2025</div>
-    </div>
-    <div class="kpi-card">
-      <span class="icon">📏</span>
-      <div class="value">15.1<small style="font-size:14px"> kg</small></div>
-      <div class="label">Avg Bunch Weight</div>
-      <div class="sub">All blocks combined</div>
+      <div class="sub"  id="kpi-ov-fuel-sub">—</div>
     </div>
     <div class="kpi-card">
       <span class="icon">🗺️</span>
-      <div class="value">9</div>
+      <div class="value" id="kpi-ov-blocks">—</div>
       <div class="label">Blocks Active</div>
       <div class="sub">M1 – M9</div>
     </div>
+    <div class="kpi-card">
+      <span class="icon">📅</span>
+      <div class="value" id="kpi-ov-sessions">—</div>
+      <div class="label">Irrigation Sessions</div>
+      <div class="sub">2020 – 2025</div>
+    </div>
   </div>
-
   <div class="chart-grid cols-2">
     <div class="chart-card dark">
       <div class="chart-title">Harvest by Block</div>
-      <div class="chart-sub">Total weight (kg) per block — 2021 season</div>
-      <div class="chart-wrap"><canvas id="c_blockHarvest" height="200"></canvas></div>
+      <div class="chart-sub">Total weight (kg) per block</div>
+      <div class="chart-wrap"><canvas id="c_blockHarvest" height="160"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-title">Mats Tagged by Block</div>
-      <div class="chart-sub">Total mats tagged per block — 2025</div>
-      <div class="chart-wrap"><canvas id="c_tagBlock" height="200"></canvas></div>
+      <div class="chart-sub">Mats per block — current season</div>
+      <div class="chart-wrap"><canvas id="c_tagBlock" height="160"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-title">Pump Hours by Year</div>
       <div class="chart-sub">Cumulative operating hours across all pumps</div>
-      <div class="chart-wrap"><canvas id="c_pumpYear_ov" height="200"></canvas></div>
+      <div class="chart-wrap"><canvas id="c_pumpYear_ov" height="160"></canvas></div>
     </div>
     <div class="chart-card dark">
       <div class="chart-title">Irrigation Fuel by Year</div>
       <div class="chart-sub">Total litres consumed per year</div>
-      <div class="chart-wrap"><canvas id="c_irrYear_ov" height="200"></canvas></div>
+      <div class="chart-wrap"><canvas id="c_irrYear_ov" height="160"></canvas></div>
     </div>
   </div>
 </div>
 
-<!-- ══ HARVEST ════════════════════════════════════════════════════════ -->
+<!-- ══ HARVEST ════════════════════════════════════════════════════ -->
 <div id="tab-harvest" class="tab-panel">
   <p class="section-title">Harvesting Data</p>
-  <p class="section-sub">Bunch weights recorded across blocks M1, M2, M3 — May/June 2021</p>
-
+  <p class="section-sub" id="harv-sub">Bunch weights recorded across all blocks</p>
   <div class="kpi-grid">
     <div class="kpi-card accent">
       <span class="icon">⚖️</span>
-      <div class="value">15,628<small style="font-size:13px"> kg</small></div>
+      <div class="value" id="kpi-harvest-total">—</div>
       <div class="label">Total Harvested</div>
     </div>
     <div class="kpi-card">
-      <span class="icon">📦</span>
-      <div class="value">1,034</div>
-      <div class="label">Bunches Harvested</div>
-    </div>
-    <div class="kpi-card">
-      <span class="icon">📐</span>
-      <div class="value">15.1<small style="font-size:13px"> kg</small></div>
+      <span class="icon">📊</span>
+      <div class="value" id="kpi-harvest-avg">—</div>
       <div class="label">Avg Bunch Weight</div>
     </div>
     <div class="kpi-card">
       <span class="icon">🏆</span>
-      <div class="value">M2</div>
+      <div class="value" id="kpi-harvest-top">—</div>
       <div class="label">Top Block by Weight</div>
-      <div class="sub">5,782 kg</div>
+      <div class="sub"  id="kpi-harvest-topval">—</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📦</span>
+      <div class="value" id="kpi-harvest-qty">—</div>
+      <div class="label">Avg Qty Harvested</div>
     </div>
   </div>
-
   <div class="chart-grid cols-2">
     <div class="chart-card dark span-2">
-      <div class="chart-title">Monthly Harvest Totals</div>
+      <div class="chart-title">Monthly Harvest Totals (All Time)</div>
       <div class="chart-sub">Weight harvested per month across all blocks</div>
-      <div class="chart-wrap"><canvas id="c_monthlyHarvest" height="160"></canvas></div>
+      <div class="chart-wrap"><canvas id="c_monthlyHarvest" height="140"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-title">Harvest Weight by Block</div>
-      <div class="chart-sub">Comparison across M1, M2, M3</div>
-      <div class="chart-wrap"><canvas id="c_blockHarvest2" height="220"></canvas></div>
+      <div class="chart-sub">Comparison across all blocks</div>
+      <div class="chart-wrap"><canvas id="c_blockHarvest2" height="180"></canvas></div>
     </div>
     <div class="chart-card dark">
-      <div class="chart-title">Bunch Count by Block</div>
-      <div class="chart-sub">Number of bunches per block</div>
-      <div class="chart-wrap"><canvas id="c_blockCount" height="220"></canvas></div>
+      <div class="chart-title">Quantity Harvested by Block</div>
+      <div class="chart-sub">Total quantity (kg) per block</div>
+      <div class="chart-wrap"><canvas id="c_blockCount" height="180"></canvas></div>
     </div>
   </div>
-
   <div class="chart-card">
     <div class="chart-title">Block Performance Summary</div>
-    <div class="chart-sub">Harvest weight, count and average per block</div>
+    <div class="chart-sub">Harvest weight, average and yield per block</div>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr><th>Block</th><th>Total (kg)</th><th>Bunches</th><th>Avg (kg)</th><th>Share</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span class="badge badge-gold">M1</span></td>
-            <td>5,572.3</td><td>361</td><td>15.44</td>
-            <td>
-              <div style="display:flex;align-items:center;gap:6px;">
-                <div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;min-width:60px;">
-                  <div style="width:35.7%;height:100%;background:var(--gold);border-radius:3px;"></div>
-                </div>
-                <span style="font-size:12px;color:var(--olive);">35.7%</span>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td><span class="badge badge-gold">M2</span></td>
-            <td>5,781.8</td><td>363</td><td>15.93</td>
-            <td>
-              <div style="display:flex;align-items:center;gap:6px;">
-                <div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;min-width:60px;">
-                  <div style="width:37%;height:100%;background:var(--gold);border-radius:3px;"></div>
-                </div>
-                <span style="font-size:12px;color:var(--olive);">37.0%</span>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td><span class="badge badge-olive">M3</span></td>
-            <td>4,273.9</td><td>310</td><td>13.79</td>
-            <td>
-              <div style="display:flex;align-items:center;gap:6px;">
-                <div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;min-width:60px;">
-                  <div style="width:27.3%;height:100%;background:var(--olive);border-radius:3px;"></div>
-                </div>
-                <span style="font-size:12px;color:var(--olive);">27.3%</span>
-              </div>
-            </td>
-          </tr>
+        <thead><tr><th>Block</th><th>Size (ha)</th><th>Total (kg)</th><th>Avg Bunch (kg)</th><th>Yield (kg/ha)</th><th>Share</th></tr></thead>
+        <tbody id="harv-table-body">
+          <tr><td colspan="6" style="text-align:center;color:var(--olive);padding:24px;">Loading…</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- ══ TAGGING ═══════════════════════════════════════════════════════ -->
+<!-- ══ TAGGING ════════════════════════════════════════════════════ -->
 <div id="tab-tagging" class="tab-panel">
   <p class="section-title">Tagging Data</p>
-  <p class="section-sub">Mat tagging records across blocks M1–M9 — 2025 season, 18 tag types</p>
-
+  <p class="section-sub" id="tag-sub">Mat tagging records across all blocks</p>
   <div class="kpi-grid">
     <div class="kpi-card accent">
       <span class="icon">🏷️</span>
-      <div class="value">9,449</div>
+      <div class="value" id="kpi-tag-total">—</div>
       <div class="label">Total Mats Tagged</div>
     </div>
     <div class="kpi-card">
       <span class="icon">🎨</span>
-      <div class="value">18</div>
+      <div class="value" id="kpi-tag-colours">—</div>
       <div class="label">Tag Colours Used</div>
     </div>
     <div class="kpi-card">
       <span class="icon">🗺️</span>
-      <div class="value">8</div>
+      <div class="value" id="kpi-tag-blocks">—</div>
       <div class="label">Blocks Tagged</div>
-      <div class="sub">M1 – M9 (excl. M8)</div>
     </div>
     <div class="kpi-card">
       <span class="icon">🏆</span>
-      <div class="value">M3</div>
+      <div class="value" id="kpi-tag-top">—</div>
       <div class="label">Top Tagged Block</div>
-      <div class="sub">1,804 mats</div>
+      <div class="sub"  id="kpi-tag-topval">—</div>
     </div>
   </div>
-
   <div class="chart-grid cols-2">
     <div class="chart-card dark span-2">
       <div class="chart-title">Mats Tagged by Block</div>
-      <div class="chart-sub">Total mats per block across all tag rounds in 2025</div>
-      <div class="chart-wrap"><canvas id="c_tagBlock2" height="160"></canvas></div>
+      <div class="chart-sub">Total mats per block across all tag rounds</div>
+      <div class="chart-wrap"><canvas id="c_tagBlock2" height="140"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-title">Top Tag Colours by Volume</div>
       <div class="chart-sub">Number of mats per tag colour</div>
-      <div class="chart-wrap"><canvas id="c_tagColour" height="260"></canvas></div>
+      <div class="chart-wrap"><canvas id="c_tagColour" height="200"></canvas></div>
     </div>
     <div class="chart-card dark">
       <div class="chart-title">Tag Colour Distribution</div>
       <div class="chart-sub">Proportional share of all tags</div>
-      <div class="chart-wrap" style="display:flex;justify-content:center;"><canvas id="c_tagPie" width="260" height="260"></canvas></div>
+      <div class="chart-wrap" style="display:flex;justify-content:center;">
+        <canvas id="c_tagPie" width="200" height="200"></canvas>
+      </div>
     </div>
   </div>
-
-  <div class="chart-card" style="margin-top:0;">
+  
+  <!-- Expected Harvest Forecast Timeline -->
+  <div class="forecast-timeline">
+    <div class="chart-title" style="margin-bottom:12px;">Expected Harvest Forecast</div>
+    <div class="chart-sub" style="margin-bottom:16px;">Tagged bunches expected to mature (3-4 months from tagging)</div>
+    <div id="harvest-forecast-container">
+      <div style="text-align:center;color:var(--olive);padding:20px;">Loading forecast…</div>
+    </div>
+  </div>
+  
+  <!-- Expected Harvest Detail Table (replaces calendar) -->
+  <div class="expected-harvest-table">
+    <div class="chart-title" style="margin-bottom:12px;">Upcoming Harvest Schedule</div>
+    <div class="chart-sub" style="margin-bottom:14px;">Future harvest dates with tagging details</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Expected Harvest</th>
+          <th>Tagged Date</th>
+          <th>Tag Colour</th>
+          <th>Block</th>
+          <th>Mat No.</th>
+        </tr>
+      </thead>
+      <tbody id="expected-harvest-body">
+        <tr><td colspan="5" class="expected-harvest-empty">Loading expected harvest data…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="chart-card">
     <div class="chart-title">Tag Volume by Colour — Detail</div>
-    <div class="chart-sub">All 18 tag types ranked by mat count</div>
+    <div class="chart-sub">All tag types ranked by mat count</div>
     <div id="tag-legend"></div>
   </div>
 </div>
 
-<!-- ══ PUMP ═══════════════════════════════════════════════════════════ -->
+<!-- ══ PUMP ══════════════════════════════════════════════════════ -->
 <div id="tab-pump" class="tab-panel">
   <p class="section-title">Pump Log</p>
-  <p class="section-sub">Operating hours for Pumps 2, 3, 4 & 5 — 2021 to 2025</p>
-
+  <p class="section-sub" id="pump-sub">Operating hours for all pumps</p>
   <div class="kpi-grid">
     <div class="kpi-card accent">
       <span class="icon">⚙️</span>
-      <div class="value">1,411<small style="font-size:13px"> hrs</small></div>
+      <div class="value" id="kpi-pump-total">—</div>
       <div class="label">Total Operating Hours</div>
     </div>
     <div class="kpi-card">
       <span class="icon">🔢</span>
-      <div class="value">4</div>
+      <div class="value" id="kpi-pump-count">—</div>
       <div class="label">Active Pumps</div>
-      <div class="sub">Pump 2, 3, 4, 5</div>
     </div>
     <div class="kpi-card">
       <span class="icon">📋</span>
-      <div class="value">246</div>
+      <div class="value" id="kpi-pump-entries">—</div>
       <div class="label">Log Entries</div>
     </div>
     <div class="kpi-card">
       <span class="icon">⚠️</span>
-      <div class="value">3</div>
+      <div class="value" id="kpi-pump-maint">—</div>
       <div class="label">Maintenance Events</div>
       <div class="sub">Lubricant / Breakdown</div>
     </div>
   </div>
-
   <div class="chart-grid cols-2">
     <div class="chart-card dark span-2">
       <div class="chart-title">Pump 2 — Operating Hours by Year</div>
-      <div class="chart-sub">Pump 2 has the longest operational history (2021–2025)</div>
-      <div class="chart-wrap"><canvas id="c_pump2year" height="160"></canvas></div>
+      <div class="chart-sub">Pump 2 has the longest operational history</div>
+      <div class="chart-wrap"><canvas id="c_pump2year" height="140"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-title">Hours Distribution by Pump</div>
       <div class="chart-sub">All-time hours per pump</div>
-      <div class="chart-wrap"><canvas id="c_pumpPie" height="220"></canvas></div>
+      <div class="chart-wrap"><canvas id="c_pumpPie" height="180"></canvas></div>
     </div>
     <div class="chart-card dark">
-      <div class="chart-title">2025 Pump Comparison</div>
-      <div class="chart-sub">Hours logged per pump in 2025 (all 4 active)</div>
-      <div class="chart-wrap"><canvas id="c_pump2025" height="220"></canvas></div>
+      <div class="chart-title" id="pump-latest-title">Latest Year Pump Comparison</div>
+      <div class="chart-sub">Hours logged per pump in the latest year</div>
+      <div class="chart-wrap"><canvas id="c_pump2025" height="180"></canvas></div>
     </div>
   </div>
-
   <div class="chart-card">
     <div class="chart-title">Pump Hours Summary</div>
     <div class="chart-sub">By pump and year</div>
     <div class="table-wrap">
-      <table>
-        <thead><tr><th>Pump</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>Total</th></tr></thead>
-        <tbody>
-          <tr>
-            <td><span class="badge badge-gold">Pump 2</span></td>
-            <td>168</td><td>278</td><td>719</td><td>28</td><td>57</td>
-            <td><strong>1,250</strong></td>
-          </tr>
-          <tr>
-            <td><span class="badge badge-olive">Pump 3</span></td>
-            <td>—</td><td>—</td><td>—</td><td>—</td><td>58</td>
-            <td><strong>58</strong></td>
-          </tr>
-          <tr>
-            <td><span class="badge badge-olive">Pump 4</span></td>
-            <td>—</td><td>—</td><td>—</td><td>—</td><td>52</td>
-            <td><strong>52</strong></td>
-          </tr>
-          <tr>
-            <td><span class="badge badge-olive">Pump 5</span></td>
-            <td>—</td><td>—</td><td>—</td><td>—</td><td>51</td>
-            <td><strong>51</strong></td>
-          </tr>
-          <tr style="background:rgba(168,147,90,0.05);">
-            <td><strong>Total</strong></td>
-            <td>168</td><td>278</td><td>719</td><td>28</td><td>218</td>
-            <td><strong>1,411</strong></td>
-          </tr>
-        </tbody>
-      </table>
+      <table><thead id="pump-table-head"></thead><tbody id="pump-table-body"></tbody></table>
     </div>
   </div>
 </div>
 
-<!-- ══ IRRIGATION ═════════════════════════════════════════════════════ -->
+<!-- ══ IRRIGATION ════════════════════════════════════════════════ -->
 <div id="tab-irrigation" class="tab-panel">
   <p class="section-title">Irrigation Records</p>
-  <p class="section-sub">753 irrigation sessions across all blocks — 2020 to 2025</p>
-
+  <p class="section-sub" id="irr-sub">Irrigation sessions across all blocks</p>
   <div class="kpi-grid">
     <div class="kpi-card accent">
       <span class="icon">💧</span>
-      <div class="value">2,857<small style="font-size:13px"> L</small></div>
+      <div class="value" id="kpi-irr-fuel">—</div>
       <div class="label">Total Fuel Used</div>
     </div>
     <div class="kpi-card">
       <span class="icon">📅</span>
-      <div class="value">753</div>
+      <div class="value" id="kpi-irr-sessions">—</div>
       <div class="label">Irrigation Sessions</div>
     </div>
     <div class="kpi-card">
       <span class="icon">📈</span>
-      <div class="value">2023</div>
+      <div class="value" id="kpi-irr-peak">—</div>
       <div class="label">Peak Fuel Year</div>
-      <div class="sub">1,136 litres</div>
+      <div class="sub"  id="kpi-irr-peakval">—</div>
     </div>
     <div class="kpi-card">
       <span class="icon">🗺️</span>
-      <div class="value">3.8<small style="font-size:13px"> L</small></div>
+      <div class="value" id="kpi-irr-avg">—</div>
       <div class="label">Avg Fuel / Session</div>
     </div>
   </div>
-
   <div class="chart-grid cols-2">
     <div class="chart-card dark span-2">
       <div class="chart-title">Annual Fuel Consumption</div>
       <div class="chart-sub">Total irrigation fuel used per year (litres)</div>
-      <div class="chart-wrap"><canvas id="c_irrYear" height="160"></canvas></div>
+      <div class="chart-wrap"><canvas id="c_irrYear" height="140"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-title">Top 10 Blocks by Fuel Consumed</div>
       <div class="chart-sub">Aggregated across all years</div>
-      <div class="chart-wrap"><canvas id="c_irrBlock" height="260"></canvas></div>
+      <div class="chart-wrap"><canvas id="c_irrBlock" height="200"></canvas></div>
     </div>
     <div class="chart-card dark">
       <div class="chart-title">Session Count by Year</div>
       <div class="chart-sub">Number of irrigation runs per year</div>
-      <div class="chart-wrap"><canvas id="c_irrSessions" height="260"></canvas></div>
+      <div class="chart-wrap"><canvas id="c_irrSessions" height="200"></canvas></div>
     </div>
   </div>
-
   <div class="chart-card">
     <div class="chart-title">Annual Irrigation Summary</div>
     <div class="chart-sub">Fuel used and sessions per year</div>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Year</th><th>Sessions</th><th>Fuel (L)</th><th>Avg L/Session</th><th>Fuel Share</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>2020</td><td>71</td><td>238.5</td><td>3.4</td>
-            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:8.3%;height:100%;background:var(--gold);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">8.3%</span></div></td>
-          </tr>
-          <tr>
-            <td>2021</td><td>112</td><td>392.5</td><td>3.5</td>
-            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:13.7%;height:100%;background:var(--gold);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">13.7%</span></div></td>
-          </tr>
-          <tr>
-            <td>2022</td><td>181</td><td>715.0</td><td>3.9</td>
-            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:25%;height:100%;background:var(--gold);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">25.0%</span></div></td>
-          </tr>
-          <tr>
-            <td>2023</td><td>310</td><td>1,136.0</td><td>3.7</td>
-            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:39.8%;height:100%;background:var(--olive);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">39.8%</span></div></td>
-          </tr>
-          <tr>
-            <td>2024</td><td>11</td><td>38.5</td><td>3.5</td>
-            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:1.3%;height:100%;background:var(--gold);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">1.3%</span></div></td>
-          </tr>
-          <tr>
-            <td>2025</td><td>68</td><td>327.5</td><td>4.8</td>
-            <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:6px;background:var(--sand);border-radius:3px;overflow:hidden;"><div style="width:11.5%;height:100%;background:var(--gold);border-radius:3px;"></div></div><span style="font-size:11px;color:var(--olive);">11.5%</span></div></td>
-          </tr>
+        <tbody id="irr-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LAND ══════════════════════════════════════════════════════ -->
+<div id="tab-land" class="tab-panel">
+  <p class="section-title">Land & Block Management</p>
+  <p class="section-sub" id="land-sub">Overview of farm blocks and land allocation</p>
+  
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <span class="icon">📐</span>
+      <div class="value" id="kpi-land-total">—</div>
+      <div class="label">Total Land Area</div>
+      <div class="sub">Across all blocks</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🔢</span>
+      <div class="value" id="kpi-land-blocks">—</div>
+      <div class="label">Total Blocks</div>
+      <div class="sub">M1 – M9</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📊</span>
+      <div class="value" id="kpi-land-avg">—</div>
+      <div class="label">Avg Block Size</div>
+      <div class="sub">Per block</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🏆</span>
+      <div class="value" id="kpi-land-largest">—</div>
+      <div class="label">Largest Block</div>
+      <div class="sub" id="kpi-land-largest-sub">—</div>
+    </div>
+  </div>
+
+  <!-- Visual Block Grid -->
+  <div class="chart-card dark">
+    <div class="chart-title">Farm Block Layout</div>
+    <div class="chart-sub">Visual representation of all blocks by size</div>
+    <div class="block-grid" id="block-grid">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+
+  <div class="chart-grid cols-2">
+    <div class="chart-card">
+      <div class="chart-title">Block Size Comparison</div>
+      <div class="chart-sub">Hectares per block (M1–M9)</div>
+      <div class="chart-wrap"><canvas id="c_landBlocks" height="160"></canvas></div>
+    </div>
+    <div class="chart-card dark">
+      <div class="chart-title">Land Distribution</div>
+      <div class="chart-sub">Percentage share of total farm area</div>
+      <div class="chart-wrap" style="display:flex;justify-content:center;">
+        <canvas id="c_landPie" width="200" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Block Size Ranking</div>
+    <div class="chart-sub">All blocks ordered by land area</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rank</th><th>Block</th><th>Size (ha)</th><th>% of Total</th><th>Status</th></tr></thead>
+        <tbody id="land-table-body">
+          <tr><td colspan="5" style="text-align:center;color:var(--olive);padding:24px;">Loading…</td></tr>
         </tbody>
       </table>
     </div>
@@ -711,353 +812,703 @@
 </main>
 
 <script>
-/* ── GLOBAL CHART DEFAULTS ─────────────────────── */
+'use strict';
+
+/* ══════════════════════════════════════════════════════════════════
+   CSV ENDPOINTS - UPDATE THESE WITH YOUR GOOGLE SHEETS URLs
+   ══════════════════════════════════════════════════════════════════ */
+const CSV_IRRIGATION = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=1622779254&single=true&output=csv';
+const CSV_TAGGING    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=268268980&single=true&output=csv';
+const CSV_PUMP       = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=121768597&single=true&output=csv';
+const CSV_HARVEST    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=2081044538&single=true&output=csv';
+const CSV_LAND       = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=349843810&single=true&output=csv';
+
+
+
+const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+
+/* ── DESIGN TOKENS ─────────────────────────────────────────────── */
+const NAVY   = '#0d2136', GOLD   = '#a8935a', CREAM  = '#f4f2ef';
+const SAND   = '#d8d0c6', OLIVE  = '#81845a', FOREST = '#2f3527';
+const GOLD_L = '#c4ac74', GOLD_D = '#7a6b41', NAVY_L = '#1a3352';
+
 Chart.defaults.font.family = "'DM Sans', sans-serif";
 Chart.defaults.color = '#7a7a7a';
 
-const NAVY   = '#0d2136';
-const GOLD   = '#a8935a';
-const CREAM  = '#f4f2ef';
-const SAND   = '#d8d0c6';
-const OLIVE  = '#81845a';
-const FOREST = '#2f3527';
-const GOLD_L = '#c4ac74';
-const GOLD_D = '#7a6b41';
-const NAVY_L = '#1a3352';
+const CHARTS = {};
 
-/* ── TAB LOGIC ─────────────────────────────────── */
-function showTab(id) {
+/* ── TAB NAVIGATION ─────────────────────────────────────────────── */
+function showTab(id, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
-  event.currentTarget.classList.add('active');
+  if (btn) btn.classList.add('active');
 }
 
-/* ── CHART HELPERS ─────────────────────────────── */
-function barOptions(dark=false, horizontal=false) {
-  return {
-    responsive: true,
-    indexAxis: horizontal ? 'y' : 'x',
-    plugins: { legend: { display: false } },
-    scales: {
-      x: {
-        grid: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
-        ticks: { color: dark ? SAND : FOREST, font:{size:11} }
-      },
-      y: {
-        grid: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
-        ticks: { color: dark ? SAND : FOREST, font:{size:11} }
+/* ── UTILITIES ──────────────────────────────────────────────────── */
+function setKPI(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function toast(msg, ms) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), ms || 2800);
+}
+
+function parseYear(val) {
+  if (!val || String(val).trim() === '') return null;
+  const s = String(val).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return parseInt(s.slice(0, 4));
+  const dmyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (dmyMatch) return parseInt(dmyMatch[3]);
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d.getFullYear();
+}
+
+/* ── FIX 2: Robust date parser that handles both DD/MM/YYYY and MM/DD/YYYY ── */
+function smartParseDate(val) {
+  if (!val || String(val).trim() === '') return null;
+  const s = String(val).trim();
+  
+  // Try ISO format first
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  
+  // Try DD/MM/YYYY or MM/DD/YYYY format
+  const parts = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (parts) {
+    const a = parseInt(parts[1]), b = parseInt(parts[2]), yr = parseInt(parts[3]);
+    let day, mon;
+    // If first number > 12, it must be day (DD/MM/YYYY)
+    if (a > 12) { day = a; mon = b; }
+    // If second number > 12, it must be day (MM/DD/YYYY)
+    else if (b > 12) { day = b; mon = a; }
+    // Otherwise default to DD/MM/YYYY (common outside US)
+    else { day = a; mon = b; }
+    
+    const d = new Date(yr, mon - 1, day);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  
+  // Fallback to native Date parsing
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/* Returns "YYYY-MM" string for reliable chronological sorting */
+function parseYearMonth(val) {
+  const d = smartParseDate(val);
+  if (!d) return null;
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+/* Format date for display */
+function formatDate(d) {
+  if (!d) return '—';
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+/* Legacy helpers kept for irrigation / pump / tagging (unchanged) */
+function parseMonthLabel(val) {
+  if (!val || String(val).trim() === '') return null;
+  const s = String(val).trim();
+  let d;
+  const dmyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (dmyMatch) {
+    d = new Date(parseInt(dmyMatch[3]), parseInt(dmyMatch[2]) - 1, parseInt(dmyMatch[1]));
+  } else {
+    d = new Date(s);
+  }
+  return isNaN(d.getTime()) ? null : d.toLocaleString('default', { month: 'short', year: 'numeric' });
+}
+
+/* FIX 1 & 2: parseDate now uses smartParseDate */
+function parseDate(val) {
+  return smartParseDate(val);
+}
+
+function shareCell(pct, colour) {
+  colour = colour || GOLD;
+  return `<div style="display:flex;align-items:center;gap:6px;">
+    <div style="flex:1;height:5px;background:var(--sand);border-radius:3px;overflow:hidden;min-width:50px;">
+      <div style="width:${Math.min(pct, 100).toFixed(1)}%;height:100%;background:${colour};border-radius:3px;"></div>
+    </div>
+    <span style="font-size:11px;color:var(--olive);">${pct.toFixed(1)}%</span>
+  </div>`;
+}
+
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
+  if (lines.length < 2) return [];
+
+  function splitLine(line) {
+    const fields = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (ch === ',' && !inQ) {
+        fields.push(cur.trim()); cur = '';
+      } else {
+        cur += ch;
       }
     }
-  };
+    fields.push(cur.trim());
+    return fields;
+  }
+
+  const headers = splitLine(lines[0]);
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = splitLine(lines[i]);
+    if (vals.every(v => v === '')) continue;
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = vals[idx] !== undefined ? vals[idx] : ''; });
+    rows.push(obj);
+  }
+  return rows;
 }
 
-/* ═══════ OVERVIEW CHARTS ══════════════════════════════════════════ */
-new Chart(document.getElementById('c_blockHarvest'), {
-  type: 'bar',
-  data: {
-    labels: ['M1','M2','M3'],
-    datasets: [{
-      data: [5572.27, 5781.83, 4273.88],
-      backgroundColor: [GOLD, GOLD_L, OLIVE],
-      borderRadius: 6, borderSkipped: false
-    }]
-  },
-  options: {
-    ...barOptions(true),
-    plugins: { legend:{display:false},
-      tooltip:{ callbacks:{ label: ctx => ` ${ctx.parsed.y.toFixed(0)} kg` } }
+async function fetchCSV(url) {
+  if (!url) return [];
+  const sep = url.includes('?') ? '&' : '?';
+  const res = await fetch(url + sep + '_cb=' + Date.now());
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return parseCSV(await res.text());
+}
+
+function upsertChart(id, type, labels, data, opts) {
+  opts = opts || {};
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+
+  const dark       = opts.dark       || false;
+  const horizontal = opts.horizontal || false;
+  const palette    = opts.palette    || null;
+  const fill       = opts.fill !== undefined ? opts.fill : false;
+  const tension    = opts.tension !== undefined ? opts.tension : 0.4;
+  const MULTI      = [GOLD, GOLD_L, OLIVE, NAVY_L, FOREST, GOLD_D, SAND,
+                      '#3b7dd8','#c0392b','#d4b44a','#5d8a4a','#e07b39'];
+  const bg         = palette ? palette : (type === 'doughnut' ? MULTI : GOLD);
+
+  if (CHARTS[id]) {
+    CHARTS[id].data.labels = labels;
+    CHARTS[id].data.datasets[0].data = data;
+    if (palette) CHARTS[id].data.datasets[0].backgroundColor = palette;
+    CHARTS[id].update('none');
+    return;
+  }
+
+  CHARTS[id] = new Chart(canvas, {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor      : bg,
+        borderColor          : type === 'line' ? GOLD : undefined,
+        borderRadius         : type !== 'doughnut' ? 5 : 0,
+        borderSkipped        : false,
+        fill,
+        tension,
+        pointBackgroundColor : GOLD,
+        pointRadius          : type === 'line' ? 4 : 0,
+        pointHoverRadius     : type === 'line' ? 6 : 0,
+        borderWidth          : type === 'doughnut' ? 0 : 2,
+        hoverOffset          : type === 'doughnut' ? 6 : 0
+      }]
+    },
+    options: {
+      indexAxis  : horizontal ? 'y' : 'x',
+      responsive : true,
+      maintainAspectRatio: false,
+      animation  : { duration: 600 },
+      plugins: {
+        legend: {
+          display  : type === 'doughnut',
+          position : 'bottom',
+          labels   : { color: dark ? SAND : FOREST, font: { size: 11 }, padding: 12 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ' + (ctx.parsed[horizontal ? 'x' : 'y'] || 0).toLocaleString()
+          }
+        }
+      },
+      scales: type === 'doughnut' ? {} : {
+        x: { grid: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }, ticks: { color: dark ? SAND : FOREST, font: { size: 10 } } },
+        y: { grid: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }, ticks: { color: dark ? SAND : FOREST, font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+const TAG_PALETTE = {
+  'White ribbon':'#e8e4df','Yellow ribbon':'#d4b44a','Red ribbon':'#c0392b',
+  'White':'#f0ece6','Blue':'#3b7dd8','Dark green':'#2d5a27','Melow':OLIVE,
+  'Orange':'#e07b39','White ulisi':'#ddd8d2','Blue ribbon':'#4a90d9',
+  'Light green ribbon':'#5d8a4a','Red ulisi':'#c23b2e','Mellon':'#e8a030',
+  'Orange ribbon':'#e06030','Black ribbon':'#333333','Green':'#3d6e40',
+  'Dark green wool':'#1e4d1a','Light green wool':'#4a7a1e',
+  'Black':'#1a1a1a','Red':'#e53e3e'
+};
+
+/* ── RENDER FUNCTIONS ──────────────────────────────────────────── */
+
+function renderLand(rows) {
+  const blockData = {};
+  rows.forEach(r => {
+    const block = String(r['Block'] || '').trim();
+    const size = parseFloat(r['Block Size (ha)']) || 0;
+    if (block) blockData[block] = size;
+  });
+
+  const blocks = Object.keys(blockData).sort();
+  const sizes = blocks.map(b => blockData[b]);
+  const totalLand = sizes.reduce((a, b) => a + b, 0);
+  const avgSize = blocks.length > 0 ? totalLand / blocks.length : 0;
+  const largestBlock = blocks.length > 0 ? blocks.reduce((a, b) => blockData[a] > blockData[b] ? a : b) : '—';
+  const smallestBlock = blocks.length > 0 ? blocks.reduce((a, b) => blockData[a] < blockData[b] ? a : b) : '—';
+
+  setKPI('kpi-land-total', totalLand.toFixed(2) + ' ha');
+  setKPI('kpi-land-blocks', blocks.length);
+  setKPI('kpi-land-avg', avgSize.toFixed(2) + ' ha');
+  setKPI('kpi-land-largest', largestBlock);
+  setKPI('kpi-land-largest-sub', largestBlock !== '—' ? blockData[largestBlock].toFixed(2) + ' ha' : '—');
+  setKPI('land-sub', `${blocks.length} blocks totaling ${totalLand.toFixed(2)} hectares — ${smallestBlock} (smallest) to ${largestBlock} (largest)`);
+
+  const gridEl = document.getElementById('block-grid');
+  if (gridEl && blocks.length > 0) {
+    const maxSize = Math.max(...sizes);
+    gridEl.innerHTML = blocks.map(block => {
+      const size = blockData[block];
+      const pct = maxSize > 0 ? (size / maxSize) * 100 : 0;
+      const share = totalLand > 0 ? (size / totalLand) * 100 : 0;
+      
+      return `<div class="block-card">
+        <div class="block-id">${block}</div>
+        <div class="block-size">${size.toFixed(2)}</div>
+        <div class="block-label">hectares</div>
+        <div class="block-bar">
+          <div class="block-fill" style="width:${pct}%"></div>
+        </div>
+        <div style="font-size:9px;color:var(--sand);margin-top:6px;">${share.toFixed(1)}% of total</div>
+      </div>`;
+    }).join('');
+  }
+
+  upsertChart('c_landBlocks', 'bar', blocks, sizes, { dark: false });
+  upsertChart('c_landPie', 'doughnut', blocks, sizes, { 
+    palette: [GOLD, GOLD_L, OLIVE, NAVY_L, FOREST, GOLD_D, SAND, '#3b7dd8', '#c0392b']
+  });
+
+  const tbody = document.getElementById('land-table-body');
+  if (tbody) {
+    const sorted = [...blocks].sort((a, b) => blockData[b] - blockData[a]);
+    tbody.innerHTML = sorted.map((block, idx) => {
+      const size = blockData[block];
+      const pct = totalLand > 0 ? (size / totalLand) * 100 : 0;
+      const status = block === largestBlock ? 'Largest' : (block === smallestBlock ? 'Smallest' : 'Active');
+      const badgeClass = status === 'Largest' ? 'badge-gold' : (status === 'Smallest' ? 'badge-olive' : 'badge-gold');
+      
+      return `<tr>
+        <td><span style="color:var(--olive);font-weight:600;">#${idx + 1}</span></td>
+        <td><span class="badge ${badgeClass}">${block}</span></td>
+        <td><strong>${size.toFixed(2)}</strong></td>
+        <td>${shareCell(pct)}</td>
+        <td><span class="badge ${badgeClass}">${status}</span></td>
+      </tr>`;
+    }).join('');
+  }
+  
+  return blocks.length;
+}
+
+function renderIrrigation(rows) {
+  const byYear = {}, sesByYear = {}, byBlock = {};
+  rows.forEach(r => {
+    const yr   = parseYear(r['DATE']);
+    const fuel = parseFloat(r['FUEL (litres)']) || 0;
+    const blk  = String(r['BLOCK'] || '').trim();
+    if (yr) { byYear[yr] = (byYear[yr] || 0) + fuel; sesByYear[yr] = (sesByYear[yr] || 0) + 1; }
+    if (blk) byBlock[blk] = (byBlock[blk] || 0) + fuel;
+  });
+  const years     = Object.keys(byYear).sort();
+  const totalFuel = Object.values(byYear).reduce((a, b) => a + b, 0);
+  const totalSes  = rows.length;
+  const peakYear  = years.length ? years.reduce((a, b) => byYear[a] > byYear[b] ? a : b) : '—';
+
+  setKPI('kpi-irr-fuel',     totalFuel.toLocaleString('en', { maximumFractionDigits: 1 }) + ' L');
+  setKPI('kpi-irr-sessions', totalSes.toLocaleString());
+  setKPI('kpi-irr-peak',     peakYear);
+  setKPI('kpi-irr-peakval',  byYear[peakYear] ? byYear[peakYear].toLocaleString('en', { maximumFractionDigits: 0 }) + ' litres' : '—');
+  setKPI('kpi-irr-avg',      totalSes > 0 ? (totalFuel / totalSes).toFixed(1) + ' L' : '—');
+  setKPI('irr-sub', `${totalSes.toLocaleString()} irrigation sessions across all blocks — ${years[0] || '—'} to ${years[years.length - 1] || '—'}`);
+
+  upsertChart('c_irrYear',     'line', years, years.map(y => byYear[y]    || 0), { 
+    dark: true, 
+    fill: false,
+    tension: 0.4
+  });
+  upsertChart('c_irrYear_ov',  'bar',  years, years.map(y => byYear[y]    || 0), { dark: true });
+  upsertChart('c_irrSessions', 'bar',  years, years.map(y => sesByYear[y] || 0), { dark: true });
+  const topBlocks = Object.entries(byBlock).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  upsertChart('c_irrBlock', 'bar', topBlocks.map(e => e[0]), topBlocks.map(e => e[1]), { horizontal: true });
+
+  const tbody = document.getElementById('irr-table-body');
+  if (tbody) tbody.innerHTML = years.map(y => {
+    const fuel = byYear[y] || 0, ses = sesByYear[y] || 0;
+    const pct  = totalFuel > 0 ? fuel / totalFuel * 100 : 0;
+    return `<tr><td>${y}</td><td>${ses.toLocaleString()}</td><td>${fuel.toLocaleString('en',{maximumFractionDigits:1})}</td><td>${ses > 0 ? (fuel/ses).toFixed(1) : '—'}</td><td>${shareCell(pct)}</td></tr>`;
+  }).join('');
+}
+
+function renderPump(rows) {
+  const byPumpYear = {};
+  rows.forEach(r => {
+    const pump = 'Pump ' + String(r['PUMP No.'] || '').trim();
+    const yr   = parseYear(r['DATE']);
+    const hrs  = Math.max(0, (parseFloat(r['CLOSING HOURS']) || 0) - (parseFloat(r['OPENING HOURS']) || 0));
+    if (!yr || pump === 'Pump ') return;
+    if (!byPumpYear[pump]) byPumpYear[pump] = {};
+    byPumpYear[pump][yr] = (byPumpYear[pump][yr] || 0) + hrs;
+  });
+
+  const pumps      = Object.keys(byPumpYear).sort();
+  const years      = [...new Set(rows.map(r => parseYear(r['DATE'])).filter(Boolean))].sort();
+  const pumpTotals = pumps.map(p => Object.values(byPumpYear[p]).reduce((a, b) => a + b, 0));
+  const totalHrs   = pumpTotals.reduce((a, b) => a + b, 0);
+  const latestYear = years[years.length - 1];
+  const maintCount = rows.filter(r => String(r['LUBRICANT / BREAKDOWN'] || '').trim() !== '').length;
+
+  setKPI('kpi-pump-total',   totalHrs.toLocaleString() + ' hrs');
+  setKPI('kpi-pump-count',   pumps.length);
+  setKPI('kpi-pump-entries', rows.length.toLocaleString());
+  setKPI('kpi-pump-maint',   maintCount);
+  setKPI('pump-sub', `Operating hours for ${pumps.join(', ')} — ${years[0] || '—'} to ${years[years.length - 1] || '—'}`);
+  const titleEl = document.getElementById('pump-latest-title');
+  if (titleEl && latestYear) titleEl.textContent = latestYear + ' Pump Comparison';
+
+  upsertChart('c_pump2year',   'bar',      years, years.map(y => (byPumpYear['Pump 2'] || {})[y] || 0), { dark: true });
+  upsertChart('c_pumpPie',     'doughnut', pumps, pumpTotals);
+  upsertChart('c_pumpYear_ov', 'line',     years, years.map(y => pumps.reduce((s, p) => s + ((byPumpYear[p] || {})[y] || 0), 0)));
+  upsertChart('c_pump2025',    'bar',      pumps, pumps.map(p => (byPumpYear[p] || {})[latestYear] || 0), { dark: true });
+
+  const thead = document.getElementById('pump-table-head');
+  const tbody = document.getElementById('pump-table-body');
+  if (thead) thead.innerHTML = '<tr><th>Pump</th>' + years.map(y => `<th>${y}</th>`).join('') + '<th>Total</th></tr>';
+  if (tbody) {
+    const trs = pumps.map((p, i) =>
+      `<tr><td><span class="badge badge-gold">${p}</span></td>` +
+      years.map(y => { const v = (byPumpYear[p] || {})[y] || 0; return `<td>${v > 0 ? v.toLocaleString() : '—'}</td>`; }).join('') +
+      `<td><strong>${pumpTotals[i].toLocaleString()}</strong></td></tr>`
+    );
+    trs.push(`<tr style="background:rgba(168,147,90,0.05);"><td><strong>Total</strong></td>` +
+      years.map(y => `<td><strong>${pumps.reduce((s,p) => s + ((byPumpYear[p]||{})[y]||0), 0).toLocaleString()}</strong></td>`).join('') +
+      `<td><strong>${totalHrs.toLocaleString()}</strong></td></tr>`);
+    tbody.innerHTML = trs.join('');
+  }
+}
+
+function renderTagging(rows, landData) {
+  const byBlock = {}, byColour = {}, byDate = {};
+  const futureHarvest = {};
+  const expectedHarvestList = [];
+
+  rows.forEach(r => {
+    const b = String(r['BLOCK'] || '').trim();
+    const c = String(r['TAG COLOUR'] || '').trim();
+    const matNo = String(r['MAT No.'] || '').trim();
+    const taggedDate = parseDate(r['DATE OF TAGGING']);
+    
+    // Use EXPECTED DATE OF HARVEST from sheet if available, otherwise calculate +3 months
+    let expectedHarvestDate;
+    if (r['EXPECTED DATE OF HARVEST'] && String(r['EXPECTED DATE OF HARVEST']).trim()) {
+      expectedHarvestDate = parseDate(r['EXPECTED DATE OF HARVEST']);
+    } else if (taggedDate) {
+      expectedHarvestDate = new Date(taggedDate);
+      expectedHarvestDate.setMonth(expectedHarvestDate.getMonth() + 3);
+    }
+
+    if (b) byBlock[b] = (byBlock[b] || 0) + 1;
+    if (c) byColour[c] = (byColour[c] || 0) + 1;
+    if (taggedDate) {
+      const dateKey = taggedDate.toISOString().slice(0, 10);
+      byDate[dateKey] = (byDate[dateKey] || 0) + 1;
+    }
+    
+    // Build expected harvest list for the table
+    if (expectedHarvestDate && b && c) {
+      expectedHarvestList.push({
+        expectedDate: expectedHarvestDate,
+        taggedDate: taggedDate,
+        colour: c,
+        block: b,
+        matNo: matNo || '—'
+      });
+      
+      // Month-level key for timeline forecast
+      const monthKey = expectedHarvestDate.toISOString().slice(0, 7);
+      futureHarvest[monthKey] = (futureHarvest[monthKey] || 0) + 1;
+    }
+  });
+
+  const blocks        = Object.keys(byBlock).sort();
+  const topBlock      = blocks.length ? blocks.reduce((a, b) => byBlock[a] > byBlock[b] ? a : b) : '—';
+  const coloursSorted = Object.entries(byColour).sort((a, b) => b[1] - a[1]);
+  const tagColors     = coloursSorted.map(([c]) => TAG_PALETTE[c] || OLIVE);
+
+  setKPI('kpi-tag-total',   rows.length.toLocaleString());
+  setKPI('kpi-tag-colours', Object.keys(byColour).length);
+  setKPI('kpi-tag-blocks',  blocks.length);
+  setKPI('kpi-tag-top',     topBlock);
+  setKPI('kpi-tag-topval',  topBlock !== '—' ? (byBlock[topBlock] || 0).toLocaleString() + ' mats' : '—');
+  setKPI('tag-sub', `Mat tagging records across blocks ${blocks.join(', ')} — ${Object.keys(byColour).length} tag types`);
+
+  upsertChart('c_tagBlock',  'bar', blocks, blocks.map(b => byBlock[b] || 0));
+  upsertChart('c_tagBlock2', 'bar', blocks, blocks.map(b => byBlock[b] || 0), { dark: true });
+  upsertChart('c_tagColour', 'bar', coloursSorted.slice(0,10).map(e=>e[0]), coloursSorted.slice(0,10).map(e=>e[1]), { horizontal:true, palette:tagColors.slice(0,10) });
+  upsertChart('c_tagPie', 'doughnut', coloursSorted.map(e=>e[0]), coloursSorted.map(e=>e[1]), { palette:tagColors });
+
+  // Render forecast timeline
+  const forecastContainer = document.getElementById('harvest-forecast-container');
+  if (forecastContainer) {
+    const months = Object.keys(futureHarvest).sort().slice(0, 6);
+    const maxVal = months.length ? Math.max(...months.map(m => futureHarvest[m])) : 1;
+
+    if (months.length > 0) {
+      forecastContainer.innerHTML = months.map(month => {
+        const count = futureHarvest[month];
+        const pct = (count / maxVal) * 100;
+        const [year, monthNum] = month.split('-');
+        const dateObj = new Date(year, monthNum - 1);
+        const monthName = dateObj.toLocaleString('default', { month: 'short', year: 'numeric' });
+
+        return `<div class="timeline-bar">
+          <div class="timeline-label">${monthName}</div>
+          <div class="timeline-track">
+            <div class="timeline-fill" style="width:${pct}%">${count}</div>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      forecastContainer.innerHTML = '<div style="text-align:center;color:var(--olive);padding:20px;">No harvest forecast available</div>';
     }
   }
-});
 
-new Chart(document.getElementById('c_tagBlock'), {
-  type: 'bar',
-  data: {
-    labels: ['M1','M2','M3','M4','M5','M6','M7','M9'],
-    datasets: [{
-      data: [1432,1735,1804,1679,1563,1128,105,3],
-      backgroundColor: [NAVY,NAVY,GOLD,NAVY,NAVY,NAVY,OLIVE,OLIVE].map((c,i)=> i===2? GOLD : NAVY_L),
-      borderRadius: 5, borderSkipped: false
-    }]
-  },
-  options: {
-    ...barOptions(false),
-    plugins: { legend:{display:false} }
-  }
-});
-
-new Chart(document.getElementById('c_pumpYear_ov'), {
-  type: 'line',
-  data: {
-    labels: ['2021','2022','2023','2024','2025'],
-    datasets: [{
-      data: [168, 278, 719, 28, 218],
-      borderColor: GOLD, backgroundColor: 'rgba(168,147,90,0.12)',
-      fill: true, tension: 0.4, pointBackgroundColor: GOLD, pointRadius: 4
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: { legend:{display:false} },
-    scales: {
-      x: { grid:{color:'rgba(0,0,0,0.05)'}, ticks:{color:FOREST,font:{size:11}} },
-      y: { grid:{color:'rgba(0,0,0,0.05)'}, ticks:{color:FOREST,font:{size:11}} }
+  // Render expected harvest table (FIX 1: replaces calendar)
+  const tableBody = document.getElementById('expected-harvest-body');
+  if (tableBody) {
+    // Sort by expected harvest date (future first, then past)
+    const today = new Date();
+    const sorted = expectedHarvestList.sort((a, b) => {
+      const aFuture = a.expectedDate >= today;
+      const bFuture = b.expectedDate >= today;
+      if (aFuture !== bFuture) return bFuture ? -1 : 1;
+      return a.expectedDate - b.expectedDate;
+    });
+    
+    if (sorted.length > 0) {
+      tableBody.innerHTML = sorted.map(item => {
+        const isFuture = item.expectedDate >= today;
+        const dateClass = isFuture ? 'future-date' : 'past-date';
+        const colourBadge = TAG_PALETTE[item.colour] ? 
+          `<span class="badge" style="background:${TAG_PALETTE[item.colour]}20;color:${TAG_PALETTE[item.colour]}">${item.colour}</span>` :
+          `<span class="badge badge-gold">${item.colour}</span>`;
+        
+        return `<tr>
+          <td class="${dateClass}">${formatDate(item.expectedDate)}</td>
+          <td>${formatDate(item.taggedDate)}</td>
+          <td>${colourBadge}</td>
+          <td><span class="badge badge-gold">${item.block}</span></td>
+          <td>${item.matNo}</td>
+        </tr>`;
+      }).join('');
+    } else {
+      tableBody.innerHTML = '<tr><td colspan="5" class="expected-harvest-empty">No expected harvest data available</td></tr>';
     }
   }
-});
 
-new Chart(document.getElementById('c_irrYear_ov'), {
-  type: 'bar',
-  data: {
-    labels: ['2020','2021','2022','2023','2024','2025'],
-    datasets: [{
-      data: [238.5, 392.5, 715.0, 1136.0, 38.5, 327.5],
-      backgroundColor: [GOLD_L,GOLD_L,GOLD,GOLD_L,OLIVE,GOLD_L],
-      borderRadius: 5, borderSkipped: false
-    }]
-  },
-  options: {
-    ...barOptions(true),
-    plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y} L`}}}
+  const legendEl = document.getElementById('tag-legend');
+  if (legendEl) {
+    const maxVal = coloursSorted[0] ? coloursSorted[0][1] : 1;
+    legendEl.innerHTML = coloursSorted.map(([label, val]) => {
+      const c = TAG_PALETTE[label] || OLIVE;
+      return `<div class="legend-row">
+        <span><span class="colour-swatch" style="background:${c}"></span>${label}</span>
+        <div class="legend-bar-bg"><div class="legend-bar-fill" style="width:${(val/maxVal*100).toFixed(1)}%;background:${c};"></div></div>
+        <span class="legend-val">${val.toLocaleString()}</span>
+      </div>`;
+    }).join('');
   }
-});
+}
 
-/* ═══════ HARVEST CHARTS ════════════════════════════════════════════ */
-new Chart(document.getElementById('c_monthlyHarvest'), {
-  type: 'bar',
-  data: {
-    labels: ['May 2021','June 2021'],
-    datasets: [{
-      label: 'kg harvested',
-      data: [3592.04, 12035.94],
-      backgroundColor: [OLIVE, GOLD],
-      borderRadius: 8, borderSkipped: false
-    }]
-  },
-  options: {
-    ...barOptions(true),
-    plugins:{ legend:{display:false},
-      tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y.toFixed(0)} kg`}}
+function renderHarvest(rows, landData) {
+  const byBlock       = {};
+  const byMonth       = {};   // keyed as "YYYY-MM" for reliable sorting — FIX 2
+  const avgBunchWeights = [];
+
+  /* ── FIX 3: per-block weight tracking ── */
+  const blockWeightSums   = {};
+  const blockWeightCounts = {};
+  const qtyHarvestedByBlock = {};
+
+  rows.forEach(r => {
+    const b         = String(r['BLOCK'] || '').trim();
+    const avgWeight = parseFloat(r['AVERAGE BUNCH WEIGHT (KG)']) || 0;
+    const qty       = parseFloat(r['QUANTITY HARVESTED (KG)'])   || 0;
+
+    /* ── FIX 2: use parseYearMonth for YYYY-MM keys ── */
+    const ym = parseYearMonth(r['DATE OF HARVESTING']);
+
+    if (b) {
+      byBlock[b] = (byBlock[b] || 0) + qty;
+      qtyHarvestedByBlock[b] = (qtyHarvestedByBlock[b] || 0) + qty;
+
+      if (avgWeight > 0) {
+        avgBunchWeights.push(avgWeight);
+        blockWeightSums[b]   = (blockWeightSums[b]   || 0) + avgWeight;
+        blockWeightCounts[b] = (blockWeightCounts[b] || 0) + 1;
+      }
     }
-  }
-});
-
-new Chart(document.getElementById('c_blockHarvest2'), {
-  type: 'bar',
-  data: {
-    labels: ['M1','M2','M3'],
-    datasets: [
-      { label:'Total (kg)', data:[5572.27,5781.83,4273.88], backgroundColor:[GOLD,GOLD_L,OLIVE], borderRadius:6, borderSkipped:false }
-    ]
-  },
-  options: {
-    responsive: true,
-    plugins:{ legend:{display:false} },
-    scales:{
-      x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST}},
-      y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST}}
+    if (ym) {
+      byMonth[ym] = (byMonth[ym] || 0) + qty;
     }
+  });
+
+  const blocks   = Object.keys(byBlock).sort();
+  const totalKg  = Object.values(byBlock).reduce((a, b) => a + b, 0);
+  const globalAvgWeight = avgBunchWeights.length > 0
+    ? avgBunchWeights.reduce((a, b) => a + b, 0) / avgBunchWeights.length
+    : 0;
+  const avgQty   = rows.length > 0 ? totalKg / rows.length : 0;
+  const topBlock = blocks.length ? blocks.reduce((a, b) => byBlock[a] > byBlock[b] ? a : b) : '—';
+
+  setKPI('kpi-harvest-total',  totalKg        > 0 ? totalKg.toLocaleString('en',{maximumFractionDigits:0}) + ' kg' : '—');
+  setKPI('kpi-harvest-avg',    globalAvgWeight > 0 ? globalAvgWeight.toFixed(1) + ' kg' : '—');
+  setKPI('kpi-harvest-top',    topBlock);
+  setKPI('kpi-harvest-topval', topBlock !== '—' ? (byBlock[topBlock]||0).toLocaleString('en',{maximumFractionDigits:0}) + ' kg' : '—');
+  setKPI('kpi-harvest-qty',    avgQty > 0 ? avgQty.toFixed(1) + ' kg' : '—');
+  setKPI('kpi-ov-harvest',     totalKg > 0 ? totalKg.toLocaleString('en',{maximumFractionDigits:0}) + ' kg' : '—');
+  setKPI('kpi-ov-harvest-sub', rows.length > 0 ? rows.length.toLocaleString() + ' harvest entries' : 'No harvest records yet');
+
+  const tbody = document.getElementById('harv-table-body');
+  if (rows.length === 0) {
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--olive);padding:24px;">No harvest records yet — data will appear once entries are added to the Google Sheet</td></tr>';
+    return;
   }
-});
 
-new Chart(document.getElementById('c_blockCount'), {
-  type: 'doughnut',
-  data: {
-    labels: ['M1 (361)','M2 (363)','M3 (310)'],
-    datasets: [{
-      data: [361,363,310],
-      backgroundColor: [GOLD, GOLD_L, OLIVE],
-      borderWidth: 0, hoverOffset: 8
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      legend: { position:'bottom', labels:{color:SAND, font:{size:12}, padding:14} }
-    }
+  upsertChart('c_blockHarvest',  'bar', blocks, blocks.map(b => byBlock[b] || 0), { dark: true });
+  upsertChart('c_blockHarvest2', 'bar', blocks, blocks.map(b => byBlock[b] || 0));
+  upsertChart('c_blockCount',    'bar', blocks, blocks.map(b => qtyHarvestedByBlock[b] || 0), { dark: true });
+
+  /* ── FIX 2: Show ALL months grouped chronologically (no slice) ── */
+  const allMonthKeys = Object.keys(byMonth).sort(); // "YYYY-MM" sorts correctly
+  const allMonthLabels = allMonthKeys.map(k => {
+    const [yr, mo] = k.split('-');
+    return new Date(parseInt(yr), parseInt(mo) - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
+  });
+  const allMonthData = allMonthKeys.map(k => byMonth[k]);
+  
+  upsertChart('c_monthlyHarvest', 'bar', allMonthLabels, allMonthData, { dark: true });
+
+  /* ── FIX 3: per-block average weight in the summary table ── */
+  if (tbody) tbody.innerHTML = blocks.map(b => {
+    const total   = byBlock[b] || 0;
+    const size    = landData[b] || 0;
+    const yieldPerHa = size > 0 ? total / size : 0;
+    const pct     = totalKg > 0 ? total / totalKg * 100 : 0;
+
+    // Per-block average bunch weight (not the global average)
+    const blockAvg = blockWeightCounts[b] > 0
+      ? (blockWeightSums[b] / blockWeightCounts[b]).toFixed(2)
+      : '—';
+
+    return `<tr>
+      <td><span class="badge badge-gold">${b}</span></td>
+      <td>${size > 0 ? size.toFixed(2) : '—'}</td>
+      <td>${total.toLocaleString('en',{maximumFractionDigits:1})}</td>
+      <td>${blockAvg}</td>
+      <td>${yieldPerHa > 0 ? yieldPerHa.toLocaleString('en',{maximumFractionDigits:0}) : '—'}</td>
+      <td>${shareCell(pct)}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadDashboard() {
+  const btn = document.getElementById('btn-refresh');
+  if (btn) btn.classList.add('spinning');
+  setKPI('data-status', 'Refreshing…');
+
+  try {
+    const [irrigation, tagging, pump, harvest, land] = await Promise.all([
+      fetchCSV(CSV_IRRIGATION),
+      fetchCSV(CSV_TAGGING),
+      fetchCSV(CSV_PUMP),
+      fetchCSV(CSV_HARVEST),
+      fetchCSV(CSV_LAND).catch(() => [])
+    ]);
+
+    const landData = {};
+    land.forEach(r => {
+      const block = r['Block'];
+      const size = parseFloat(r['Block Size (ha)']) || 0;
+      if (block) landData[block] = size;
+    });
+
+    const blockCount = renderLand(land);
+    renderIrrigation(irrigation);
+    renderPump(pump);
+    renderTagging(tagging, landData);
+    renderHarvest(harvest, landData);
+
+    const totalFuel = irrigation.reduce((s, r) => s + (parseFloat(r['FUEL (litres)']) || 0), 0);
+    const totalHrs  = pump.reduce((s, r) =>
+      s + Math.max(0, (parseFloat(r['CLOSING HOURS']) || 0) - (parseFloat(r['OPENING HOURS']) || 0)), 0);
+
+    setKPI('kpi-ov-fuel',      totalFuel.toLocaleString('en', { maximumFractionDigits: 0 }) + ' L');
+    setKPI('kpi-ov-fuel-sub',  irrigation.length.toLocaleString() + ' sessions · 2020–2025');
+    setKPI('kpi-ov-pumph',     totalHrs.toLocaleString() + ' hrs');
+    setKPI('kpi-ov-pump-sub',  pump.length.toLocaleString() + ' log entries');
+    setKPI('kpi-ov-tags',      tagging.length.toLocaleString());
+    setKPI('kpi-ov-tags-sub',  'Mats tagged — current season');
+    setKPI('kpi-ov-sessions',  irrigation.length.toLocaleString());
+    setKPI('kpi-ov-blocks',    blockCount);
+
+    const now = new Date();
+    setKPI('data-status', 'Updated ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    toast('✓ Data refreshed');
+
+  } catch (err) {
+    console.error('Dashboard error:', err);
+    setKPI('data-status', '⚠ Offline — check console');
+    toast('⚠ Could not load data — check CSV URLs');
+  } finally {
+    if (btn) btn.classList.remove('spinning');
+    const ls = document.getElementById('loading-screen');
+    if (ls && !ls.classList.contains('hidden')) setTimeout(() => ls.classList.add('hidden'), 300);
   }
+}
+
+function manualRefresh() { loadDashboard(); }
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadDashboard();
+  setInterval(loadDashboard, REFRESH_INTERVAL_MS);
 });
 
-/* ═══════ TAGGING CHARTS ════════════════════════════════════════════ */
-new Chart(document.getElementById('c_tagBlock2'), {
-  type: 'bar',
-  data: {
-    labels: ['M1','M2','M3','M4','M5','M6','M7','M9'],
-    datasets: [{
-      data: [1432,1735,1804,1679,1563,1128,105,3],
-      backgroundColor: [NAVY_L,NAVY_L,GOLD,NAVY_L,NAVY_L,NAVY_L,OLIVE,OLIVE],
-      borderRadius:6, borderSkipped:false
-    }]
-  },
-  options:{
-    ...barOptions(true),
-    plugins:{legend:{display:false}}
-  }
-});
-
-const tagLabels = ['White ribbon','Yellow ribbon','Red ribbon','White','Blue','Dark green','Melow','Orange','White ulisi','Blue ribbon','Light green ribbon','Red ulisi','Mellon','Orange ribbon','Black ribbon','Green','Dark green wool','Light green wool'];
-const tagVals =   [1951,771,678,599,406,666,548,500,360,586,567,268,377,230,336,214,203,189];
-const tagColors = [
-  SAND, '#d4b44a', '#c0392b', '#e0ddd8', '#3b7dd8', '#2d5a27', OLIVE, '#e07b39', '#f0ece6',
-  '#4a90d9','#5d8a4a','#c23b2e','#e8a030','#e06030','#2d2d2d','#3d6e40','#1e4d1a','#4a7a1e'
-];
-
-new Chart(document.getElementById('c_tagColour'), {
-  type: 'bar',
-  data: {
-    labels: tagLabels.slice(0,10),
-    datasets: [{
-      data: tagVals.slice(0,10),
-      backgroundColor: tagColors.slice(0,10),
-      borderRadius: 4, borderSkipped: false
-    }]
-  },
-  options: {
-    indexAxis:'y', responsive:true,
-    plugins:{legend:{display:false}},
-    scales:{
-      x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST,font:{size:10}}},
-      y:{grid:{color:'none'},ticks:{color:FOREST,font:{size:10}}}
-    }
-  }
-});
-
-new Chart(document.getElementById('c_tagPie'), {
-  type: 'doughnut',
-  data: {
-    labels: tagLabels,
-    datasets: [{
-      data: tagVals,
-      backgroundColor: tagColors,
-      borderWidth: 0, hoverOffset:6
-    }]
-  },
-  options:{
-    responsive:false,
-    plugins:{ legend:{display:false} }
-  }
-});
-
-// Build legend
-const maxTag = Math.max(...tagVals);
-const sorted = tagLabels.map((l,i)=>({l,v:tagVals[i],c:tagColors[i]})).sort((a,b)=>b.v-a.v);
-const legendEl = document.getElementById('tag-legend');
-sorted.forEach(({l,v,c})=>{
-  legendEl.innerHTML += `
-    <div class="legend-row">
-      <span><span class="colour-swatch" style="background:${c}"></span>${l}</span>
-      <div class="legend-bar-bg"><div class="legend-bar-fill" style="width:${(v/maxTag*100).toFixed(1)}%;background:${c};"></div></div>
-      <span class="legend-val">${v.toLocaleString()}</span>
-    </div>`;
-});
-
-/* ═══════ PUMP CHARTS ═══════════════════════════════════════════════ */
-new Chart(document.getElementById('c_pump2year'), {
-  type: 'bar',
-  data: {
-    labels: ['2021','2022','2023','2024','2025'],
-    datasets: [{
-      label:'Hours',
-      data: [168,278,719,28,57],
-      backgroundColor:[GOLD_L,GOLD_L,GOLD,OLIVE,GOLD_L],
-      borderRadius:6, borderSkipped:false
-    }]
-  },
-  options:{
-    ...barOptions(true),
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y} hrs`}}}
-  }
-});
-
-new Chart(document.getElementById('c_pumpPie'), {
-  type:'doughnut',
-  data:{
-    labels:['Pump 2 (1,250h)','Pump 3 (58h)','Pump 4 (52h)','Pump 5 (51h)'],
-    datasets:[{
-      data:[1250,58,52,51],
-      backgroundColor:[GOLD, OLIVE, FOREST, NAVY_L],
-      borderWidth:0, hoverOffset:6
-    }]
-  },
-  options:{
-    responsive:true,
-    plugins:{legend:{position:'bottom', labels:{color:FOREST,font:{size:11},padding:12}}}
-  }
-});
-
-new Chart(document.getElementById('c_pump2025'), {
-  type:'bar',
-  data:{
-    labels:['Pump 2','Pump 3','Pump 4','Pump 5'],
-    datasets:[{
-      data:[57,58,52,51],
-      backgroundColor:[GOLD,GOLD_L,OLIVE,OLIVE],
-      borderRadius:6, borderSkipped:false
-    }]
-  },
-  options:{
-    ...barOptions(true),
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y} hrs`}}}
-  }
-});
-
-/* ═══════ IRRIGATION CHARTS ═════════════════════════════════════════ */
-new Chart(document.getElementById('c_irrYear'), {
-  type:'line',
-  data:{
-    labels:['2020','2021','2022','2023','2024','2025'],
-    datasets:[{
-      data:[238.5,392.5,715.0,1136.0,38.5,327.5],
-      borderColor: GOLD, backgroundColor:'rgba(168,147,90,0.12)',
-      fill:true, tension:0.4, pointBackgroundColor:GOLD, pointRadius:5, pointHoverRadius:7
-    }]
-  },
-  options:{
-    responsive:true,
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y} L`}}},
-    scales:{
-      x:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:SAND,font:{size:11}}},
-      y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:SAND,font:{size:11}}}
-    }
-  }
-});
-
-new Chart(document.getElementById('c_irrBlock'), {
-  type:'bar',
-  data:{
-    labels:['M2,3','M5,6','M1,M2','M3','M1','M4','M8','M9','M3,4','M7'],
-    datasets:[{
-      data:[633.5,449.0,429.0,236.0,225.5,214.5,89.5,67.0,65.0,64.5],
-      backgroundColor: [GOLD,GOLD_L,GOLD_L,OLIVE,OLIVE,OLIVE,NAVY_L,NAVY_L,NAVY_L,NAVY_L],
-      borderRadius:4, borderSkipped:false
-    }]
-  },
-  options:{
-    indexAxis:'y', responsive:true,
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.x} L`}}},
-    scales:{
-      x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:FOREST,font:{size:10}}},
-      y:{grid:{color:'none'},ticks:{color:FOREST,font:{size:10}}}
-    }
-  }
-});
-
-new Chart(document.getElementById('c_irrSessions'), {
-  type:'bar',
-  data:{
-    labels:['2020','2021','2022','2023','2024','2025'],
-    datasets:[{
-      data:[71,112,181,310,11,68],
-      backgroundColor:[GOLD_L,GOLD_L,GOLD_L,GOLD,OLIVE,GOLD_L],
-      borderRadius:6, borderSkipped:false
-    }]
-  },
-  options:{
-    ...barOptions(true),
-    plugins:{legend:{display:false}}
-  }
-});
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
 </script>
 </body>
 </html>
