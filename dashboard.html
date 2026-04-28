@@ -71,7 +71,7 @@ body {
   100% { width:0%;  margin-left:100%; }
 }
 
-/* ── HEADER ────────────────────────────────── */
+/* ── HEADER ───────────────────────────────── */
 header {
   background: var(--navy); padding: 0 20px;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
@@ -128,7 +128,7 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
 
 /* ── KPI CARDS ────────────────────────────────── */
 .kpi-grid {
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
   gap:12px; margin-bottom:22px;
 }
 .kpi-card {
@@ -150,8 +150,10 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
 
 /* ── CHARTS ───────────────────────────────────── */
 .chart-grid { display:grid; gap:14px; margin-bottom:22px; }
-.chart-grid.cols-2 { grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); }
-.chart-grid.cols-3 { grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); }
+
+/* FIX 2: 2 small charts per row (was minmax 290px → 460px) */
+.chart-grid.cols-2 { grid-template-columns:repeat(auto-fit,minmax(460px,1fr)); }
+
 .chart-card {
   background:#fff; border-radius:12px; padding:18px;
   border:1px solid var(--sand); box-shadow:0 2px 8px rgba(13,33,54,.05);
@@ -162,13 +164,23 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
 .chart-card.dark .chart-title { color:var(--gold); }
 .chart-sub { font-size:11px; color:var(--olive); margin-bottom:14px; }
 .chart-card.dark .chart-sub   { color:var(--sand); opacity:.7; }
-.chart-wrap { 
-  position:relative; 
+
+/* FIX 1: normal chart height */
+.chart-wrap {
+  position:relative;
   max-height: 220px;
   overflow: hidden;
 }
 .chart-wrap canvas {
   max-height: 200px !important;
+}
+
+/* FIX 1: span-2 wide charts get double height */
+.chart-card.span-2 .chart-wrap {
+  max-height: 420px;
+}
+.chart-card.span-2 .chart-wrap canvas {
+  max-height: 400px !important;
 }
 
 /* ── BLOCK GRID VISUALIZATION ────────────────── */
@@ -191,9 +203,7 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
 .block-card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 3px;
   background: var(--gold);
 }
@@ -203,102 +213,53 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
 }
 .block-card .block-id {
   font-family: 'Playfair Display', serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--gold);
-  margin-bottom: 4px;
+  font-size: 24px; font-weight: 700;
+  color: var(--gold); margin-bottom: 4px;
 }
 .block-card .block-size {
-  font-size: 18px;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 2px;
+  font-size: 18px; font-weight: 600;
+  color: #fff; margin-bottom: 2px;
 }
 .block-card .block-label {
-  font-size: 10px;
-  color: var(--sand);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 10px; color: var(--sand);
+  text-transform: uppercase; letter-spacing: 0.05em;
 }
 .block-card .block-bar {
-  margin-top: 10px;
-  height: 4px;
+  margin-top: 10px; height: 4px;
   background: rgba(255,255,255,0.1);
-  border-radius: 2px;
-  overflow: hidden;
+  border-radius: 2px; overflow: hidden;
 }
 .block-card .block-fill {
-  height: 100%;
-  background: var(--gold);
-  border-radius: 2px;
-  transition: width 0.6s ease;
+  height: 100%; background: var(--gold);
+  border-radius: 2px; transition: width 0.6s ease;
 }
 
 /* ── EXPECTED HARVEST TABLE ─────────────────── */
 .expected-harvest-table {
-  background: #fff;
-  border-radius: 12px;
-  padding: 18px;
-  border: 1px solid var(--sand);
-  margin-top: 14px;
-  overflow-x: auto;
+  background: #fff; border-radius: 12px; padding: 18px;
+  border: 1px solid var(--sand); margin-top: 14px; overflow-x: auto;
 }
 .expected-harvest-table table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-  min-width: 500px;
+  width: 100%; border-collapse: collapse;
+  font-size: 12px; min-width: 500px;
 }
 .expected-harvest-table th {
-  background: var(--navy);
-  color: var(--gold);
-  padding: 9px 12px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  white-space: nowrap;
-  position: sticky;
-  top: 0;
+  background: var(--navy); color: var(--gold);
+  padding: 9px 12px; text-align: left; font-weight: 600;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .07em;
+  white-space: nowrap; position: sticky; top: 0;
 }
 .expected-harvest-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--sand);
-  color: var(--forest);
-  white-space: nowrap;
+  padding: 8px 12px; border-bottom: 1px solid var(--sand);
+  color: var(--forest); white-space: nowrap;
 }
-.expected-harvest-table tr:hover td {
-  background: rgba(168,147,90,.06);
-}
-.expected-harvest-table tr:last-child td {
-  border-bottom: none;
-}
-.expected-harvest-table .badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-}
-.expected-harvest-table .badge-gold {
-  background: rgba(168,147,90,.15);
-  color: var(--gold-dim);
-}
-.expected-harvest-table .future-date {
-  color: var(--gold-dim);
-  font-weight: 600;
-}
-.expected-harvest-table .past-date {
-  color: var(--olive);
-  font-style: italic;
-}
-.expected-harvest-empty {
-  text-align: center;
-  color: var(--olive);
-  padding: 24px;
-  font-size: 13px;
-}
+.expected-harvest-table tr:hover td { background: rgba(168,147,90,.06); }
+.expected-harvest-table tr:last-child td { border-bottom: none; }
+.expected-harvest-table .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.expected-harvest-table .badge-gold { background: rgba(168,147,90,.15); color: var(--gold-dim); }
+.expected-harvest-table .future-date { color: var(--gold-dim); font-weight: 600; }
+.expected-harvest-table .past-date   { color: var(--olive); font-style: italic; }
+.expected-harvest-empty { text-align: center; color: var(--olive); padding: 24px; font-size: 13px; }
 
 /* ── TABLES ───────────────────────────────────── */
 .table-wrap { overflow-x:auto; }
@@ -321,44 +282,18 @@ tr:last-child td { border-bottom:none; }
 
 /* ── FORECAST TIMELINE ────────────────────────── */
 .forecast-timeline {
-  background: #fff;
-  border-radius: 12px;
-  padding: 18px;
-  border: 1px solid var(--sand);
-  margin-top: 14px;
+  background: #fff; border-radius: 12px; padding: 18px;
+  border: 1px solid var(--sand); margin-top: 14px;
 }
-.timeline-bar {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-  gap: 12px;
-}
-.timeline-label {
-  min-width: 80px;
-  font-size: 11px;
-  color: var(--forest);
-  font-weight: 500;
-}
-.timeline-track {
-  flex: 1;
-  height: 28px;
-  background: var(--cream);
-  border-radius: 6px;
-  overflow: hidden;
-  position: relative;
-}
+.timeline-bar { display: flex; align-items: center; margin-bottom: 12px; gap: 12px; }
+.timeline-label { min-width: 80px; font-size: 11px; color: var(--forest); font-weight: 500; }
+.timeline-track { flex: 1; height: 28px; background: var(--cream); border-radius: 6px; overflow: hidden; position: relative; }
 .timeline-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--gold) 0%, var(--gold-lt) 100%);
-  border-radius: 6px;
-  transition: width 0.6s ease;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 8px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--navy);
+  border-radius: 6px; transition: width 0.6s ease;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 8px; font-size: 11px; font-weight: 600; color: var(--navy);
 }
 
 /* ── TOAST ────────────────────────────────────── */
@@ -380,6 +315,11 @@ tr:last-child td { border-bottom:none; }
   .kpi-grid   { grid-template-columns:repeat(2,1fr); gap:10px; }
   .header-meta { display:none; }
   .chart-wrap { max-height: 180px; }
+  /* FIX 1 mobile: span-2 gets reasonable height on small screens */
+  .chart-card.span-2 .chart-wrap { max-height: 260px; }
+  .chart-card.span-2 .chart-wrap canvas { max-height: 240px !important; }
+  /* FIX 2 mobile: cols-2 stacks to 1 column */
+  .chart-grid.cols-2 { grid-template-columns: 1fr; }
   .block-grid { grid-template-columns: repeat(2, 1fr); }
   .expected-harvest-table table { font-size: 11px; }
   .expected-harvest-table th,
@@ -413,12 +353,13 @@ tr:last-child td { border-bottom:none; }
 </header>
 
 <nav>
-  <button class="tab-btn active" onclick="showTab('overview',   this)">Overview</button>
-  <button class="tab-btn"        onclick="showTab('harvest',    this)">Harvesting</button>
-  <button class="tab-btn"        onclick="showTab('tagging',    this)">Tagging</button>
-  <button class="tab-btn"        onclick="showTab('pump',       this)">Pump Log</button>
-  <button class="tab-btn"        onclick="showTab('irrigation', this)">Irrigation</button>
-  <button class="tab-btn"        onclick="showTab('land',       this)">Land</button>
+  <button class="tab-btn active" onclick="showTab('overview',    this)">Overview</button>
+  <button class="tab-btn"        onclick="showTab('harvest',     this)">Harvesting</button>
+  <button class="tab-btn"        onclick="showTab('tagging',     this)">Tagging</button>
+  <button class="tab-btn"        onclick="showTab('pump',        this)">Pump Log</button>
+  <button class="tab-btn"        onclick="showTab('irrigation',  this)">Irrigation</button>
+  <button class="tab-btn"        onclick="showTab('land',        this)">Land</button>
+  <button class="tab-btn"        onclick="showTab('financials',  this)">Financials</button>
 </nav>
 
 <main>
@@ -426,43 +367,39 @@ tr:last-child td { border-bottom:none; }
 <!-- ══ OVERVIEW ══════════════════════════════════════════════════ -->
 <div id="tab-overview" class="tab-panel active">
   <p class="section-title">Farm Operations Overview</p>
-  <p class="section-sub">Consolidated summary across Harvesting, Tagging, Pump and Irrigation records</p>
+  <p class="section-sub">Consolidated summary across Harvesting, Land, and Financial records</p>
   <div class="kpi-grid">
     <div class="kpi-card accent">
-      <span class="icon">🍌</span>
-      <div class="value" id="kpi-ov-harvest">—</div>
-      <div class="label">Total Harvest Weight</div>
-      <div class="sub"  id="kpi-ov-harvest-sub">—</div>
+      <span class="icon">📐</span>
+      <div class="value" id="kpi-ov-avg-weight">—</div>
+      <div class="label">Avg Bunch Weight</div>
+      <div class="sub">Overall (kg)</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🎯</span>
+      <div class="value" id="kpi-ov-land-progress">—</div>
+      <div class="label">Land Acquisition</div>
+      <div class="sub" id="kpi-ov-land-sub">vs 50 ha target</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">💰</span>
+      <div class="value" id="kpi-ov-last-rev">—</div>
+      <!-- FIX 3: label gets id so JS can inject the month name -->
+      <div class="label" id="kpi-ov-last-rev-label">Last Month Revenue</div>
+      <div class="sub">Actual (MWK)</div>
     </div>
     <div class="kpi-card">
       <span class="icon">🏷️</span>
-      <div class="value" id="kpi-ov-tags">—</div>
-      <div class="label">Mats Tagged</div>
-      <div class="sub"  id="kpi-ov-tags-sub">—</div>
+      <div class="value" id="kpi-ov-avg-price">—</div>
+      <div class="label">Avg Selling Price</div>
+      <div class="sub">Actual (MWK/kg)</div>
     </div>
     <div class="kpi-card">
-      <span class="icon">⚙️</span>
-      <div class="value" id="kpi-ov-pumph">—</div>
-      <div class="label">Total Pump Hours</div>
-      <div class="sub"  id="kpi-ov-pump-sub">—</div>
-    </div>
-    <div class="kpi-card">
-      <span class="icon">💧</span>
-      <div class="value" id="kpi-ov-fuel">—</div>
-      <div class="label">Irrigation Fuel Used</div>
-      <div class="sub"  id="kpi-ov-fuel-sub">—</div>
-    </div>
-    <div class="kpi-card">
-      <span class="icon">🗺️</span>
-      <div class="value" id="kpi-ov-blocks">—</div>
-      <div class="label">Blocks Active</div>
-      <div class="sub">M1 – M9</div>
-    </div>
-    <div class="kpi-card">
-      <span class="icon">📅</span>
-      <div class="value" id="kpi-ov-sessions">—</div>
-      <div class="label">Irrigation Sessions</div>
-      <div class="sub">2020 – 2025</div>
+      <span class="icon">📦</span>
+      <div class="value" id="kpi-ov-last-vol">—</div>
+      <!-- FIX 3: same for volume -->
+      <div class="label" id="kpi-ov-last-vol-label">Last Month Volume</div>
+      <div class="sub">Actual (kg)</div>
     </div>
   </div>
   <div class="chart-grid cols-2">
@@ -472,19 +409,19 @@ tr:last-child td { border-bottom:none; }
       <div class="chart-wrap"><canvas id="c_blockHarvest" height="160"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Mats Tagged by Block</div>
-      <div class="chart-sub">Mats per block — current season</div>
-      <div class="chart-wrap"><canvas id="c_tagBlock" height="160"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Pump Hours by Year</div>
-      <div class="chart-sub">Cumulative operating hours across all pumps</div>
-      <div class="chart-wrap"><canvas id="c_pumpYear_ov" height="160"></canvas></div>
+      <div class="chart-title">Production Volume Trend</div>
+      <div class="chart-sub">Planned vs Actual volume (kg)</div>
+      <div class="chart-wrap"><canvas id="c_prodVolume" height="160"></canvas></div>
     </div>
     <div class="chart-card dark">
-      <div class="chart-title">Irrigation Fuel by Year</div>
-      <div class="chart-sub">Total litres consumed per year</div>
-      <div class="chart-wrap"><canvas id="c_irrYear_ov" height="160"></canvas></div>
+      <div class="chart-title">Price & Weight Analysis</div>
+      <div class="chart-sub">Actual selling price & avg bunch weight</div>
+      <div class="chart-wrap"><canvas id="c_priceWeight" height="160"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Land Acquisition Progress</div>
+      <div class="chart-sub">Acquired vs Target (50 ha)</div>
+      <div class="chart-wrap"><canvas id="c_landProgress_ov" height="160"></canvas></div>
     </div>
   </div>
 </div>
@@ -526,11 +463,6 @@ tr:last-child td { border-bottom:none; }
       <div class="chart-title">Harvest Weight by Block</div>
       <div class="chart-sub">Comparison across all blocks</div>
       <div class="chart-wrap"><canvas id="c_blockHarvest2" height="180"></canvas></div>
-    </div>
-    <div class="chart-card dark">
-      <div class="chart-title">Quantity Harvested by Block</div>
-      <div class="chart-sub">Total quantity (kg) per block</div>
-      <div class="chart-wrap"><canvas id="c_blockCount" height="180"></canvas></div>
     </div>
   </div>
   <div class="chart-card">
@@ -585,16 +517,8 @@ tr:last-child td { border-bottom:none; }
       <div class="chart-sub">Number of mats per tag colour</div>
       <div class="chart-wrap"><canvas id="c_tagColour" height="200"></canvas></div>
     </div>
-    <div class="chart-card dark">
-      <div class="chart-title">Tag Colour Distribution</div>
-      <div class="chart-sub">Proportional share of all tags</div>
-      <div class="chart-wrap" style="display:flex;justify-content:center;">
-        <canvas id="c_tagPie" width="200" height="200"></canvas>
-      </div>
-    </div>
   </div>
-  
-  <!-- Expected Harvest Forecast Timeline -->
+
   <div class="forecast-timeline">
     <div class="chart-title" style="margin-bottom:12px;">Expected Harvest Forecast</div>
     <div class="chart-sub" style="margin-bottom:16px;">Tagged bunches expected to mature (3-4 months from tagging)</div>
@@ -602,8 +526,7 @@ tr:last-child td { border-bottom:none; }
       <div style="text-align:center;color:var(--olive);padding:20px;">Loading forecast…</div>
     </div>
   </div>
-  
-  <!-- Expected Harvest Detail Table (replaces calendar) -->
+
   <div class="expected-harvest-table">
     <div class="chart-title" style="margin-bottom:12px;">Upcoming Harvest Schedule</div>
     <div class="chart-sub" style="margin-bottom:14px;">Future harvest dates with tagging details</div>
@@ -622,7 +545,7 @@ tr:last-child td { border-bottom:none; }
       </tbody>
     </table>
   </div>
-  
+
   <div class="chart-card">
     <div class="chart-title">Tag Volume by Colour — Detail</div>
     <div class="chart-sub">All tag types ranked by mat count</div>
@@ -662,11 +585,6 @@ tr:last-child td { border-bottom:none; }
       <div class="chart-title">Pump 2 — Operating Hours by Year</div>
       <div class="chart-sub">Pump 2 has the longest operational history</div>
       <div class="chart-wrap"><canvas id="c_pump2year" height="140"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Hours Distribution by Pump</div>
-      <div class="chart-sub">All-time hours per pump</div>
-      <div class="chart-wrap"><canvas id="c_pumpPie" height="180"></canvas></div>
     </div>
     <div class="chart-card dark">
       <div class="chart-title" id="pump-latest-title">Latest Year Pump Comparison</div>
@@ -742,8 +660,8 @@ tr:last-child td { border-bottom:none; }
 <!-- ══ LAND ══════════════════════════════════════════════════════ -->
 <div id="tab-land" class="tab-panel">
   <p class="section-title">Land & Block Management</p>
-  <p class="section-sub" id="land-sub">Overview of farm blocks and land allocation</p>
-  
+  <p class="section-sub" id="land-sub">Overview of farm blocks and land acquisition progress</p>
+
   <div class="kpi-grid">
     <div class="kpi-card accent">
       <span class="icon">📐</span>
@@ -752,10 +670,10 @@ tr:last-child td { border-bottom:none; }
       <div class="sub">Across all blocks</div>
     </div>
     <div class="kpi-card">
-      <span class="icon">🔢</span>
-      <div class="value" id="kpi-land-blocks">—</div>
-      <div class="label">Total Blocks</div>
-      <div class="sub">M1 – M9</div>
+      <span class="icon">🎯</span>
+      <div class="value" id="kpi-land-progress">—</div>
+      <div class="label">Acquisition Progress</div>
+      <div class="sub">vs 50 ha target</div>
     </div>
     <div class="kpi-card">
       <span class="icon">📊</span>
@@ -771,13 +689,10 @@ tr:last-child td { border-bottom:none; }
     </div>
   </div>
 
-  <!-- Visual Block Grid -->
   <div class="chart-card dark">
     <div class="chart-title">Farm Block Layout</div>
     <div class="chart-sub">Visual representation of all blocks by size</div>
-    <div class="block-grid" id="block-grid">
-      <!-- Dynamically populated -->
-    </div>
+    <div class="block-grid" id="block-grid"></div>
   </div>
 
   <div class="chart-grid cols-2">
@@ -787,10 +702,10 @@ tr:last-child td { border-bottom:none; }
       <div class="chart-wrap"><canvas id="c_landBlocks" height="160"></canvas></div>
     </div>
     <div class="chart-card dark">
-      <div class="chart-title">Land Distribution</div>
-      <div class="chart-sub">Percentage share of total farm area</div>
+      <div class="chart-title">Land Acquisition Progress</div>
+      <div class="chart-sub">Acquired vs Target (50 ha)</div>
       <div class="chart-wrap" style="display:flex;justify-content:center;">
-        <canvas id="c_landPie" width="200" height="200"></canvas>
+        <canvas id="c_landProgress" width="200" height="200"></canvas>
       </div>
     </div>
   </div>
@@ -803,6 +718,99 @@ tr:last-child td { border-bottom:none; }
         <thead><tr><th>Rank</th><th>Block</th><th>Size (ha)</th><th>% of Total</th><th>Status</th></tr></thead>
         <tbody id="land-table-body">
           <tr><td colspan="5" style="text-align:center;color:var(--olive);padding:24px;">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FINANCIALS ════════════════════════════════════════════════ -->
+<div id="tab-financials" class="tab-panel">
+  <!-- FIX 4: section title gets id so JS can inject the year -->
+  <p class="section-title" id="fin-section-title">Financial Performance</p>
+  <p class="section-sub" id="fin-sub">Revenue, volume, pricing and bunch weight trends</p>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <span class="icon">💰</span>
+      <div class="value" id="kpi-fin-total-rev">—</div>
+      <div class="label">Total Revenue</div>
+      <div class="sub">All months (MWK)</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📅</span>
+      <div class="value" id="kpi-fin-last-rev">—</div>
+      <!-- FIX 3: label id for dynamic month injection -->
+      <div class="label" id="kpi-fin-last-rev-label">Last Month Revenue</div>
+      <div class="sub">Actual (MWK)</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📦</span>
+      <div class="value" id="kpi-fin-total-vol">—</div>
+      <div class="label">Total Volume</div>
+      <div class="sub">Actual (kg)</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🏷️</span>
+      <div class="value" id="kpi-fin-avg-price">—</div>
+      <div class="label">Avg Selling Price</div>
+      <div class="sub">Actual (MWK/kg)</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">⚖️</span>
+      <div class="value" id="kpi-fin-avg-weight">—</div>
+      <div class="label">Avg Bunch Weight</div>
+      <div class="sub">Actual (kg)</div>
+    </div>
+  </div>
+
+  <div class="chart-grid cols-2">
+    <!-- Planned vs Actual Volume — dedicated dual-bar chart -->
+    <div class="chart-card span-2">
+      <div class="chart-title">Production Volume — Planned vs Actual</div>
+      <div class="chart-sub">Monthly planned and actual volumes (kg)</div>
+      <div class="chart-wrap"><canvas id="c_fin_prodVolume" height="160"></canvas></div>
+    </div>
+    <div class="chart-card dark">
+      <div class="chart-title">Actual Revenue by Month</div>
+      <div class="chart-sub">Monthly revenue trend (MWK)</div>
+      <div class="chart-wrap"><canvas id="c_fin_revenue" height="160"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Avg Selling Price by Month</div>
+      <div class="chart-sub">MWK per kg over time</div>
+      <div class="chart-wrap"><canvas id="c_fin_price" height="160"></canvas></div>
+    </div>
+    <div class="chart-card dark">
+      <div class="chart-title">Price & Weight Analysis</div>
+      <div class="chart-sub">Selling price vs avg bunch weight (dual axis)</div>
+      <div class="chart-wrap"><canvas id="c_fin_priceWeight" height="160"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Avg Bunch Weight by Month</div>
+      <div class="chart-sub">kg per bunch trend</div>
+      <div class="chart-wrap"><canvas id="c_fin_weight" height="160"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Monthly Financial Summary</div>
+    <div class="chart-sub">Full breakdown by month</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Planned Vol (kg)</th>
+            <th>Actual Vol (kg)</th>
+            <th>Avg Price (MWK)</th>
+            <th>Avg Weight (kg)</th>
+            <th>Revenue (MWK)</th>
+            <th>Vol Achievement</th>
+          </tr>
+        </thead>
+        <tbody id="fin-table-body">
+          <tr><td colspan="7" style="text-align:center;color:var(--olive);padding:24px;">Loading…</td></tr>
         </tbody>
       </table>
     </div>
@@ -822,9 +830,13 @@ const CSV_TAGGING    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16v
 const CSV_PUMP       = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=121768597&single=true&output=csv';
 const CSV_HARVEST    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=2081044538&single=true&output=csv';
 const CSV_LAND       = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=349843810&single=true&output=csv';
+const CSV_FINANCIALS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJbMVAcL_W5nQJU71-7z7KemUt75Ddjd_uk5o11pE-LlM_HVcxwiwGQyvalj5L-Kj6mRVsd5iXWAV1/pub?gid=2036435473&single=true&output=csv'; // Paste your Financials CSV URL here
 
 
 
+
+
+const TARGET_LAND_HA = 50;
 const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 
 /* ── DESIGN TOKENS ─────────────────────────────────────────────── */
@@ -868,68 +880,43 @@ function parseYear(val) {
   return isNaN(d.getTime()) ? null : d.getFullYear();
 }
 
-/* ── FIX 2: Robust date parser that handles both DD/MM/YYYY and MM/DD/YYYY ── */
 function smartParseDate(val) {
   if (!val || String(val).trim() === '') return null;
   const s = String(val).trim();
-  
-  // Try ISO format first
   if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : d;
   }
-  
-  // Try DD/MM/YYYY or MM/DD/YYYY format
   const parts = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if (parts) {
     const a = parseInt(parts[1]), b = parseInt(parts[2]), yr = parseInt(parts[3]);
     let day, mon;
-    // If first number > 12, it must be day (DD/MM/YYYY)
-    if (a > 12) { day = a; mon = b; }
-    // If second number > 12, it must be day (MM/DD/YYYY)
+    if (a > 12)      { day = a; mon = b; }
     else if (b > 12) { day = b; mon = a; }
-    // Otherwise default to DD/MM/YYYY (common outside US)
-    else { day = a; mon = b; }
-    
+    else             { day = a; mon = b; }
     const d = new Date(yr, mon - 1, day);
     return isNaN(d.getTime()) ? null : d;
   }
-  
-  // Fallback to native Date parsing
   const d = new Date(s);
   return isNaN(d.getTime()) ? null : d;
 }
 
-/* Returns "YYYY-MM" string for reliable chronological sorting */
 function parseYearMonth(val) {
   const d = smartParseDate(val);
   if (!d) return null;
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
 }
 
-/* Format date for display */
 function formatDate(d) {
   if (!d) return '—';
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-/* Legacy helpers kept for irrigation / pump / tagging (unchanged) */
-function parseMonthLabel(val) {
-  if (!val || String(val).trim() === '') return null;
-  const s = String(val).trim();
-  let d;
-  const dmyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (dmyMatch) {
-    d = new Date(parseInt(dmyMatch[3]), parseInt(dmyMatch[2]) - 1, parseInt(dmyMatch[1]));
-  } else {
-    d = new Date(s);
-  }
-  return isNaN(d.getTime()) ? null : d.toLocaleString('default', { month: 'short', year: 'numeric' });
-}
+function parseDate(val) { return smartParseDate(val); }
 
-/* FIX 1 & 2: parseDate now uses smartParseDate */
-function parseDate(val) {
-  return smartParseDate(val);
+function cleanNum(val) {
+  if (!val) return 0;
+  return parseFloat(String(val).replace(/,/g, '').replace(/%/g, '').trim()) || 0;
 }
 
 function shareCell(pct, colour) {
@@ -945,8 +932,8 @@ function shareCell(pct, colour) {
 function parseCSV(text) {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
+  while (lines.length && lines[0].replace(/,/g, '').trim() === '') lines.shift();
   if (lines.length < 2) return [];
-
   function splitLine(line) {
     const fields = [];
     let cur = '', inQ = false;
@@ -957,14 +944,11 @@ function parseCSV(text) {
         else inQ = !inQ;
       } else if (ch === ',' && !inQ) {
         fields.push(cur.trim()); cur = '';
-      } else {
-        cur += ch;
-      }
+      } else { cur += ch; }
     }
     fields.push(cur.trim());
     return fields;
   }
-
   const headers = splitLine(lines[0]);
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
@@ -986,22 +970,23 @@ async function fetchCSV(url) {
   return parseCSV(await res.text());
 }
 
+/* ── CHART HELPERS ──────────────────────────────────────────────── */
+
 function upsertChart(id, type, labels, data, opts) {
   opts = opts || {};
   const canvas = document.getElementById(id);
   if (!canvas) return;
-
   const dark       = opts.dark       || false;
   const horizontal = opts.horizontal || false;
   const palette    = opts.palette    || null;
-  const fill       = opts.fill !== undefined ? opts.fill : false;
+  const fill       = opts.fill    !== undefined ? opts.fill    : false;
   const tension    = opts.tension !== undefined ? opts.tension : 0.4;
-  const MULTI      = [GOLD, GOLD_L, OLIVE, NAVY_L, FOREST, GOLD_D, SAND,
-                      '#3b7dd8','#c0392b','#d4b44a','#5d8a4a','#e07b39'];
-  const bg         = palette ? palette : (type === 'doughnut' ? MULTI : GOLD);
+  const MULTI = [GOLD, GOLD_L, OLIVE, NAVY_L, FOREST, GOLD_D, SAND,
+                 '#3b7dd8','#c0392b','#d4b44a','#5d8a4a','#e07b39'];
+  const bg = palette ? palette : (type === 'doughnut' ? MULTI : GOLD);
 
   if (CHARTS[id]) {
-    CHARTS[id].data.labels = labels;
+    CHARTS[id].data.labels           = labels;
     CHARTS[id].data.datasets[0].data = data;
     if (palette) CHARTS[id].data.datasets[0].backgroundColor = palette;
     CHARTS[id].update('none');
@@ -1014,37 +999,98 @@ function upsertChart(id, type, labels, data, opts) {
       labels,
       datasets: [{
         data,
-        backgroundColor      : bg,
-        borderColor          : type === 'line' ? GOLD : undefined,
-        borderRadius         : type !== 'doughnut' ? 5 : 0,
-        borderSkipped        : false,
+        backgroundColor:    bg,
+        borderColor:        type === 'line' ? GOLD : undefined,
+        borderRadius:       type !== 'doughnut' ? 5 : 0,
+        borderSkipped:      false,
         fill,
         tension,
-        pointBackgroundColor : GOLD,
-        pointRadius          : type === 'line' ? 4 : 0,
-        pointHoverRadius     : type === 'line' ? 6 : 0,
-        borderWidth          : type === 'doughnut' ? 0 : 2,
-        hoverOffset          : type === 'doughnut' ? 6 : 0
+        pointBackgroundColor: GOLD,
+        pointRadius:        type === 'line' ? 4 : 0,
+        pointHoverRadius:   type === 'line' ? 6 : 0,
+        borderWidth:        type === 'doughnut' ? 0 : 2,
+        hoverOffset:        type === 'doughnut' ? 6 : 0
       }]
     },
     options: {
-      indexAxis  : horizontal ? 'y' : 'x',
-      responsive : true,
+      indexAxis: horizontal ? 'y' : 'x',
+      responsive: true,
       maintainAspectRatio: false,
-      animation  : { duration: 600 },
+      animation: { duration: 600 },
       plugins: {
-        legend: {
-          display  : type === 'doughnut',
-          position : 'bottom',
-          labels   : { color: dark ? SAND : FOREST, font: { size: 11 }, padding: 12 }
-        },
-        tooltip: {
-          callbacks: {
-            label: ctx => ' ' + (ctx.parsed[horizontal ? 'x' : 'y'] || 0).toLocaleString()
-          }
-        }
+        legend: { display: type === 'doughnut', position: 'bottom', labels: { color: dark ? SAND : FOREST, font: { size: 11 }, padding: 12 } },
+        tooltip: { callbacks: { label: ctx => ' ' + (ctx.parsed[horizontal ? 'x' : 'y'] || 0).toLocaleString() } }
       },
       scales: type === 'doughnut' ? {} : {
+        x: { grid: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }, ticks: { color: dark ? SAND : FOREST, font: { size: 10 } } },
+        y: { grid: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }, ticks: { color: dark ? SAND : FOREST, font: { size: 10 }, callback: v => type === 'bar' && id.includes('landProgress') ? v + ' ha' : v } }
+      }
+    }
+  });
+}
+
+function upsertDualLineChart(id, labels, data1, data2, label1, label2, color1, color2) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) {
+    CHARTS[id].data.labels           = labels;
+    CHARTS[id].data.datasets[0].data = data1;
+    CHARTS[id].data.datasets[1].data = data2;
+    CHARTS[id].update('none');
+    return;
+  }
+  CHARTS[id] = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: label1, data: data1, borderColor: color1, backgroundColor: color1 + '33', tension: 0.4, yAxisID: 'y',  pointRadius: 3 },
+        { label: label2, data: data2, borderColor: color2, backgroundColor: color2 + '33', tension: 0.4, yAxisID: 'y1', pointRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { labels: { color: '#7a7a7a', font: { size: 11 } } } },
+      scales: {
+        y:  { type: 'linear', display: true, position: 'left',  title: { display: true, text: label1, color: '#7a7a7a' }, ticks: { color: '#7a7a7a' }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: label2, color: '#7a7a7a' }, ticks: { color: '#7a7a7a' }, grid: { drawOnChartArea: false } },
+        x:  { ticks: { color: '#7a7a7a' }, grid: { color: 'rgba(0,0,0,0.05)' } }
+      }
+    }
+  });
+}
+
+function upsertDualBarChart(id, labels, data1, data2, label1, label2, color1, color2, dark) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  dark = dark || false;
+  if (CHARTS[id]) {
+    CHARTS[id].data.labels           = labels;
+    CHARTS[id].data.datasets[0].data = data1;
+    if (CHARTS[id].data.datasets.length > 1) CHARTS[id].data.datasets[1].data = data2;
+    CHARTS[id].update('none');
+    return;
+  }
+  CHARTS[id] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: label1, data: data1, backgroundColor: color1, borderRadius: 4, borderSkipped: false },
+        { label: label2, data: data2, backgroundColor: color2, borderRadius: 4, borderSkipped: false }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 600 },
+      plugins: {
+        legend: { display: true, position: 'top', labels: { color: dark ? SAND : FOREST, font: { size: 11 }, padding: 12 } },
+        tooltip: { callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + (ctx.parsed.y || 0).toLocaleString() } }
+      },
+      scales: {
         x: { grid: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }, ticks: { color: dark ? SAND : FOREST, font: { size: 10 } } },
         y: { grid: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }, ticks: { color: dark ? SAND : FOREST, font: { size: 10 } } }
       }
@@ -1068,58 +1114,52 @@ function renderLand(rows) {
   const blockData = {};
   rows.forEach(r => {
     const block = String(r['Block'] || '').trim();
-    const size = parseFloat(r['Block Size (ha)']) || 0;
+    const size  = parseFloat(r['Block Size (ha)']) || 0;
     if (block) blockData[block] = size;
   });
-
-  const blocks = Object.keys(blockData).sort();
-  const sizes = blocks.map(b => blockData[b]);
-  const totalLand = sizes.reduce((a, b) => a + b, 0);
-  const avgSize = blocks.length > 0 ? totalLand / blocks.length : 0;
-  const largestBlock = blocks.length > 0 ? blocks.reduce((a, b) => blockData[a] > blockData[b] ? a : b) : '—';
+  const blocks  = Object.keys(blockData).sort();
+  const sizes   = blocks.map(b => blockData[b]);
+  const totalLand     = sizes.reduce((a, b) => a + b, 0);
+  const avgSize       = blocks.length > 0 ? totalLand / blocks.length : 0;
+  const largestBlock  = blocks.length > 0 ? blocks.reduce((a, b) => blockData[a] > blockData[b] ? a : b) : '—';
   const smallestBlock = blocks.length > 0 ? blocks.reduce((a, b) => blockData[a] < blockData[b] ? a : b) : '—';
+  const acquisitionPct = Math.min((totalLand / TARGET_LAND_HA) * 100, 100);
 
-  setKPI('kpi-land-total', totalLand.toFixed(2) + ' ha');
-  setKPI('kpi-land-blocks', blocks.length);
-  setKPI('kpi-land-avg', avgSize.toFixed(2) + ' ha');
-  setKPI('kpi-land-largest', largestBlock);
+  setKPI('kpi-land-total',       totalLand.toFixed(2) + ' ha');
+  setKPI('kpi-land-progress',    acquisitionPct.toFixed(1) + '%');
+  setKPI('kpi-land-avg',         avgSize.toFixed(2) + ' ha');
+  setKPI('kpi-land-largest',     largestBlock);
   setKPI('kpi-land-largest-sub', largestBlock !== '—' ? blockData[largestBlock].toFixed(2) + ' ha' : '—');
-  setKPI('land-sub', `${blocks.length} blocks totaling ${totalLand.toFixed(2)} hectares — ${smallestBlock} (smallest) to ${largestBlock} (largest)`);
+  setKPI('land-sub', `${blocks.length} blocks • ${Math.max(TARGET_LAND_HA - totalLand, 0).toFixed(2)} ha remaining to reach ${TARGET_LAND_HA} ha target`);
 
   const gridEl = document.getElementById('block-grid');
   if (gridEl && blocks.length > 0) {
     const maxSize = Math.max(...sizes);
     gridEl.innerHTML = blocks.map(block => {
-      const size = blockData[block];
-      const pct = maxSize > 0 ? (size / maxSize) * 100 : 0;
+      const size  = blockData[block];
+      const pct   = maxSize > 0 ? (size / maxSize) * 100 : 0;
       const share = totalLand > 0 ? (size / totalLand) * 100 : 0;
-      
       return `<div class="block-card">
         <div class="block-id">${block}</div>
         <div class="block-size">${size.toFixed(2)}</div>
         <div class="block-label">hectares</div>
-        <div class="block-bar">
-          <div class="block-fill" style="width:${pct}%"></div>
-        </div>
+        <div class="block-bar"><div class="block-fill" style="width:${pct}%"></div></div>
         <div style="font-size:9px;color:var(--sand);margin-top:6px;">${share.toFixed(1)}% of total</div>
       </div>`;
     }).join('');
   }
 
-  upsertChart('c_landBlocks', 'bar', blocks, sizes, { dark: false });
-  upsertChart('c_landPie', 'doughnut', blocks, sizes, { 
-    palette: [GOLD, GOLD_L, OLIVE, NAVY_L, FOREST, GOLD_D, SAND, '#3b7dd8', '#c0392b']
-  });
+  upsertChart('c_landBlocks',   'bar', blocks, sizes, { dark: false });
+  upsertChart('c_landProgress', 'bar', ['Acquired', 'Target'], [totalLand, TARGET_LAND_HA], { dark: true, palette: [GOLD, NAVY_L] });
 
   const tbody = document.getElementById('land-table-body');
   if (tbody) {
     const sorted = [...blocks].sort((a, b) => blockData[b] - blockData[a]);
     tbody.innerHTML = sorted.map((block, idx) => {
-      const size = blockData[block];
-      const pct = totalLand > 0 ? (size / totalLand) * 100 : 0;
+      const size  = blockData[block];
+      const pct   = totalLand > 0 ? (size / totalLand) * 100 : 0;
       const status = block === largestBlock ? 'Largest' : (block === smallestBlock ? 'Smallest' : 'Active');
-      const badgeClass = status === 'Largest' ? 'badge-gold' : (status === 'Smallest' ? 'badge-olive' : 'badge-gold');
-      
+      const badgeClass = status === 'Smallest' ? 'badge-olive' : 'badge-gold';
       return `<tr>
         <td><span style="color:var(--olive);font-weight:600;">#${idx + 1}</span></td>
         <td><span class="badge ${badgeClass}">${block}</span></td>
@@ -1129,8 +1169,117 @@ function renderLand(rows) {
       </tr>`;
     }).join('');
   }
-  
-  return blocks.length;
+  return { totalLand, blockCount: blocks.length };
+}
+
+function renderFinancials(rows) {
+  const months = [], plannedVol = [], actualVol = [], actualPrice = [], actualWeight = [], actualRev = [];
+  let lastRev = 0, lastVol = 0, totalRev = 0, totalVol = 0;
+  let weightSum = 0, weightCount = 0;
+  let lastMonthWithData = null;
+  // FIX 4: track years found in the data
+  const yearsFound = new Set();
+
+  // Removed hardcoded slice(0,16) — process all rows, skip non-data rows
+  rows.forEach(r => {
+    const m = String(r['Month'] || '').trim();
+    if (!m || m === '' || m.toLowerCase() === 'total' || m.length < 3) return;
+    const pv  = cleanNum(r['Planned Total Volume (kg)']);
+    const av  = cleanNum(r['Actual Total Volume (kg)']);
+    const ap  = cleanNum(r['Actual Avg Selling Price (MWK)']);
+    const aw  = cleanNum(r['Actual Avg. Bunch Weight (kg)']);
+    const rev = cleanNum(r['Actual Revenue (MWK)']);
+    months.push(m);
+    plannedVol.push(pv);
+    actualVol.push(av);
+    actualPrice.push(ap);
+    actualWeight.push(aw);
+    actualRev.push(rev);
+    if (rev > 0) {
+      lastRev  = rev;
+      lastVol  = av;
+      totalRev += rev;
+      totalVol += av;
+      lastMonthWithData = m; // FIX 3: track last month that has revenue
+    }
+    if (aw > 0) { weightSum += aw; weightCount++; }
+    // FIX 4: extract year from month label (e.g. "Jan 2026", "February 2026")
+    const yrMatch = m.match(/\b(20\d{2})\b/);
+    if (yrMatch) yearsFound.add(yrMatch[1]);
+  });
+
+  const avgPrice  = totalVol  > 0 ? totalRev  / totalVol  : 0;
+  const avgWeight = weightCount > 0 ? weightSum / weightCount : 0;
+
+  // FIX 4: build year label for the section title
+  const yearLabel = yearsFound.size > 0
+    ? ' — ' + [...yearsFound].sort().join(' / ')
+    : '';
+  const titleEl = document.getElementById('fin-section-title');
+  if (titleEl) titleEl.textContent = 'Financial Performance' + yearLabel;
+
+  // FIX 3: extract short month name (e.g. "April" from "Apr 2026" or "April 2026")
+  function shortMonth(label) {
+    if (!label) return null;
+    const match = label.match(/^([A-Za-z]+)/);
+    return match ? match[1] : label;
+  }
+  const lastMonthShort = lastMonthWithData ? shortMonth(lastMonthWithData) : null;
+
+  // FIX 3: update "Last Month" KPI card labels with the actual month name
+  if (lastMonthShort) {
+    ['kpi-ov-last-rev-label', 'kpi-fin-last-rev-label'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = `Last Month Revenue (${lastMonthShort})`;
+    });
+    const volLabel = document.getElementById('kpi-ov-last-vol-label');
+    if (volLabel) volLabel.textContent = `Last Month Volume (${lastMonthShort})`;
+  }
+
+  // FIX 5: MWK prefix before the number (was suffix)
+  setKPI('kpi-fin-total-rev',  totalRev > 0  ? 'MWK ' + totalRev.toLocaleString()  : '—');
+  setKPI('kpi-fin-last-rev',   lastRev  > 0  ? 'MWK ' + lastRev.toLocaleString()   : '—');
+  setKPI('kpi-fin-total-vol',  totalVol > 0  ? totalVol.toLocaleString()  + ' kg'  : '—');
+  setKPI('kpi-fin-avg-price',  avgPrice > 0  ? 'MWK ' + avgPrice.toFixed(0)         : '—');
+  setKPI('kpi-fin-avg-weight', avgWeight > 0 ? avgWeight.toFixed(1)        + ' kg'  : '—');
+  setKPI('fin-sub', months.length > 0
+    ? `${months.length} month${months.length > 1 ? 's' : ''} of data — ${months[0]} to ${months[months.length - 1]}`
+    : 'No financial records loaded yet');
+
+  // ── Financials tab charts
+  upsertDualBarChart('c_fin_prodVolume', months, plannedVol, actualVol,
+    'Planned', 'Actual', NAVY_L, GOLD, false);
+  upsertChart('c_fin_revenue', 'bar',  months, actualRev,    { dark: true,  fill: false });
+  upsertChart('c_fin_price',   'line', months, actualPrice,  { dark: false, fill: false, tension: 0.4 });
+  upsertChart('c_fin_weight',  'line', months, actualWeight, { dark: false, fill: false, tension: 0.4 });
+  upsertDualLineChart('c_fin_priceWeight', months, actualPrice, actualWeight,
+    'Avg Price (MWK)', 'Avg Weight (kg)', GOLD, NAVY_L);
+
+  // ── Financials monthly table
+  const tbody = document.getElementById('fin-table-body');
+  if (tbody) {
+    if (months.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--olive);padding:24px;">No financial records yet</td></tr>';
+    } else {
+      tbody.innerHTML = months.map((m, i) => {
+        const pv  = plannedVol[i],  av  = actualVol[i];
+        const ap  = actualPrice[i], aw  = actualWeight[i];
+        const rev = actualRev[i];
+        const achPct = pv > 0 ? (av / pv) * 100 : 0;
+        return `<tr>
+          <td><strong>${m}</strong></td>
+          <td>${pv  > 0 ? pv.toLocaleString()  : '—'}</td>
+          <td>${av  > 0 ? av.toLocaleString()  : '—'}</td>
+          <td>${ap  > 0 ? 'MWK ' + ap.toLocaleString()  : '—'}</td>
+          <td>${aw  > 0 ? aw.toFixed(2)        : '—'}</td>
+          <td>${rev > 0 ? 'MWK ' + rev.toLocaleString() : '—'}</td>
+          <td>${pv  > 0 ? shareCell(achPct)    : '—'}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  return { lastRev, lastVol, avgPrice, avgWeight, months, plannedVol, actualVol, actualPrice, actualWeight };
 }
 
 function renderIrrigation(rows) {
@@ -1139,27 +1288,22 @@ function renderIrrigation(rows) {
     const yr   = parseYear(r['DATE']);
     const fuel = parseFloat(r['FUEL (litres)']) || 0;
     const blk  = String(r['BLOCK'] || '').trim();
-    if (yr) { byYear[yr] = (byYear[yr] || 0) + fuel; sesByYear[yr] = (sesByYear[yr] || 0) + 1; }
-    if (blk) byBlock[blk] = (byBlock[blk] || 0) + fuel;
+    if (yr)  { byYear[yr]    = (byYear[yr]    || 0) + fuel; sesByYear[yr] = (sesByYear[yr] || 0) + 1; }
+    if (blk) { byBlock[blk]  = (byBlock[blk]  || 0) + fuel; }
   });
   const years     = Object.keys(byYear).sort();
   const totalFuel = Object.values(byYear).reduce((a, b) => a + b, 0);
   const totalSes  = rows.length;
   const peakYear  = years.length ? years.reduce((a, b) => byYear[a] > byYear[b] ? a : b) : '—';
 
-  setKPI('kpi-irr-fuel',     totalFuel.toLocaleString('en', { maximumFractionDigits: 1 }) + ' L');
+  setKPI('kpi-irr-fuel',    totalFuel.toLocaleString('en', { maximumFractionDigits: 1 }) + ' L');
   setKPI('kpi-irr-sessions', totalSes.toLocaleString());
-  setKPI('kpi-irr-peak',     peakYear);
-  setKPI('kpi-irr-peakval',  byYear[peakYear] ? byYear[peakYear].toLocaleString('en', { maximumFractionDigits: 0 }) + ' litres' : '—');
-  setKPI('kpi-irr-avg',      totalSes > 0 ? (totalFuel / totalSes).toFixed(1) + ' L' : '—');
+  setKPI('kpi-irr-peak',    peakYear);
+  setKPI('kpi-irr-peakval', byYear[peakYear] ? byYear[peakYear].toLocaleString('en', { maximumFractionDigits: 0 }) + ' litres' : '—');
+  setKPI('kpi-irr-avg',     totalSes > 0 ? (totalFuel / totalSes).toFixed(1) + ' L' : '—');
   setKPI('irr-sub', `${totalSes.toLocaleString()} irrigation sessions across all blocks — ${years[0] || '—'} to ${years[years.length - 1] || '—'}`);
 
-  upsertChart('c_irrYear',     'line', years, years.map(y => byYear[y]    || 0), { 
-    dark: true, 
-    fill: false,
-    tension: 0.4
-  });
-  upsertChart('c_irrYear_ov',  'bar',  years, years.map(y => byYear[y]    || 0), { dark: true });
+  upsertChart('c_irrYear',     'line', years, years.map(y => byYear[y]    || 0), { dark: true, fill: false, tension: 0.4 });
   upsertChart('c_irrSessions', 'bar',  years, years.map(y => sesByYear[y] || 0), { dark: true });
   const topBlocks = Object.entries(byBlock).sort((a, b) => b[1] - a[1]).slice(0, 10);
   upsertChart('c_irrBlock', 'bar', topBlocks.map(e => e[0]), topBlocks.map(e => e[1]), { horizontal: true });
@@ -1168,7 +1312,13 @@ function renderIrrigation(rows) {
   if (tbody) tbody.innerHTML = years.map(y => {
     const fuel = byYear[y] || 0, ses = sesByYear[y] || 0;
     const pct  = totalFuel > 0 ? fuel / totalFuel * 100 : 0;
-    return `<tr><td>${y}</td><td>${ses.toLocaleString()}</td><td>${fuel.toLocaleString('en',{maximumFractionDigits:1})}</td><td>${ses > 0 ? (fuel/ses).toFixed(1) : '—'}</td><td>${shareCell(pct)}</td></tr>`;
+    return `<tr>
+      <td>${y}</td>
+      <td>${ses.toLocaleString()}</td>
+      <td>${fuel.toLocaleString('en', { maximumFractionDigits: 1 })}</td>
+      <td>${ses > 0 ? (fuel / ses).toFixed(1) : '—'}</td>
+      <td>${shareCell(pct)}</td>
+    </tr>`;
   }).join('');
 }
 
@@ -1182,7 +1332,6 @@ function renderPump(rows) {
     if (!byPumpYear[pump]) byPumpYear[pump] = {};
     byPumpYear[pump][yr] = (byPumpYear[pump][yr] || 0) + hrs;
   });
-
   const pumps      = Object.keys(byPumpYear).sort();
   const years      = [...new Set(rows.map(r => parseYear(r['DATE'])).filter(Boolean))].sort();
   const pumpTotals = pumps.map(p => Object.values(byPumpYear[p]).reduce((a, b) => a + b, 0));
@@ -1198,10 +1347,8 @@ function renderPump(rows) {
   const titleEl = document.getElementById('pump-latest-title');
   if (titleEl && latestYear) titleEl.textContent = latestYear + ' Pump Comparison';
 
-  upsertChart('c_pump2year',   'bar',      years, years.map(y => (byPumpYear['Pump 2'] || {})[y] || 0), { dark: true });
-  upsertChart('c_pumpPie',     'doughnut', pumps, pumpTotals);
-  upsertChart('c_pumpYear_ov', 'line',     years, years.map(y => pumps.reduce((s, p) => s + ((byPumpYear[p] || {})[y] || 0), 0)));
-  upsertChart('c_pump2025',    'bar',      pumps, pumps.map(p => (byPumpYear[p] || {})[latestYear] || 0), { dark: true });
+  upsertChart('c_pump2year',   'bar', years, years.map(y => (byPumpYear['Pump 2'] || {})[y] || 0), { dark: true });
+  upsertChart('c_pump2025',    'bar', pumps, pumps.map(p => (byPumpYear[p] || {})[latestYear] || 0), { dark: true });
 
   const thead = document.getElementById('pump-table-head');
   const tbody = document.getElementById('pump-table-body');
@@ -1213,24 +1360,20 @@ function renderPump(rows) {
       `<td><strong>${pumpTotals[i].toLocaleString()}</strong></td></tr>`
     );
     trs.push(`<tr style="background:rgba(168,147,90,0.05);"><td><strong>Total</strong></td>` +
-      years.map(y => `<td><strong>${pumps.reduce((s,p) => s + ((byPumpYear[p]||{})[y]||0), 0).toLocaleString()}</strong></td>`).join('') +
+      years.map(y => `<td><strong>${pumps.reduce((s, p) => s + ((byPumpYear[p] || {})[y] || 0), 0).toLocaleString()}</strong></td>`).join('') +
       `<td><strong>${totalHrs.toLocaleString()}</strong></td></tr>`);
     tbody.innerHTML = trs.join('');
   }
 }
 
 function renderTagging(rows, landData) {
-  const byBlock = {}, byColour = {}, byDate = {};
-  const futureHarvest = {};
-  const expectedHarvestList = [];
+  const byBlock = {}, byColour = {}, futureHarvest = {}, expectedHarvestList = [];
 
   rows.forEach(r => {
-    const b = String(r['BLOCK'] || '').trim();
-    const c = String(r['TAG COLOUR'] || '').trim();
-    const matNo = String(r['MAT No.'] || '').trim();
+    const b      = String(r['BLOCK']          || '').trim();
+    const c      = String(r['TAG COLOUR']     || '').trim();
+    const matNo  = String(r['MAT No.']        || '').trim();
     const taggedDate = parseDate(r['DATE OF TAGGING']);
-    
-    // Use EXPECTED DATE OF HARVEST from sheet if available, otherwise calculate +3 months
     let expectedHarvestDate;
     if (r['EXPECTED DATE OF HARVEST'] && String(r['EXPECTED DATE OF HARVEST']).trim()) {
       expectedHarvestDate = parseDate(r['EXPECTED DATE OF HARVEST']);
@@ -1238,25 +1381,10 @@ function renderTagging(rows, landData) {
       expectedHarvestDate = new Date(taggedDate);
       expectedHarvestDate.setMonth(expectedHarvestDate.getMonth() + 3);
     }
-
-    if (b) byBlock[b] = (byBlock[b] || 0) + 1;
+    if (b) byBlock[b]  = (byBlock[b]  || 0) + 1;
     if (c) byColour[c] = (byColour[c] || 0) + 1;
-    if (taggedDate) {
-      const dateKey = taggedDate.toISOString().slice(0, 10);
-      byDate[dateKey] = (byDate[dateKey] || 0) + 1;
-    }
-    
-    // Build expected harvest list for the table
     if (expectedHarvestDate && b && c) {
-      expectedHarvestList.push({
-        expectedDate: expectedHarvestDate,
-        taggedDate: taggedDate,
-        colour: c,
-        block: b,
-        matNo: matNo || '—'
-      });
-      
-      // Month-level key for timeline forecast
+      expectedHarvestList.push({ expectedDate: expectedHarvestDate, taggedDate, colour: c, block: b, matNo: matNo || '—' });
       const monthKey = expectedHarvestDate.toISOString().slice(0, 7);
       futureHarvest[monthKey] = (futureHarvest[monthKey] || 0) + 1;
     }
@@ -1274,68 +1402,51 @@ function renderTagging(rows, landData) {
   setKPI('kpi-tag-topval',  topBlock !== '—' ? (byBlock[topBlock] || 0).toLocaleString() + ' mats' : '—');
   setKPI('tag-sub', `Mat tagging records across blocks ${blocks.join(', ')} — ${Object.keys(byColour).length} tag types`);
 
-  upsertChart('c_tagBlock',  'bar', blocks, blocks.map(b => byBlock[b] || 0));
   upsertChart('c_tagBlock2', 'bar', blocks, blocks.map(b => byBlock[b] || 0), { dark: true });
-  upsertChart('c_tagColour', 'bar', coloursSorted.slice(0,10).map(e=>e[0]), coloursSorted.slice(0,10).map(e=>e[1]), { horizontal:true, palette:tagColors.slice(0,10) });
-  upsertChart('c_tagPie', 'doughnut', coloursSorted.map(e=>e[0]), coloursSorted.map(e=>e[1]), { palette:tagColors });
+  upsertChart('c_tagColour', 'bar', coloursSorted.slice(0, 10).map(e => e[0]), coloursSorted.slice(0, 10).map(e => e[1]), { horizontal: true, palette: tagColors.slice(0, 10) });
 
-  // Render forecast timeline
   const forecastContainer = document.getElementById('harvest-forecast-container');
   if (forecastContainer) {
-    const months = Object.keys(futureHarvest).sort().slice(0, 6);
-    const maxVal = months.length ? Math.max(...months.map(m => futureHarvest[m])) : 1;
-
-    if (months.length > 0) {
-      forecastContainer.innerHTML = months.map(month => {
-        const count = futureHarvest[month];
-        const pct = (count / maxVal) * 100;
-        const [year, monthNum] = month.split('-');
-        const dateObj = new Date(year, monthNum - 1);
-        const monthName = dateObj.toLocaleString('default', { month: 'short', year: 'numeric' });
-
-        return `<div class="timeline-bar">
-          <div class="timeline-label">${monthName}</div>
-          <div class="timeline-track">
-            <div class="timeline-fill" style="width:${pct}%">${count}</div>
-          </div>
-        </div>`;
-      }).join('');
-    } else {
-      forecastContainer.innerHTML = '<div style="text-align:center;color:var(--olive);padding:20px;">No harvest forecast available</div>';
-    }
+    const fMonths = Object.keys(futureHarvest).sort().slice(0, 6);
+    const maxVal  = fMonths.length ? Math.max(...fMonths.map(m => futureHarvest[m])) : 1;
+    forecastContainer.innerHTML = fMonths.length > 0
+      ? fMonths.map(month => {
+          const count     = futureHarvest[month];
+          const pct       = (count / maxVal) * 100;
+          const [yr, mn]  = month.split('-');
+          const monthName = new Date(yr, mn - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
+          return `<div class="timeline-bar">
+            <div class="timeline-label">${monthName}</div>
+            <div class="timeline-track"><div class="timeline-fill" style="width:${pct}%">${count}</div></div>
+          </div>`;
+        }).join('')
+      : '<div style="text-align:center;color:var(--olive);padding:20px;">No harvest forecast available</div>';
   }
 
-  // Render expected harvest table (FIX 1: replaces calendar)
   const tableBody = document.getElementById('expected-harvest-body');
   if (tableBody) {
-    // Sort by expected harvest date (future first, then past)
-    const today = new Date();
+    const today  = new Date();
     const sorted = expectedHarvestList.sort((a, b) => {
-      const aFuture = a.expectedDate >= today;
-      const bFuture = b.expectedDate >= today;
-      if (aFuture !== bFuture) return bFuture ? -1 : 1;
+      const af = a.expectedDate >= today, bf = b.expectedDate >= today;
+      if (af !== bf) return bf ? -1 : 1;
       return a.expectedDate - b.expectedDate;
     });
-    
-    if (sorted.length > 0) {
-      tableBody.innerHTML = sorted.map(item => {
-        const isFuture = item.expectedDate >= today;
-        const dateClass = isFuture ? 'future-date' : 'past-date';
-        const colourBadge = TAG_PALETTE[item.colour] ? 
-          `<span class="badge" style="background:${TAG_PALETTE[item.colour]}20;color:${TAG_PALETTE[item.colour]}">${item.colour}</span>` :
-          `<span class="badge badge-gold">${item.colour}</span>`;
-        
-        return `<tr>
-          <td class="${dateClass}">${formatDate(item.expectedDate)}</td>
-          <td>${formatDate(item.taggedDate)}</td>
-          <td>${colourBadge}</td>
-          <td><span class="badge badge-gold">${item.block}</span></td>
-          <td>${item.matNo}</td>
-        </tr>`;
-      }).join('');
-    } else {
-      tableBody.innerHTML = '<tr><td colspan="5" class="expected-harvest-empty">No expected harvest data available</td></tr>';
-    }
+    tableBody.innerHTML = sorted.length > 0
+      ? sorted.map(item => {
+          const isFuture    = item.expectedDate >= today;
+          const dateClass   = isFuture ? 'future-date' : 'past-date';
+          const colourBadge = TAG_PALETTE[item.colour]
+            ? `<span class="badge" style="background:${TAG_PALETTE[item.colour]}20;color:${TAG_PALETTE[item.colour]}">${item.colour}</span>`
+            : `<span class="badge badge-gold">${item.colour}</span>`;
+          return `<tr>
+            <td class="${dateClass}">${formatDate(item.expectedDate)}</td>
+            <td>${formatDate(item.taggedDate)}</td>
+            <td>${colourBadge}</td>
+            <td><span class="badge badge-gold">${item.block}</span></td>
+            <td>${item.matNo}</td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="5" class="expected-harvest-empty">No expected harvest data available</td></tr>';
   }
 
   const legendEl = document.getElementById('tag-legend');
@@ -1345,7 +1456,7 @@ function renderTagging(rows, landData) {
       const c = TAG_PALETTE[label] || OLIVE;
       return `<div class="legend-row">
         <span><span class="colour-swatch" style="background:${c}"></span>${label}</span>
-        <div class="legend-bar-bg"><div class="legend-bar-fill" style="width:${(val/maxVal*100).toFixed(1)}%;background:${c};"></div></div>
+        <div class="legend-bar-bg"><div class="legend-bar-fill" style="width:${(val / maxVal * 100).toFixed(1)}%;background:${c};"></div></div>
         <span class="legend-val">${val.toLocaleString()}</span>
       </div>`;
     }).join('');
@@ -1353,136 +1464,121 @@ function renderTagging(rows, landData) {
 }
 
 function renderHarvest(rows, landData) {
-  const byBlock       = {};
-  const byMonth       = {};   // keyed as "YYYY-MM" for reliable sorting — FIX 2
-  const avgBunchWeights = [];
-
-  /* ── FIX 3: per-block weight tracking ── */
-  const blockWeightSums   = {};
-  const blockWeightCounts = {};
-  const qtyHarvestedByBlock = {};
+  const byBlock = {}, byMonth = {}, avgBunchWeights = [];
+  const blockWeightSums = {}, blockWeightCounts = {};
+  let globalAvgWeight = 0;
 
   rows.forEach(r => {
     const b         = String(r['BLOCK'] || '').trim();
     const avgWeight = parseFloat(r['AVERAGE BUNCH WEIGHT (KG)']) || 0;
     const qty       = parseFloat(r['QUANTITY HARVESTED (KG)'])   || 0;
-
-    /* ── FIX 2: use parseYearMonth for YYYY-MM keys ── */
-    const ym = parseYearMonth(r['DATE OF HARVESTING']);
-
+    const ym        = parseYearMonth(r['DATE OF HARVESTING']);
     if (b) {
       byBlock[b] = (byBlock[b] || 0) + qty;
-      qtyHarvestedByBlock[b] = (qtyHarvestedByBlock[b] || 0) + qty;
-
       if (avgWeight > 0) {
         avgBunchWeights.push(avgWeight);
         blockWeightSums[b]   = (blockWeightSums[b]   || 0) + avgWeight;
         blockWeightCounts[b] = (blockWeightCounts[b] || 0) + 1;
       }
     }
-    if (ym) {
-      byMonth[ym] = (byMonth[ym] || 0) + qty;
-    }
+    if (ym) byMonth[ym] = (byMonth[ym] || 0) + qty;
   });
 
   const blocks   = Object.keys(byBlock).sort();
   const totalKg  = Object.values(byBlock).reduce((a, b) => a + b, 0);
-  const globalAvgWeight = avgBunchWeights.length > 0
-    ? avgBunchWeights.reduce((a, b) => a + b, 0) / avgBunchWeights.length
-    : 0;
+  globalAvgWeight = avgBunchWeights.length > 0
+    ? avgBunchWeights.reduce((a, b) => a + b, 0) / avgBunchWeights.length : 0;
   const avgQty   = rows.length > 0 ? totalKg / rows.length : 0;
   const topBlock = blocks.length ? blocks.reduce((a, b) => byBlock[a] > byBlock[b] ? a : b) : '—';
 
-  setKPI('kpi-harvest-total',  totalKg        > 0 ? totalKg.toLocaleString('en',{maximumFractionDigits:0}) + ' kg' : '—');
+  setKPI('kpi-harvest-total',  totalKg       > 0 ? totalKg.toLocaleString('en', { maximumFractionDigits: 0 }) + ' kg' : '—');
   setKPI('kpi-harvest-avg',    globalAvgWeight > 0 ? globalAvgWeight.toFixed(1) + ' kg' : '—');
   setKPI('kpi-harvest-top',    topBlock);
-  setKPI('kpi-harvest-topval', topBlock !== '—' ? (byBlock[topBlock]||0).toLocaleString('en',{maximumFractionDigits:0}) + ' kg' : '—');
+  setKPI('kpi-harvest-topval', topBlock !== '—' ? (byBlock[topBlock] || 0).toLocaleString('en', { maximumFractionDigits: 0 }) + ' kg' : '—');
   setKPI('kpi-harvest-qty',    avgQty > 0 ? avgQty.toFixed(1) + ' kg' : '—');
-  setKPI('kpi-ov-harvest',     totalKg > 0 ? totalKg.toLocaleString('en',{maximumFractionDigits:0}) + ' kg' : '—');
-  setKPI('kpi-ov-harvest-sub', rows.length > 0 ? rows.length.toLocaleString() + ' harvest entries' : 'No harvest records yet');
+
+  // Fix: set harv-sub dynamically
+  const allMonthKeys = Object.keys(byMonth).sort();
+  setKPI('harv-sub', rows.length > 0
+    ? `${rows.length.toLocaleString()} harvest records across ${blocks.length} block${blocks.length !== 1 ? 's' : ''}` +
+      (allMonthKeys.length > 0 ? ` — ${allMonthKeys[0]} to ${allMonthKeys[allMonthKeys.length - 1]}` : '')
+    : 'No harvest records loaded yet');
 
   const tbody = document.getElementById('harv-table-body');
   if (rows.length === 0) {
-    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--olive);padding:24px;">No harvest records yet — data will appear once entries are added to the Google Sheet</td></tr>';
-    return;
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--olive);padding:24px;">No harvest records yet</td></tr>';
+    return { globalAvgWeight, totalKg };
   }
 
   upsertChart('c_blockHarvest',  'bar', blocks, blocks.map(b => byBlock[b] || 0), { dark: true });
   upsertChart('c_blockHarvest2', 'bar', blocks, blocks.map(b => byBlock[b] || 0));
-  upsertChart('c_blockCount',    'bar', blocks, blocks.map(b => qtyHarvestedByBlock[b] || 0), { dark: true });
 
-  /* ── FIX 2: Show ALL months grouped chronologically (no slice) ── */
-  const allMonthKeys = Object.keys(byMonth).sort(); // "YYYY-MM" sorts correctly
   const allMonthLabels = allMonthKeys.map(k => {
-    const [yr, mo] = k.split('-');
-    return new Date(parseInt(yr), parseInt(mo) - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
+    const [yr, mn] = k.split('-');
+    return new Date(parseInt(yr), parseInt(mn) - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
   });
-  const allMonthData = allMonthKeys.map(k => byMonth[k]);
-  
-  upsertChart('c_monthlyHarvest', 'bar', allMonthLabels, allMonthData, { dark: true });
+  upsertChart('c_monthlyHarvest', 'bar', allMonthLabels, allMonthKeys.map(k => byMonth[k]), { dark: true });
 
-  /* ── FIX 3: per-block average weight in the summary table ── */
   if (tbody) tbody.innerHTML = blocks.map(b => {
-    const total   = byBlock[b] || 0;
-    const size    = landData[b] || 0;
+    const total      = byBlock[b] || 0;
+    const size       = landData[b] || 0;
     const yieldPerHa = size > 0 ? total / size : 0;
-    const pct     = totalKg > 0 ? total / totalKg * 100 : 0;
-
-    // Per-block average bunch weight (not the global average)
-    const blockAvg = blockWeightCounts[b] > 0
-      ? (blockWeightSums[b] / blockWeightCounts[b]).toFixed(2)
-      : '—';
-
+    const pct        = totalKg > 0 ? total / totalKg * 100 : 0;
+    const blockAvg   = blockWeightCounts[b] > 0 ? (blockWeightSums[b] / blockWeightCounts[b]).toFixed(2) : '—';
     return `<tr>
       <td><span class="badge badge-gold">${b}</span></td>
       <td>${size > 0 ? size.toFixed(2) : '—'}</td>
-      <td>${total.toLocaleString('en',{maximumFractionDigits:1})}</td>
+      <td>${total.toLocaleString('en', { maximumFractionDigits: 1 })}</td>
       <td>${blockAvg}</td>
-      <td>${yieldPerHa > 0 ? yieldPerHa.toLocaleString('en',{maximumFractionDigits:0}) : '—'}</td>
+      <td>${yieldPerHa > 0 ? yieldPerHa.toLocaleString('en', { maximumFractionDigits: 0 }) : '—'}</td>
       <td>${shareCell(pct)}</td>
     </tr>`;
   }).join('');
+
+  return { globalAvgWeight, totalKg };
 }
 
+/* ── MAIN LOAD ──────────────────────────────────────────────────── */
 async function loadDashboard() {
   const btn = document.getElementById('btn-refresh');
   if (btn) btn.classList.add('spinning');
   setKPI('data-status', 'Refreshing…');
 
   try {
-    const [irrigation, tagging, pump, harvest, land] = await Promise.all([
+    const [irrigation, tagging, pump, harvest, land, financials] = await Promise.all([
       fetchCSV(CSV_IRRIGATION),
       fetchCSV(CSV_TAGGING),
       fetchCSV(CSV_PUMP),
       fetchCSV(CSV_HARVEST),
-      fetchCSV(CSV_LAND).catch(() => [])
+      fetchCSV(CSV_LAND).catch(() => []),
+      fetchCSV(CSV_FINANCIALS).catch(() => [])
     ]);
 
     const landData = {};
-    land.forEach(r => {
-      const block = r['Block'];
-      const size = parseFloat(r['Block Size (ha)']) || 0;
-      if (block) landData[block] = size;
-    });
+    land.forEach(r => { const b = r['Block']; if (b) landData[b] = parseFloat(r['Block Size (ha)']) || 0; });
 
-    const blockCount = renderLand(land);
+    const { totalLand }       = renderLand(land);
+    const { globalAvgWeight } = renderHarvest(harvest, landData);
     renderIrrigation(irrigation);
     renderPump(pump);
     renderTagging(tagging, landData);
-    renderHarvest(harvest, landData);
+    const fin = renderFinancials(financials);
 
-    const totalFuel = irrigation.reduce((s, r) => s + (parseFloat(r['FUEL (litres)']) || 0), 0);
-    const totalHrs  = pump.reduce((s, r) =>
-      s + Math.max(0, (parseFloat(r['CLOSING HOURS']) || 0) - (parseFloat(r['OPENING HOURS']) || 0)), 0);
+    // ── Overview KPIs (FIX 5: MWK prefix)
+    setKPI('kpi-ov-avg-weight',    globalAvgWeight > 0 ? globalAvgWeight.toFixed(1) + ' kg' : '—');
+    setKPI('kpi-ov-land-progress', Math.min((totalLand / TARGET_LAND_HA) * 100, 100).toFixed(1) + '%');
+    setKPI('kpi-ov-land-sub',      `${totalLand.toFixed(2)} ha of ${TARGET_LAND_HA} ha`);
+    setKPI('kpi-ov-last-rev',      fin.lastRev  > 0 ? 'MWK ' + fin.lastRev.toLocaleString()  : '—');
+    setKPI('kpi-ov-avg-price',     fin.avgPrice > 0 ? 'MWK ' + fin.avgPrice.toFixed(0)        : '—');
+    setKPI('kpi-ov-last-vol',      fin.lastVol  > 0 ? fin.lastVol.toLocaleString()  + ' kg'   : '—');
 
-    setKPI('kpi-ov-fuel',      totalFuel.toLocaleString('en', { maximumFractionDigits: 0 }) + ' L');
-    setKPI('kpi-ov-fuel-sub',  irrigation.length.toLocaleString() + ' sessions · 2020–2025');
-    setKPI('kpi-ov-pumph',     totalHrs.toLocaleString() + ' hrs');
-    setKPI('kpi-ov-pump-sub',  pump.length.toLocaleString() + ' log entries');
-    setKPI('kpi-ov-tags',      tagging.length.toLocaleString());
-    setKPI('kpi-ov-tags-sub',  'Mats tagged — current season');
-    setKPI('kpi-ov-sessions',  irrigation.length.toLocaleString());
-    setKPI('kpi-ov-blocks',    blockCount);
+    // ── Overview charts
+    upsertDualBarChart('c_prodVolume', fin.months, fin.plannedVol, fin.actualVol,
+      'Planned', 'Actual', NAVY_L, GOLD, false);
+    upsertDualLineChart('c_priceWeight', fin.months, fin.actualPrice, fin.actualWeight,
+      'Avg Price (MWK)', 'Avg Weight (kg)', GOLD, NAVY_L);
+    upsertChart('c_landProgress_ov', 'bar', ['Acquired', 'Target'], [totalLand, TARGET_LAND_HA],
+      { dark: false, palette: [GOLD, NAVY_L] });
 
     const now = new Date();
     setKPI('data-status', 'Updated ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
