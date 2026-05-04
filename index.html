@@ -4,17 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Favicon / Browser tab icon -->
   <link rel="icon" type="image/png" href="browser.png">
   <link rel="apple-touch-icon" href="browser.png">
   
-  <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#0d2136">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Elim Farms">
   
-  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
   
   <title>Elim Farms - Data Hub</title>
@@ -43,7 +40,7 @@
       margin: 0 auto;
     }
 
-    /* ========== PREMIUM HEADER REDESIGN ========== */
+    /* ========== HEADER ========== */
     .header {
       text-align: center;
       margin-bottom: 3rem;
@@ -151,15 +148,10 @@
       margin-top: 0.8rem;
     }
 
-    .install-btn:hover {
-      background: #1a334d;
-    }
+    .install-btn:hover { background: #1a334d; }
+    .install-btn.hidden { display: none; }
 
-    .install-btn.hidden {
-      display: none;
-    }
-
-    /* Card grid - 2 columns, but we reorganize content */
+    /* ========== CARD GRID ========== */
     .card-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -167,7 +159,6 @@
       margin-bottom: 3rem;
     }
 
-    /* Individual card */
     .form-card {
       background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(10px);
@@ -188,10 +179,9 @@
       background: rgba(255, 255, 255, 0.95);
     }
 
-    /* Dropdown card specific styling - spans 2 columns */
-    .form-card.dropdown-card {
+    /* Spans both columns */
+    .form-card.full-width {
       grid-column: span 2;
-      padding-bottom: 1.5rem;
     }
 
     .card-icon {
@@ -213,7 +203,7 @@
       font-size: 1rem;
     }
 
-    /* Dropdown button styles */
+    /* ========== DROPDOWN ========== */
     .dropdown-btn {
       background: #0d2136;
       color: white;
@@ -243,11 +233,8 @@
       transition: transform 0.3s ease;
     }
 
-    .dropdown-arrow.open {
-      transform: rotate(180deg);
-    }
+    .dropdown-arrow.open { transform: rotate(180deg); }
 
-    /* Dropdown content grid - hidden by default */
     .dropdown-content {
       max-height: 0;
       overflow: hidden;
@@ -256,7 +243,7 @@
     }
 
     .dropdown-content.show {
-      max-height: 800px; /* enough for 4 cards */
+      max-height: 800px;
       margin-top: 1.8rem;
     }
 
@@ -266,7 +253,6 @@
       gap: 1.2rem;
     }
 
-    /* Mini card inside dropdown */
     .mini-form-card {
       background: rgba(248, 245, 240, 0.9);
       border-radius: 24px;
@@ -301,6 +287,46 @@
       color: #5b6e8c;
     }
 
+    /* ========== BUTTONS ========== */
+    .btn {
+      display: inline-block;
+      color: white;
+      font-weight: 500;
+      text-decoration: none;
+      padding: 0.85rem 1.2rem;
+      border-radius: 60px;
+      text-align: center;
+      font-size: 1rem;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      letter-spacing: -0.01em;
+      cursor: pointer;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+
+    /* Database button */
+    .btn-database {
+      background: #81845a;
+      box-shadow: 0 6px 12px -6px rgba(129, 132, 90, 0.4);
+    }
+    .btn-database:hover { background: #6b6e4a; }
+
+    /* Farm map button */
+    .btn-map {
+      background: #6f5e3e;
+      box-shadow: 0 6px 12px -6px rgba(111, 94, 62, 0.4);
+    }
+    .btn-map:hover { background: #5a4c32; }
+
+    /* Monthly Reports button — dark teal, distinct but harmonious */
+    .btn-reports {
+      background: #004551;
+      box-shadow: 0 6px 12px -6px rgba(0, 69, 81, 0.4);
+    }
+    .btn-reports:hover { background: #005f6e; }
+
+    /* Mini form card buttons */
     .mini-btn {
       background: #0d2136;
       color: white;
@@ -310,46 +336,32 @@
       text-align: center;
       font-size: 0.85rem;
       font-weight: 500;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.15s;
       display: inline-block;
       margin-top: auto;
+      border: none;
+      cursor: pointer;
     }
 
     .mini-btn:hover {
       background: #1a334d;
+      transform: translateY(-1px);
     }
 
-    /* Database card remains separate */
-    .form-card.database-card .btn {
-      background: #81845a;
-      box-shadow: 0 6px 12px -6px rgba(5, 150, 105, 0.35);
+    /* ========== CARD-SPECIFIC BACKGROUNDS ========== */
+    .farm-overview-card {
+      background: linear-gradient(135deg, rgba(255,255,240,0.9), rgba(240,235,220,0.9));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(168, 147, 90, 0.3);
     }
 
-    .form-card.database-card .btn:hover {
-      background: #6b6e4a;
+    .reports-card {
+      background: #F9F8F7;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 69, 81, 0.2);
     }
 
-    .btn {
-      display: inline-block;
-      background: #0d2136;
-      color: white;
-      font-weight: 500;
-      text-decoration: none;
-      padding: 0.85rem 1.2rem;
-      border-radius: 60px;
-      text-align: center;
-      font-size: 1rem;
-      transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 6px 12px -6px rgba(37, 99, 235, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      letter-spacing: -0.01em;
-    }
-
-    .btn:hover {
-      background: #1a334d;
-    }
-
-    /* Dashboard preview */
+    /* ========== DASHBOARD PREVIEW ========== */
     .dashboard-preview {
       background: white;
       border-radius: 32px;
@@ -398,22 +410,7 @@
       transform: translateY(-2px);
     }
 
-    /* New Farm Overview Card */
-    .farm-overview-card {
-      background: linear-gradient(135deg, rgba(255,255,240,0.9), rgba(240,235,220,0.9));
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(168, 147, 90, 0.3);
-    }
-    
-    .farm-overview-card .btn-map {
-      background: #6f5e3e;
-      box-shadow: 0 6px 12px -6px rgba(111, 94, 62, 0.4);
-    }
-    
-    .farm-overview-card .btn-map:hover {
-      background: #5a4c32;
-    }
-
+    /* ========== FOOTER ========== */
     .footer {
       margin-top: 3rem;
       text-align: center;
@@ -451,16 +448,60 @@
       object-fit: contain;
     }
 
+    /* ========== LOADING TOAST ========== */
+    .loading-toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #0d2136;
+      color: white;
+      padding: 0.75rem 1.6rem;
+      border-radius: 60px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      box-shadow: 0 12px 28px -6px rgba(13, 33, 54, 0.4);
+      z-index: 9999;
+      opacity: 0;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .loading-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ========== RESPONSIVE ========== */
     @media (max-width: 640px) {
       body { padding: 1.5rem 1rem 5rem; }
       .header h1 { font-size: 2.2rem; }
       .header h1 .banana-icon { font-size: 2rem; }
       .card-grid { grid-template-columns: 1fr; gap: 1.2rem; }
-      .form-card.dropdown-card { grid-column: span 1; }
+      .form-card.full-width { grid-column: span 1; }
       .inner-forms-grid { grid-template-columns: 1fr; gap: 1rem; }
       .dashboard-preview { flex-direction: column; align-items: flex-start; }
       .powered-by { bottom: 15px; right: 15px; }
       .dropdown-btn { font-size: 1rem; padding: 0.8rem 1.2rem; }
+      .loading-toast { font-size: 0.82rem; padding: 0.65rem 1.2rem; bottom: 80px; }
     }
   </style>
 </head>
@@ -479,10 +520,10 @@
       </div>
     </div>
 
-    <!-- Card Grid: Contains dropdown card, database card, and farm overview card -->
     <div class="card-grid">
-      <!-- DROPDOWN CARD: All Google Forms collapsible -->
-      <div class="form-card dropdown-card">
+
+      <!-- DROPDOWN CARD: All Google Forms collapsible — spans both columns -->
+      <div class="form-card full-width">
         <div class="card-icon">📋</div>
         <h2>Data Entry Forms</h2>
         <p>Quickly submit operational data — click below to reveal all forms.</p>
@@ -497,61 +538,90 @@
               <div class="mini-icon">📝</div>
               <h3>Pump Log</h3>
               <p>Live update on activity of all pumps found at the farm.</p>
-              <a href="https://docs.google.com/forms/d/e/1FAIpQLSfqPkoiG4S1vTRkqlaXrsHRtlOi45SoJHrRhd-IgcbuEk9btA/viewform?usp=header" class="mini-btn" target="_blank" rel="noopener">Open form →</a>
+              <a href="https://docs.google.com/forms/d/e/1FAIpQLSfqPkoiG4S1vTRkqlaXrsHRtlOi45SoJHrRhd-IgcbuEk9btA/viewform?usp=header"
+                 class="mini-btn launch-link"
+                 data-label="Pump Log form"
+                 target="_blank" rel="noopener">Open form →</a>
             </div>
             <!-- Tagging -->
             <div class="mini-form-card">
               <div class="mini-icon">🏷️</div>
               <h3>Tagging</h3>
               <p>Track and update the growth of your bananas.</p>
-              <a href="https://docs.google.com/forms/d/e/1FAIpQLSdQhArOLQ49CHv-NpqvFAHYFxWfgn8hv6XZz9kXC6TLm5Pycg/viewform?usp=header" class="mini-btn" target="_blank" rel="noopener">Open form →</a>
+              <a href="https://docs.google.com/forms/d/e/1FAIpQLSdQhArOLQ49CHv-NpqvFAHYFxWfgn8hv6XZz9kXC6TLm5Pycg/viewform?usp=header"
+                 class="mini-btn launch-link"
+                 data-label="Tagging form"
+                 target="_blank" rel="noopener">Open form →</a>
             </div>
             <!-- Harvesting -->
             <div class="mini-form-card">
               <div class="mini-icon">🚜</div>
               <h3>Harvesting</h3>
-              <p>Record quantity & quality of harvest banana bunches.</p>
-              <a href="https://docs.google.com/forms/d/e/1FAIpQLSet4llXfSSV4wOrjzlFt_fjrK9evCUEbQ7vgvK__5qAb_ROCA/viewform?usp=header" class="mini-btn" target="_blank" rel="noopener">Open form →</a>
+              <p>Record quantity &amp; quality of harvest banana bunches.</p>
+              <a href="https://docs.google.com/forms/d/e/1FAIpQLSet4llXfSSV4wOrjzlFt_fjrK9evCUEbQ7vgvK__5qAb_ROCA/viewform?usp=header"
+                 class="mini-btn launch-link"
+                 data-label="Harvesting form"
+                 target="_blank" rel="noopener">Open form →</a>
             </div>
             <!-- Irrigation -->
             <div class="mini-form-card">
               <div class="mini-icon">💧</div>
               <h3>Irrigation</h3>
               <p>Log water usage and scheduling changes.</p>
-              <a href="https://docs.google.com/forms/d/e/1FAIpQLSfEbQGnc1pEJldk9vbVmUQBqSpFpwSsCB1E_3xvFQNCguYaGA/viewform?usp=header" class="mini-btn" target="_blank" rel="noopener">Open form →</a>
+              <a href="https://docs.google.com/forms/d/e/1FAIpQLSfEbQGnc1pEJldk9vbVmUQBqSpFpwSsCB1E_3xvFQNCguYaGA/viewform?usp=header"
+                 class="mini-btn launch-link"
+                 data-label="Irrigation form"
+                 target="_blank" rel="noopener">Open form →</a>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Database Card (spans 2 columns) -->
-      <div class="form-card database-card span-two">
+      <!-- DATABASE CARD -->
+      <div class="form-card database-card">
         <div class="card-icon">🗄️</div>
         <h2>Master Database</h2>
         <p>View all submitted data from every form in the central Google Sheet.</p>
-        <a href="https://docs.google.com/spreadsheets/d/1KNqzCOnvgn-pU5zVnh-hOjPXKQe6Z9DDpZjKMDEcY1k/edit?usp=sharing" class="btn" target="_blank" rel="noopener">
-          <i>→</i> Open database
-        </a>
+        <a href="https://docs.google.com/spreadsheets/d/1KNqzCOnvgn-pU5zVnh-hOjPXKQe6Z9DDpZjKMDEcY1k/edit?usp=sharing"
+           class="btn btn-database launch-link"
+           data-label="Master Database"
+           target="_blank" rel="noopener">→ Open database</a>
       </div>
 
-      <!-- NEW Farm Overview Card (Interactive Map) -->
+      <!-- FARM OVERVIEW CARD -->
       <div class="form-card farm-overview-card">
         <div class="card-icon">🗺️</div>
         <h2>Farm Overview</h2>
         <p>Interactive map with real-time insights on field health, irrigation zones, and crop performance.</p>
-        <a href="map.html" class="btn btn-map" target="_blank" rel="noopener">
-          <i>🗺️</i> Launch interactive map
-        </a>
+        <a href="map.html"
+           class="btn btn-map launch-link"
+           data-label="Farm map"
+           target="_blank" rel="noopener">🗺️ Launch interactive map</a>
       </div>
+
+      <!-- MONTHLY REPORTS CARD -->
+      <div class="form-card reports-card full-width">
+        <div class="card-icon">📊</div>
+        <h2>Monthly Reports</h2>
+        <p>View monthly operational reports covering production performance, financial outcomes, and variance analysis throughout the year.</p>
+        <a href="https://drive.google.com/drive/folders/1DfrF_XqfTDdfgVfcPgEBT4y2OAoAWCV6?usp=drive_link"
+           class="btn btn-reports launch-link"
+           data-label="Monthly Reports folder"
+           target="_blank" rel="noopener">📁 View reports</a>
+      </div>
+
     </div>
 
-    <!-- Dashboard & Analytics Section (remains intact) -->
+    <!-- Dashboard & Analytics Section -->
     <div class="dashboard-preview">
       <div class="preview-text">
-        <h3>📈 Dashboard & Analytics</h3>
+        <h3>📈 Dashboard &amp; Analytics</h3>
         <p>Real-time visualizations, charts, and reports for all farm operations — now accessible.</p>
       </div>
-      <a href="dashboard.html" class="dashboard-btn" target="_blank" rel="noopener">
+      <a href="dashboard.html"
+         class="dashboard-btn launch-link"
+         data-label="Dashboard"
+         target="_blank" rel="noopener">
         <span>📊</span> Explore Dashboard
       </a>
     </div>
@@ -564,32 +634,58 @@
     </div>
   </div>
 
+  <!-- Loading Toast -->
+  <div id="loadingToast" class="loading-toast">
+    <span class="toast-spinner"></span>
+    <span id="toastLabel">Opening…</span>
+  </div>
+
   <div class="powered-by">
     <span>Powered by</span>
     <img src="Logo.png" alt="Elim Farms Logo" onerror="this.style.display='none'">
   </div>
 
-  <!-- Dropdown Interaction + PWA Script -->
   <script>
-    // DROPDOWN TOGGLE LOGIC
-    const toggleBtn = document.getElementById('dropdownToggleBtn');
+    // ── DROPDOWN TOGGLE ──────────────────────────────────────────────────────
+    const toggleBtn       = document.getElementById('dropdownToggleBtn');
     const dropdownContent = document.getElementById('dropdownContent');
-    const arrowSpan = document.getElementById('dropdownArrow');
+    const arrowSpan       = document.getElementById('dropdownArrow');
 
     if (toggleBtn && dropdownContent) {
       toggleBtn.addEventListener('click', () => {
         const isOpen = dropdownContent.classList.contains('show');
-        if (isOpen) {
-          dropdownContent.classList.remove('show');
-          arrowSpan.classList.remove('open');
-        } else {
-          dropdownContent.classList.add('show');
-          arrowSpan.classList.add('open');
-        }
+        dropdownContent.classList.toggle('show', !isOpen);
+        arrowSpan.classList.toggle('open', !isOpen);
       });
     }
 
-    // PWA Install Logic
+    // ── LOADING TOAST ────────────────────────────────────────────────────────
+    const toast      = document.getElementById('loadingToast');
+    const toastLabel = document.getElementById('toastLabel');
+    let toastTimer   = null;
+
+    function showToast(label) {
+      // Clear any pending hide
+      clearTimeout(toastTimer);
+      toastLabel.textContent = `Opening ${label}…`;
+      toast.classList.add('show');
+      // Auto-hide after 2.2s — enough time for the new tab to have opened
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2200);
+    }
+
+    // Attach to every link that has data-label
+    document.querySelectorAll('.launch-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const label = link.dataset.label || 'page';
+        // Don't show toast for empty hrefs (placeholder links)
+        if (!link.href || link.href === window.location.href || link.href.endsWith('#')) return;
+        showToast(label);
+      });
+    });
+
+    // ── PWA INSTALL ───────────────────────────────────────────────────────────
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
