@@ -272,7 +272,7 @@
       background: linear-gradient(145deg, var(--cream) 0%, #f0ede9 100%);
     }
 
-    /* Block styles - SINGLE UNIFORM GREEN COLOR */
+    /* Block styles — filter/stroke handled by JS for SVG reliability */
     .block {
       fill: var(--block-color);
       stroke: #ffffff;
@@ -281,7 +281,7 @@
       paint-order: stroke;
       outline: none !important;
       -webkit-tap-highlight-color: transparent !important;
-      transition: filter 0.2s ease;
+      transition: opacity 150ms ease;
     }
     
     .block-click-target {
@@ -299,15 +299,9 @@
       box-shadow: none !important;
     }
     
-    .block.selected {
-      stroke-width: 4px;
-      stroke: #ffffff;
-      filter: drop-shadow(0 0 15px rgba(44, 82, 130, 0.7)) brightness(1.1);
-    }
     
     .block.faded {
-      opacity: 0.2;
-      filter: grayscale(0.5);
+      opacity: 0.12;
     }
 
     /* Block labels */
@@ -410,14 +404,23 @@
       overflow: hidden;
       padding: 0;
       transform: translateY(100%);
-      transition: transform 0.3s ease, height 0s 0.3s;
+      transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1), height 0s 0.35s;
       border-top: 3px solid var(--gold);
     }
     
-    .info-panel.visible, .stats-panel.visible { 
+    /* Block info panel — compact, no scroll */
+    .info-panel.visible {
+      height: auto;
+      max-height: min(42vh, 360px);
+      transform: translateY(0);
+      transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1), height 0s;
+    }
+
+    /* Stats/list panels can be taller since they have more rows */
+    .stats-panel.visible { 
       height: min(55vh, 500px);
       transform: translateY(0);
-      transition: transform 0.3s ease, height 0s;
+      transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1), height 0s;
     }
     
     .panel-header {
@@ -425,7 +428,7 @@
       top: 0;
       background: white;
       z-index: 10;
-      padding: clamp(16px, 3vh, 20px) clamp(16px, 4vw, 20px) clamp(10px, 2vh, 12px);
+      padding: 10px clamp(16px, 4vw, 20px) 8px;
       border-bottom: 1px solid var(--sand);
       display: flex;
       justify-content: space-between;
@@ -433,25 +436,25 @@
     }
     
     .panel-content {
-      height: calc(100% - 70px);
+      height: calc(100% - 58px);
       overflow-y: auto;
-      padding: 0 clamp(16px, 4vw, 20px) clamp(16px, 3vh, 20px);
+      padding: 0 clamp(16px, 4vw, 20px) 12px;
       -webkit-overflow-scrolling: touch;
     }
     
     .panel-title { 
       color: var(--navy); 
       font-weight: 700; 
-      font-size: clamp(20px, 5vw, 24px);
+      font-size: clamp(17px, 4.5vw, 21px);
       font-family: 'Playfair Display', serif;
       margin: 0;
     }
     
     .panel-subtitle { 
       color: var(--olive); 
-      font-size: clamp(14px, 3.5vw, 16px);
+      font-size: clamp(12px, 3vw, 14px);
       font-weight: 500;
-      margin: 4px 0 0;
+      margin: 2px 0 0;
       letter-spacing: .04em;
     }
     
@@ -482,7 +485,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: clamp(12px, 2.5vh, 16px) 0;
+      padding: 7px 0;
       border-bottom: 1px solid var(--sand);
     }
 
@@ -493,24 +496,24 @@
     .detail-label {
       color: var(--forest);
       font-weight: 600;
-      font-size: clamp(14px, 3.5vw, 16px);
+      font-size: clamp(12px, 3vw, 14px);
       opacity: 0.85;
     }
 
     .detail-value {
       color: var(--navy);
       font-weight: 700;
-      font-size: clamp(15px, 4vw, 18px);
+      font-size: clamp(13px, 3.5vw, 15px);
       font-family: 'DM Sans', sans-serif;
     }
 
     /* Density chart */
     .density-chart {
       width: 100%;
-      height: clamp(60px, 10vh, 80px);
+      height: 36px;
       background: var(--sand);
-      border-radius: 12px;
-      margin: clamp(15px, 3vh, 20px) 0;
+      border-radius: 10px;
+      margin: 8px 0 4px;
       position: relative;
       overflow: hidden;
       box-shadow: inset 0 2px 4px rgba(13,33,54,0.05);
@@ -781,6 +784,26 @@
     <svg id="map-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
       <defs>
         <!-- Removed high-yield pattern - using single color -->
+        <!-- Pulse on click (bloom burst) -->
+        <filter id="pulseEffect" x="-25%" y="-25%" width="150%" height="150%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+          <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="pulse" />
+          <feBlend in="SourceGraphic" in2="pulse" mode="screen" />
+        </filter>
+        <!-- Hover glow — soft green halo -->
+        <filter id="hoverGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
+          <feFlood flood-color="#0f5c3f" flood-opacity="0.7" result="color" />
+          <feComposite in="color" in2="blur" operator="in" result="shadow" />
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <!-- Selected glow — gold halo -->
+        <filter id="selectedGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur" />
+          <feFlood flood-color="#ffd700" flood-opacity="0.75" result="color" />
+          <feComposite in="color" in2="blur" operator="in" result="shadow" />
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
       </defs>
     </svg>
     
@@ -828,18 +851,29 @@
         <div class="stats-title">Farm Summary</div>
         <button class="close-button" aria-label="Close panel">×</button>
       </div>
-      <div class="panel-content">
-        <table class="stats-table" id="summary-table"></table>
-      </div>
+      <div class="panel-content" id="summary-panel-content"></div>
     </div>
     
     <div id="blocks-panel" class="stats-panel" role="dialog" aria-modal="true" aria-hidden="true">
       <div class="panel-header">
-        <div class="stats-title">All Blocks</div>
+        <div>
+          <div class="stats-title">All Blocks</div>
+          <div class="panel-subtitle" id="blocks-panel-subtitle"></div>
+        </div>
         <button class="close-button" aria-label="Close panel">×</button>
       </div>
       <div class="panel-content">
-        <table class="stats-table" id="blocks-table"></table>
+        <table class="stats-table" id="blocks-table">
+          <thead>
+            <tr>
+              <th>Block</th>
+              <th style="text-align:right">Size (ha)</th>
+              <th style="text-align:right">Harvest (kg)</th>
+              <th style="text-align:right">Avg (kg)</th>
+            </tr>
+          </thead>
+          <tbody id="blocks-table-body"></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -946,8 +980,9 @@
     const blockPanelTitle = d3.select("#block-panel-title");
     const blockPanelSubtitle = d3.select("#block-panel-subtitle");
     const blockPanelContent = d3.select("#block-panel-content");
-    const summaryTable = d3.select("#summary-table");
-    const blocksTable = d3.select("#blocks-table");
+    const summaryPanelContent = d3.select("#summary-panel-content");
+    const blocksTableBody = d3.select("#blocks-table-body");
+    const blocksPanelSubtitle = d3.select("#blocks-panel-subtitle");
     
     const farmStatsDisplay = d3.select("#farmStatsDisplay");
 
@@ -1235,9 +1270,23 @@
         .attr("d", d => {
           try { return path(d); } catch (e) { return null; }
         })
-        .attr("fill", config.colors.block)  // Uniform green for all
+        .attr("fill", config.colors.block)
         .style("stroke-width", "2px")
-        .style("stroke", "#ffffff");
+        .style("stroke", "#ffffff")
+        .on("mouseover", function(event, d) {
+          const el = d3.select(this);
+          if (el.classed("faded")) return; // don't glow faded blocks
+          if (!el.classed("selected")) {
+            el.raise();
+            el.attr("filter", "url(#hoverGlow)").attr("stroke-width", "3px");
+          }
+        })
+        .on("mouseout", function(event, d) {
+          const el = d3.select(this);
+          if (!el.classed("selected")) {
+            el.attr("filter", null).attr("stroke-width", "2px");
+          }
+        });
 
       addClickLayer();
       initZoom();
@@ -1328,12 +1377,14 @@
         
         const targetScale = Math.min(width, height) < 400 ? 0.75 : 0.65;
         const scale = Math.max(1.2, Math.min(5, targetScale / Math.max(dx / (width * 0.65), dy / (height * 0.65))));
-        const verticalAnchor = height < 600 ? 0.35 : 0.4;
+        const verticalAnchor = height < 600 ? 0.35 : 0.38;
         const translate = [width * 0.5 - scale * x, height * verticalAnchor - scale * y];
 
         const newTransform = d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale);
         currentTransform = newTransform;
-        svg.call(zoomBehavior.transform, newTransform);
+        // Animated zoom-in like desktop.html (smooth, 900ms)
+        svg.transition().duration(900).ease(d3.easeCubicInOut)
+          .call(zoomBehavior.transform, newTransform);
         updateLabelPositions();
       } catch (e) {
         console.warn("Error focusing on block:", e);
@@ -1343,17 +1394,21 @@
     function resetView() {
       selectedBlock = null;
       selectedBlockIndex = -1;
-      currentTransform = d3.zoomIdentity;
-      svg.call(zoomBehavior.transform, currentTransform);
+      // Animated zoom-out like desktop.html (smooth, 700ms)
+      svg.transition().duration(700).ease(d3.easeCubicInOut)
+        .call(zoomBehavior.transform, d3.zoomIdentity)
+        .on("end", () => { currentTransform = d3.zoomIdentity; updateLabelPositions(); });
       
       if (blockSelection) {
-        blockSelection.classed("faded", false).classed("selected", false);
-        blockSelection.attr("fill", config.colors.block);
+        blockSelection
+          .classed("faded", false)
+          .classed("selected", false)
+          .attr("filter", null)
+          .attr("stroke-width", "2px");
       }
       hideAllPanels();
       header.classed("hidden", false);
       farmInfo.classed("hidden", false);
-      updateLabelPositions();
       if (blockLabels) blockLabels.classed("hidden", false);
     }
 
@@ -1366,9 +1421,26 @@
       selectedBlock = fieldName;
       selectedBlockIndex = blocks.indexOf(fieldName);
       
-      blockSelection.classed("faded", dd => dd !== d);
-      blockSelection.classed("selected", dd => dd === d);
-      blockSelection.attr("fill", dd => dd === d ? config.colors.block : config.colors.block); // Same color, just highlight border
+      // Reset all blocks
+      blockSelection
+        .classed("faded", dd => dd !== d)
+        .classed("selected", dd => dd === d)
+        .attr("filter", null)
+        .attr("stroke-width", "2px");
+
+      // Apply gold glow + thicker stroke to selected block
+      const selectedEl = blockSelection.filter(dd => dd === d);
+      selectedEl
+        .raise()
+        .attr("stroke-width", "3.5px")
+        .attr("filter", "url(#selectedGlow)");
+
+      // Pulse animation on top of the glow
+      selectedEl
+        .transition().duration(800)
+          .attr("filter", "url(#pulseEffect)")
+        .transition().duration(800)
+          .attr("filter", "url(#selectedGlow)"); // settle back to gold glow
       
       header.classed("hidden", true);
       farmInfo.classed("hidden", true);
@@ -1378,7 +1450,7 @@
       if (blockLabels) blockLabels.classed("hidden", true);
     }
 
-    // ========== BLOCK PANEL METRICS (ALPHA-ELIM STRUCTURE - UPDATED) ==========
+    // ========== BLOCK PANEL METRICS (COMPACT - NO SCROLL) ==========
     function updateBlockPanel(feature) {
       const fieldName = feature.properties?.Field_Name;
       if (!fieldName) return;
@@ -1391,7 +1463,7 @@
       
       const hData = harvestData[fieldName] || {};
       const avgBunchWeight = hData.avgWeight || 0;
-      const totalHarvestWeight = hData.totalWeight || 0;  // REPLACED matsTagged
+      const totalHarvestWeight = hData.totalWeight || 0;
       
       const iData = irrigationData[fieldName] || {};
       const irrFuel = iData.fuelUsed || 0;
@@ -1399,39 +1471,43 @@
       
       blockPanelSubtitle.text(`${blockSize.toFixed(2)} ha · ${landPercent}% of farm`);
       
+      // Compact bar inline with the subtitle row
+      const barPct = Math.min(100, parseFloat(landPercent));
+
       const html = `
-        <div class="detail-row">
-          <span class="detail-label">Block Size</span>
-          <span class="detail-value">${blockSize.toFixed(2)} ha</span>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+          <div class="detail-row" style="grid-column:span 1; border-right:1px solid var(--sand); padding-right:12px; margin-right:12px;">
+            <span class="detail-label">Block Size</span>
+            <span class="detail-value">${blockSize.toFixed(2)} ha</span>
+          </div>
+          <div class="detail-row" style="grid-column:span 1;">
+            <span class="detail-label">Farm Share</span>
+            <span class="detail-value">${landPercent}%</span>
+          </div>
+          <div class="detail-row" style="grid-column:span 1; border-right:1px solid var(--sand); padding-right:12px; margin-right:12px;">
+            <span class="detail-label">Avg Bunch Wt</span>
+            <span class="detail-value">${avgBunchWeight > 0 ? avgBunchWeight.toFixed(1) + ' kg' : '—'}</span>
+          </div>
+          <div class="detail-row" style="grid-column:span 1;">
+            <span class="detail-label">Total Harvested</span>
+            <span class="detail-value">${totalHarvestWeight > 0 ? (totalHarvestWeight/1000).toFixed(1) + ' t' : '—'}</span>
+          </div>
+          <div class="detail-row" style="grid-column:span 1; border-right:1px solid var(--sand); padding-right:12px; margin-right:12px;">
+            <span class="detail-label">Irr. Sessions</span>
+            <span class="detail-value">${irrSessions}</span>
+          </div>
+          <div class="detail-row" style="grid-column:span 1;">
+            <span class="detail-label">Fuel Used</span>
+            <span class="detail-value">${irrFuel.toFixed(1)} L</span>
+          </div>
         </div>
-        <div class="detail-row">
-          <span class="detail-label">Land Distribution</span>
-          <span class="detail-value">${landPercent}% of total farm</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Avg Bunch Weight</span>
-          <span class="detail-value">${avgBunchWeight > 0 ? avgBunchWeight.toFixed(1) + ' kg' : '—'}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Total Harvested</span>
-          <span class="detail-value">${totalHarvestWeight > 0 ? totalHarvestWeight.toLocaleString('en',{maximumFractionDigits:0}) + ' kg' : '—'}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Irrigation Details</span>
-          <span class="detail-value">${irrSessions} sessions · ${irrFuel.toFixed(1)} L</span>
-        </div>
-        
-        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--sand);">
-          <div style="font-weight:700; color:var(--navy); margin-bottom:12px; font-family:'Playfair Display',serif">
-            📊 Land Allocation
+        <div style="margin-top:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="font-size:11px; font-weight:600; color:var(--forest); opacity:0.75; text-transform:uppercase; letter-spacing:.07em;">Land Allocation</span>
+            <span style="font-size:11px; font-weight:700; color:var(--gold-dim);">${landPercent}% of farm</span>
           </div>
           <div class="density-chart">
-            <div class="density-fill" style="width: ${Math.min(100, landPercent)}%"></div>
-            <div class="chart-label">${landPercent}% of farm</div>
-          </div>
-          <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--olive); margin-top:8px">
-            <span>0%</span>
-            <span>100%</span>
+            <div class="density-fill" style="width:${barPct}%"></div>
           </div>
         </div>
       `;
@@ -1461,77 +1537,95 @@
       activePanel = null;
     }
 
-    // ========== SUMMARY PANEL (UPDATED - NO TAGGING DATA) ==========
+    // ========== SUMMARY PANEL — DASHBOARD CARD LAYOUT ==========
     function updateSummaryPanel() {
       const totalArea = totalFarmArea;
       const totalBlocks = blocks.length;
       
-      // Harvest aggregations (aligned with dashboard)
       const allWeights = Object.values(harvestData).map(d => d.avgWeight).filter(w => w > 0);
       const avgBunchWeight = allWeights.length > 0 
-        ? allWeights.reduce((a,b) => a+b, 0) / allWeights.length 
-        : 0;
-      const totalHarvestWeight = Object.values(harvestData).reduce((a,b) => a + (b.totalWeight||0), 0);
-      
-      // Irrigation aggregations
+        ? allWeights.reduce((a,b) => a+b, 0) / allWeights.length : 0;
+      const totalHarvestKg = Object.values(harvestData).reduce((a,b) => a + (b.totalWeight||0), 0);
       const totalIrrFuel = Object.values(irrigationData).reduce((a,b) => a + (b.fuelUsed||0), 0);
       const totalIrrSessions = Object.values(irrigationData).reduce((a,b) => a + (b.sessions||0), 0);
+      const blocksWithHarvest = Object.keys(harvestData).filter(b => (harvestData[b]?.totalWeight||0) > 0).length;
+      
+      const sorted = [...blocks].sort((a,b) => (harvestData[b]?.totalWeight||0) - (harvestData[a]?.totalWeight||0));
+      const topBlock = sorted[0];
+      const topBlockHarvest = harvestData[topBlock]?.totalWeight || 0;
 
       const html = `
-        <div style="margin-bottom:20px; padding:16px; background:var(--navy); border-radius:12px; border:1px solid rgba(168,147,90,0.2)">
-          <div style="font-weight:700; color:var(--gold); font-family:'Playfair Display',serif; margin-bottom:8px">
-            🌿 Farm Overview
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 0 10px;">
+          <div style="background:var(--navy);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;border:1px solid rgba(168,147,90,0.25);">
+            <span style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.09em;">Total Area</span>
+            <span style="font-size:clamp(20px,5vw,26px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${totalArea.toFixed(1)}<span style="font-size:13px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> ha</span></span>
+            <span style="font-size:11px;color:var(--sand);">${totalBlocks} blocks total</span>
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:14px; color:var(--sand)">
-            <div><strong style="color:var(--gold)">Total Area:</strong> ${totalArea.toFixed(1)} ha</div>
-            <div><strong style="color:var(--gold)">Active Blocks:</strong> ${totalBlocks}</div>
-            <div><strong style="color:var(--gold)">Total Harvest:</strong> ${totalHarvestWeight > 0 ? totalHarvestWeight.toLocaleString('en',{maximumFractionDigits:0}) + ' kg' : '—'}</div>
-            <div><strong style="color:var(--gold)">Avg Bunch Weight:</strong> ${avgBunchWeight > 0 ? avgBunchWeight.toFixed(1) + ' kg' : '—'}</div>
-            <div><strong style="color:var(--gold)">Irrigation Fuel:</strong> ${totalIrrFuel.toFixed(0)} L</div>
-            <div><strong style="color:var(--gold)">Irrigation Sessions:</strong> ${totalIrrSessions}</div>
+          <div style="background:var(--navy);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;border:1px solid rgba(168,147,90,0.25);">
+            <span style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.09em;">Total Harvest</span>
+            <span style="font-size:clamp(20px,5vw,26px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${totalHarvestKg > 0 ? (totalHarvestKg/1000).toFixed(1) : '—'}<span style="font-size:13px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> t</span></span>
+            <span style="font-size:11px;color:var(--sand);">${blocksWithHarvest} active blocks</span>
+          </div>
+          <div style="background:linear-gradient(135deg,#1a3352,#0d2136);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;border:1px solid rgba(168,147,90,0.2);">
+            <span style="font-size:10px;font-weight:700;color:var(--gold-lt);text-transform:uppercase;letter-spacing:.09em;">Avg Bunch Wt</span>
+            <span style="font-size:clamp(20px,5vw,26px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${avgBunchWeight > 0 ? avgBunchWeight.toFixed(1) : '—'}<span style="font-size:13px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> kg</span></span>
+            <span style="font-size:11px;color:var(--sand);">per bunch</span>
+          </div>
+          <div style="background:linear-gradient(135deg,#1a3352,#0d2136);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;border:1px solid rgba(168,147,90,0.2);">
+            <span style="font-size:10px;font-weight:700;color:var(--gold-lt);text-transform:uppercase;letter-spacing:.09em;">Irrigation</span>
+            <span style="font-size:clamp(20px,5vw,26px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${totalIrrFuel.toFixed(0)}<span style="font-size:13px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> L</span></span>
+            <span style="font-size:11px;color:var(--sand);">${totalIrrSessions} sessions</span>
           </div>
         </div>
-        
-        <table class="stats-table">
-          <thead>
-            <tr>
-              <th style="text-align:left; padding:12px 8px; color:var(--gold); font-weight:600; opacity:0.85; font-size:10px; text-transform:uppercase; letter-spacing:.07em">Block</th>
-              <th style="text-align:right; padding:12px 8px; color:var(--gold); font-weight:600; opacity:0.85; font-size:10px; text-transform:uppercase; letter-spacing:.07em">Size (ha)</th>
-              <th style="text-align:right; padding:12px 8px; color:var(--gold); font-weight:600; opacity:0.85; font-size:10px; text-transform:uppercase; letter-spacing:.07em">Harvest (kg)</th>
-              <th style="text-align:right; padding:12px 8px; color:var(--gold); font-weight:600; opacity:0.85; font-size:10px; text-transform:uppercase; letter-spacing:.07em">Avg (kg)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${blocks.map(blockName => {
-              const lData = landData[blockName] || {};
-              const hData = harvestData[blockName] || {};
-              const size = lData.size || 0;
-              const harvest = hData.totalWeight || 0;
-              const avg = hData.avgWeight || 0;
-              return `<tr style="cursor:pointer" data-block="${blockName}">
-                <td style="font-weight:600; color:var(--forest)"><span class="badge badge-gold">${blockName}</span></td>
-                <td style="text-align:right">${size.toFixed(2)}</td>
-                <td style="text-align:right">${harvest > 0 ? harvest.toLocaleString('en',{maximumFractionDigits:0}) : '—'}</td>
-                <td style="text-align:right">${avg > 0 ? avg.toFixed(1) : '—'}</td>
-              </tr>`;
-            }).join('')}
-          </tbody>
+
+        ${topBlock && topBlockHarvest > 0 ? `
+        <div style="margin:0 0 14px;padding:12px 16px;background:rgba(168,147,90,0.08);border-radius:12px;border:1px solid rgba(168,147,90,0.25);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="min-width:0;">
+            <div style="font-size:10px;font-weight:700;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.09em;margin-bottom:3px;">🏆 Top Block</div>
+            <div style="font-size:17px;font-weight:700;color:var(--navy);font-family:'Playfair Display',serif;">${topBlock}</div>
+            <div style="font-size:12px;color:var(--olive);margin-top:2px;">${(topBlockHarvest/1000).toFixed(2)} t · ${landData[topBlock]?.size?.toFixed(2)||'—'} ha</div>
+          </div>
+          <div style="background:var(--navy);border-radius:10px;padding:10px 14px;text-align:center;flex-shrink:0;">
+            <div style="font-size:17px;font-weight:700;color:var(--gold);font-family:'Playfair Display',serif;">${harvestData[topBlock]?.avgWeight > 0 ? harvestData[topBlock].avgWeight.toFixed(1) : '—'}</div>
+            <div style="font-size:10px;color:var(--sand);margin-top:1px;">kg avg</div>
+          </div>
+        </div>` : ''}
+
+        <div style="font-size:10px;font-weight:700;color:var(--olive);text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px;">Block Breakdown</div>
+        <table class="stats-table" style="margin-bottom:12px;">
+          <thead><tr>
+            <th>Block</th>
+            <th style="text-align:right">Size</th>
+            <th style="text-align:right">Harvest</th>
+            <th style="text-align:right">Avg</th>
+          </tr></thead>
+          <tbody>${sorted.map(b => {
+            const sz = (landData[b]?.size||0).toFixed(2);
+            const hw = harvestData[b]?.totalWeight||0;
+            const av = harvestData[b]?.avgWeight||0;
+            const isTop = b === topBlock && topBlockHarvest > 0;
+            return `<tr style="cursor:pointer${isTop?';background:rgba(168,147,90,0.06)':''}" data-block="${b}">
+              <td><span class="badge badge-gold">${b}</span>${isTop?' <span style="font-size:10px">🏆</span>':''}</td>
+              <td style="text-align:right;color:var(--forest)">${sz}</td>
+              <td style="text-align:right;font-weight:${hw>0?700:400};color:${hw>0?'var(--navy)':'var(--sand)'}">
+                ${hw>0?(hw/1000).toFixed(2)+'t':'—'}</td>
+              <td style="text-align:right;color:${av>0?'var(--navy)':'var(--sand)'}">
+                ${av>0?av.toFixed(1):'—'}</td>
+            </tr>`;
+          }).join('')}</tbody>
         </table>
       `;
-      summaryTable.html(html);
-      
-      summaryTable.selectAll("tr[data-block]").on("click", function() {
+      summaryPanelContent.html(html);
+      summaryPanelContent.selectAll("tr[data-block]").on("click", function() {
         const blockName = d3.select(this).attr("data-block");
         const feature = geoData.features.find(f => f.properties?.Field_Name === blockName);
-        if (feature) {
-          hideAllPanels();
-          onBlockClick({ currentTarget: null }, feature);
-        }
+        if (feature) { hideAllPanels(); onBlockClick({ currentTarget: null }, feature); }
       });
     }
 
-    // ========== BLOCKS PANEL (FIXED HEADER VISIBILITY) ==========
+    // ========== BLOCKS PANEL ==========
     function updateBlocksPanel() {
+      blocksPanelSubtitle.text(`${blocks.length} blocks · ${totalFarmArea.toFixed(1)} ha`);
       let html = '';
       blocks.forEach(blockName => {
         const lData = landData[blockName] || {};
@@ -1539,18 +1633,18 @@
         const size = lData.size || 0;
         const harvest = hData.totalWeight || 0;
         const avg = hData.avgWeight || 0;
-        html += `<tr style="cursor: pointer;" data-block="${blockName}" role="option">
+        html += `<tr style="cursor:pointer;" data-block="${blockName}" role="option">
           <td class="stat-name"><span class="badge badge-gold">${blockName}</span></td>
           <td class="stat-value">${size.toFixed(2)} ha</td>
           <td class="stat-value">${harvest > 0 ? harvest.toLocaleString('en',{maximumFractionDigits:0}) + ' kg' : '—'}</td>
           <td class="stat-value">${avg > 0 ? avg.toFixed(1) + ' kg' : '—'}</td>
         </tr>`;
       });
-      blocksTable.html(html);
-      blocksTable.selectAll("tr").on("click", function() {
+      blocksTableBody.html(html);
+      blocksTableBody.selectAll("tr").on("click", function() {
         const blockName = d3.select(this).attr("data-block");
         const feature = geoData.features.find(f => f.properties?.Field_Name === blockName);
-        if (feature) { onBlockClick({ currentTarget: null }, feature); hideAllPanels(); showPanel(blockPanel); }
+        if (feature) { hideAllPanels(); onBlockClick({ currentTarget: null }, feature); showPanel(blockPanel); }
       });
     }
 
