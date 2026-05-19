@@ -37,6 +37,7 @@
       --beige:        #d8d0c6;
       --beige-light:  #e6e1da;
       --beige-xlight: #f4f2ef;
+      --beige-dropdown: #c4c0ba;
       --grey-blue:    #8a949e;
       --sand:         #d6cab0;
       --teal:         #004551;
@@ -65,7 +66,6 @@
 
     body {
       background-color: var(--beige-light);
-      /* Subtle gold bloom top-centre, navy wash bottom-right */
       background-image:
         radial-gradient(ellipse 70% 50% at 50% -5%, rgba(168,147,90,.07) 0%, transparent 65%),
         radial-gradient(ellipse 55% 45% at 105% 105%, rgba(13,33,54,.06) 0%, transparent 55%);
@@ -79,7 +79,6 @@
       align-items: center;
     }
 
-    /* ── Decorative brand E-pattern (top-right corner) — UPDATED ────── */
     body::before {
       content: '';
       position: fixed;
@@ -91,7 +90,6 @@
       z-index: 0;
     }
 
-    /* Decorative gold E-pattern (bottom-left) — UPDATED */
     body::after {
       content: '';
       position: fixed;
@@ -143,7 +141,6 @@
       margin-bottom: 1.1rem;
     }
 
-    /* Gold rule — brand divider */
     .header-rule {
       width: 44px;
       height: 2px;
@@ -184,7 +181,6 @@
       flex-shrink: 0;
     }
 
-    /* ── PWA install — position/behaviour unchanged from original ── */
     .install-prompt { text-align: center; margin-top: .9rem; }
 
     .install-btn {
@@ -207,7 +203,7 @@
     .install-btn.hidden { display: none; }
 
     /* ─────────────────────────────────────────────────
-       SECTION LABEL  (mini upper-case eyebrow on cards)
+       SECTION LABEL
        ───────────────────────────────────────────────── */
     .section-label {
       font-size: .67rem;
@@ -239,7 +235,6 @@
       display: flex;
       flex-direction: column;
       box-shadow: var(--shadow-card);
-      /* Only transform+opacity animated — GPU composited, no repaints */
       transition: transform var(--dur) var(--ease),
                   box-shadow var(--dur) var(--ease),
                   border-color var(--dur) var(--ease);
@@ -254,7 +249,6 @@
 
     .card.full-width { grid-column: span 2; }
 
-    /* Gold accent bar — brand language */
     .card::before {
       content: '';
       display: block;
@@ -358,7 +352,7 @@
     }
     .btn-ghost:hover { background: rgba(168,147,90,.24); }
 
-    /* Focus visible for keyboard navigation */
+    /* Focus visible */
     .btn:focus-visible,
     .dropdown-btn:focus-visible,
     .mini-btn:focus-visible,
@@ -368,7 +362,7 @@
     }
 
     /* ─────────────────────────────────────────────────
-       DROPDOWN  (Data Entry Forms card)
+       DROPDOWN  (navy card variant)
        ───────────────────────────────────────────────── */
     .dropdown-btn {
       background: rgba(255,255,255,.1);
@@ -395,13 +389,42 @@
       transform: translateY(-1px);
     }
 
+    /* ── White-card dropdown variant ───────────────── */
+    .dropdown-btn-light {
+      background: var(--beige-light);
+      color: var(--navy);
+      font-family: var(--font-sans);
+      font-weight: 500;
+      font-size: .85rem;
+      letter-spacing: .04em;
+      padding: .95rem 1.3rem;
+      border-radius: var(--r-pill);
+      border: 1px solid rgba(13,33,54,.12);
+      width: 100%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: background var(--dur) var(--ease),
+                  transform var(--dur) var(--ease);
+    }
+
+    .dropdown-btn-light:hover {
+      background: var(--beige);
+      transform: translateY(-1px);
+    }
+
+    .dropdown-btn-light .dropdown-count {
+      background: var(--navy);
+    }
+
     .dropdown-btn-left {
       display: flex;
       align-items: center;
       gap: .65rem;
     }
 
-    /* Gold pill — form count indicator */
     .dropdown-count {
       background: var(--gold);
       color: var(--white);
@@ -444,9 +467,19 @@
       padding-top: 1.4rem;
     }
 
-    .mini-card {
+    /* Mini-cards inside navy card */
+    .card-navy .mini-card {
       background: rgba(244,242,239,.95);
       border: 1px solid rgba(255,255,255,.3);
+    }
+
+    /* Mini-cards inside white card */
+    .card-white-db .mini-card {
+      background: var(--beige-xlight);
+      border: 1px solid rgba(13,33,54,.07);
+    }
+
+    .mini-card {
       border-radius: var(--r-mini);
       padding: 1.25rem 1.25rem 1.35rem;
       display: flex;
@@ -528,7 +561,6 @@
       animation: fadeUp .5s .28s var(--ease) both;
     }
 
-    /* Phantom E-pattern watermark — decorative only, UPDATED */
     .dashboard-strip::after {
       content: '';
       position: absolute;
@@ -585,7 +617,7 @@
     }
 
     /* ─────────────────────────────────────────────────
-       POWERED BY  (fixed · bottom-right — unchanged)
+       POWERED BY
        ───────────────────────────────────────────────── */
     .powered-by {
       position: fixed;
@@ -613,7 +645,7 @@
     }
 
     /* ─────────────────────────────────────────────────
-       LOADING TOAST  (fixed — unchanged behaviour)
+       LOADING TOAST
        ───────────────────────────────────────────────── */
     .loading-toast {
       position: fixed;
@@ -654,7 +686,7 @@
     }
 
     /* ─────────────────────────────────────────────────
-       KEYFRAMES  (transform+opacity only — GPU path)
+       KEYFRAMES
        ───────────────────────────────────────────────── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(18px); }
@@ -663,19 +695,13 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Stagger card reveals */
     .card-grid .card:nth-child(1) { animation-delay: .04s; }
     .card-grid .card:nth-child(2) { animation-delay: .1s;  }
     .card-grid .card:nth-child(3) { animation-delay: .16s; }
     .card-grid .card:nth-child(4) { animation-delay: .22s; }
 
-    /* ─────────────────────────────────────────────────
-       ACCESSIBILITY: Respect reduced motion preferences
-       ───────────────────────────────────────────────── */
     @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
+      *, *::before, *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
@@ -686,65 +712,57 @@
     /* ─────────────────────────────────────────────────
        RESPONSIVE
        ───────────────────────────────────────────────── */
-      /* ─────────────────────────────────────────────────
-     RESPONSIVE  (UPDATED: Patterns now visible on mobile)
-     ───────────────────────────────────────────────── */
-  @media (max-width: 640px) {
-    body {
-      padding: 2rem 1rem 6.5rem;
+    @media (max-width: 640px) {
+      body {
+        padding: 2rem 1rem 6.5rem;
+      }
+
+      body::before {
+        width: 200px; height: 180px;
+        top: -30px; right: -15px;
+        opacity: 0.04;
+      }
+      body::after {
+        width: 150px; height: 130px;
+        bottom: 70px; left: -10px;
+        opacity: 0.05;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .card.full-width { grid-column: span 1; }
+      .inner-grid { grid-template-columns: 1fr; gap: .85rem; }
+
+      .dashboard-strip {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.5rem 1.4rem;
+      }
+
+      .dashboard-strip::after {
+        width: 140px; height: 100px;
+        right: 12px; top: auto; bottom: 12px;
+        transform: none;
+        opacity: 0.035;
+      }
+
+      .powered-by { bottom: 14px; right: 12px; }
+
+      .loading-toast {
+        font-size: .79rem;
+        padding: .6rem 1.1rem;
+        bottom: 72px;
+      }
+
+      .card { padding: 1.6rem 1.5rem 1.8rem; }
     }
-
-    /* Show patterns on mobile with adjusted size/position */
-    body::before {
-      width: 200px; height: 180px;
-      top: -30px; right: -15px;
-      opacity: 0.04; /* Slightly lower to avoid visual clutter */
-    }
-    body::after {
-      width: 150px; height: 130px;
-      bottom: 70px; left: -10px;
-      opacity: 0.05;
-    }
-
-    .card-grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-
-    .card.full-width { grid-column: span 1; }
-    .inner-grid { grid-template-columns: 1fr; gap: .85rem; }
-
-    .dashboard-strip {
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 1.5rem 1.4rem;
-    }
-
-    /* Keep dashboard pattern visible, but tuck it neatly */
-    .dashboard-strip::after {
-      width: 140px; height: 100px;
-      right: 12px; top: auto; bottom: 12px;
-      transform: none;
-      opacity: 0.035;
-    }
-
-    .powered-by { bottom: 14px; right: 12px; }
-
-    .loading-toast {
-      font-size: .79rem;
-      padding: .6rem 1.1rem;
-      bottom: 72px;
-    }
-
-    .card { padding: 1.6rem 1.5rem 1.8rem; }
-  }
-
-
   </style>
 </head>
 <body>
 
-  <!-- Skip link for keyboard accessibility -->
   <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Skip to content</a>
 
   <div class="container" id="main-content">
@@ -762,7 +780,6 @@
         All tools &middot; Secure &middot; Updated
       </div>
 
-      <!-- PWA install — position + markup unchanged -->
       <div class="install-prompt">
         <button id="installBtn" class="install-btn hidden">📲 Install App</button>
       </div>
@@ -780,18 +797,18 @@
         <h2>Data Entry Forms</h2>
         <p>Quickly submit operational data — click below to reveal all active forms.</p>
 
-        <button id="dropdownToggleBtn"
+        <button id="formsDropdownBtn"
                 class="dropdown-btn"
                 aria-expanded="false"
-                aria-controls="dropdownContent">
+                aria-controls="formsDropdownContent">
           <span class="dropdown-btn-left">
             <span>View all forms</span>
             <span class="dropdown-count">4</span>
           </span>
-          <span class="dropdown-arrow" id="dropdownArrow" aria-hidden="true">▼</span>
+          <span class="dropdown-arrow" id="formsDropdownArrow" aria-hidden="true">▼</span>
         </button>
 
-        <div id="dropdownContent" class="dropdown-content" role="region" aria-label="Form links">
+        <div id="formsDropdownContent" class="dropdown-content" role="region" aria-label="Form links">
           <div class="inner-grid">
 
             <div class="mini-card">
@@ -834,27 +851,26 @@
         </div>
       </div>
 
-      <!-- ── MASTER DATABASE ── -->
-      <!-- ── MASTER DATABASE (dropdown) ── -->
-      <div class="card card-navy full-width">
+      <!-- ── MASTER DATABASE  (white · full-width · dropdown) ── -->
+      <div class="card full-width card-white-db">
         <div class="card-icon">🗄️</div>
         <h2>Master Database</h2>
         <p>Access centralised Google Sheets for production, budgets, and sales tracking.</p>
-      
-        <button class="dropdown-btn db-dropdown-toggle"
+
+        <button id="dbDropdownBtn"
+                class="dropdown-btn-light"
                 aria-expanded="false"
                 aria-controls="dbDropdownContent">
           <span class="dropdown-btn-left">
             <span>View all databases</span>
             <span class="dropdown-count">3</span>
           </span>
-          <span class="dropdown-arrow db-dropdown-arrow" aria-hidden="true">▼</span>
+          <span class="dropdown-arrow" id="dbDropdownArrow" aria-hidden="true">▼</span>
         </button>
-      
+
         <div id="dbDropdownContent" class="dropdown-content" role="region" aria-label="Database links">
           <div class="inner-grid">
-      
-            <!-- Production & Processes -->
+
             <div class="mini-card">
               <div class="mini-card-icon">⚙️</div>
               <h3>Production & Processes</h3>
@@ -863,8 +879,7 @@
                  class="mini-btn launch-link" data-label="Production database"
                  target="_blank" rel="noopener">Open sheet →</a>
             </div>
-      
-            <!-- Budgets & Projections -->
+
             <div class="mini-card">
               <div class="mini-card-icon">💰</div>
               <h3>Budgets & Projections</h3>
@@ -873,8 +888,7 @@
                  class="mini-btn launch-link" data-label="Budgets database"
                  target="_blank" rel="noopener">Open sheet →</a>
             </div>
-      
-            <!-- Volumes & Sales -->
+
             <div class="mini-card">
               <div class="mini-card-icon">📦</div>
               <h3>Volumes & Sales</h3>
@@ -883,13 +897,13 @@
                  class="mini-btn launch-link" data-label="Sales database"
                  target="_blank" rel="noopener">Open sheet →</a>
             </div>
-      
+
           </div>
         </div>
       </div>
 
-      <!-- ── FARM OVERVIEW ── -->
-      <div class="card card-beige">
+      <!-- ── FARM OVERVIEW  (full-width) ── -->
+      <div class="card card-beige full-width">
         <div class="card-icon">🗺️</div>
         <h2>Farm Overview</h2>
         <p>Interactive map with real-time field health, irrigation zones, and crop performance.</p>
@@ -944,7 +958,7 @@
 
 
   <!-- ══════════════════════════════════════════
-       LOADING TOAST  (unchanged)
+       LOADING TOAST
        ══════════════════════════════════════════ -->
   <div id="loadingToast" class="loading-toast" role="status" aria-live="polite">
     <span class="toast-spinner"></span>
@@ -952,9 +966,8 @@
   </div>
 
 
-  
   <!-- ══════════════════════════════════════════
-       POWERED BY  (fixed · bottom-right — unchanged)
+       POWERED BY
        ══════════════════════════════════════════ -->
   <div class="powered-by">
     <span>Powered by</span>
@@ -963,21 +976,25 @@
 
 
   <script>
-    /* ── DROPDOWN ───────────────────────────────────────────── */
-    const toggleBtn       = document.getElementById('dropdownToggleBtn');
-    const dropdownContent = document.getElementById('dropdownContent');
-    const arrowSpan       = document.getElementById('dropdownArrow');
+    /* ── GENERIC DROPDOWN FACTORY ───────────────────── */
+    function initDropdown(btnId, contentId, arrowId) {
+      const btn     = document.getElementById(btnId);
+      const content = document.getElementById(contentId);
+      const arrow   = document.getElementById(arrowId);
+      if (!btn || !content) return;
 
-    if (toggleBtn && dropdownContent) {
-      toggleBtn.addEventListener('click', () => {
-        const isOpen = dropdownContent.classList.contains('show');
-        dropdownContent.classList.toggle('show', !isOpen);
-        arrowSpan.classList.toggle('open', !isOpen);
-        toggleBtn.setAttribute('aria-expanded', String(!isOpen));
+      btn.addEventListener('click', () => {
+        const isOpen = content.classList.contains('show');
+        content.classList.toggle('show', !isOpen);
+        if (arrow) arrow.classList.toggle('open', !isOpen);
+        btn.setAttribute('aria-expanded', String(!isOpen));
       });
     }
 
-    /* ── LOADING TOAST ──────────────────────────────────────── */
+    initDropdown('formsDropdownBtn', 'formsDropdownContent', 'formsDropdownArrow');
+    initDropdown('dbDropdownBtn',    'dbDropdownContent',    'dbDropdownArrow');
+
+    /* ── LOADING TOAST ──────────────────────────────── */
     const toast      = document.getElementById('loadingToast');
     const toastLabel = document.getElementById('toastLabel');
     let   toastTimer = null;
@@ -989,7 +1006,7 @@
       toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
     }
 
-    /*A Danford Mponda product */
+    /* A Danford Mponda product */
 
     document.querySelectorAll('.launch-link').forEach(link => {
       link.addEventListener('click', () => {
@@ -1000,7 +1017,7 @@
       });
     });
 
-    /* ── PWA INSTALL  (position + behaviour unchanged) ──────── */
+    /* ── PWA INSTALL ────────────────────────────────── */
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
