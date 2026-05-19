@@ -835,13 +835,57 @@
       </div>
 
       <!-- ── MASTER DATABASE ── -->
-      <div class="card">
+      <!-- ── MASTER DATABASE (dropdown) ── -->
+      <div class="card card-navy full-width">
         <div class="card-icon">🗄️</div>
         <h2>Master Database</h2>
-        <p>View all submitted data from every form in the central Google Sheet.</p>
-        <a href="https://docs.google.com/spreadsheets/d/1KNqzCOnvgn-pU5zVnh-hOjPXKQe6Z9DDpZjKMDEcY1k/edit?usp=sharing"
-           class="btn btn-primary launch-link" data-label="Master Database"
-           target="_blank" rel="noopener">Open database →</a>
+        <p>Access centralised Google Sheets for production, budgets, and sales tracking.</p>
+      
+        <button class="dropdown-btn db-dropdown-toggle"
+                aria-expanded="false"
+                aria-controls="dbDropdownContent">
+          <span class="dropdown-btn-left">
+            <span>View all databases</span>
+            <span class="dropdown-count">3</span>
+          </span>
+          <span class="dropdown-arrow db-dropdown-arrow" aria-hidden="true">▼</span>
+        </button>
+      
+        <div id="dbDropdownContent" class="dropdown-content" role="region" aria-label="Database links">
+          <div class="inner-grid">
+      
+            <!-- Production & Processes -->
+            <div class="mini-card">
+              <div class="mini-card-icon">⚙️</div>
+              <h3>Production & Processes</h3>
+              <p>Track farm operations, input usage, and workflow metrics.</p>
+              <a href="https://docs.google.com/spreadsheets/d/1KNqzCOnvgn-pU5zVnh-hOjPXKQe6Z9DDpZjKMDEcY1k/edit?usp=sharing"
+                 class="mini-btn launch-link" data-label="Production database"
+                 target="_blank" rel="noopener">Open sheet →</a>
+            </div>
+      
+            <!-- Budgets & Projections -->
+            <div class="mini-card">
+              <div class="mini-card-icon">💰</div>
+              <h3>Budgets & Projections</h3>
+              <p>Financial planning, cost analysis, and forecast modelling.</p>
+              <a href="https://docs.google.com/spreadsheets/u/0/d/1Ru3j74JStFbaPuyt2MrI33Z9WevxLsFunzXAAwcgrFI/edit"
+                 class="mini-btn launch-link" data-label="Budgets database"
+                 target="_blank" rel="noopener">Open sheet →</a>
+            </div>
+      
+            <!-- Volumes & Sales -->
+            <div class="mini-card">
+              <div class="mini-card-icon">📦</div>
+              <h3>Volumes & Sales</h3>
+              <p>Deposit tracker, sales logs, and revenue reconciliation.</p>
+              <a href="https://docs.google.com/spreadsheets/d/1iQvrP03QjWzfYmHnePz5z9CXH0WehVuCPDQqCFOzkPc/edit?usp=sharing"
+                 class="mini-btn launch-link" data-label="Sales database"
+                 target="_blank" rel="noopener">Open sheet →</a>
+            </div>
+      
+          </div>
+        </div>
       </div>
 
       <!-- ── FARM OVERVIEW ── -->
