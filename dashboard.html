@@ -176,7 +176,7 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
   max-height: 400px !important;
 }
 
-/* ── DOUGHNUT WRAP (land progress) ──────────── */
+/* ── DOUGHNUT WRAP ──────────────────────────── */
 .chart-wrap-doughnut {
   display: flex;
   justify-content: center;
@@ -189,7 +189,7 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
   max-height: 200px !important;
 }
 
-/* ── BLOCK GRID VISUALIZATION ────────────────── */
+/* ── BLOCK GRID ─────────────────────────────── */
 .block-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -217,28 +217,11 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
   transform: translateY(-3px);
   box-shadow: 0 8px 24px rgba(168,147,90,0.3);
 }
-.block-card .block-id {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px; font-weight: 700;
-  color: var(--gold); margin-bottom: 4px;
-}
-.block-card .block-size {
-  font-size: 18px; font-weight: 600;
-  color: #fff; margin-bottom: 2px;
-}
-.block-card .block-label {
-  font-size: 10px; color: var(--sand);
-  text-transform: uppercase; letter-spacing: 0.05em;
-}
-.block-card .block-bar {
-  margin-top: 10px; height: 4px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 2px; overflow: hidden;
-}
-.block-card .block-fill {
-  height: 100%; background: var(--gold);
-  border-radius: 2px; transition: width 0.6s ease;
-}
+.block-card .block-id    { font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:var(--gold); margin-bottom:4px; }
+.block-card .block-size  { font-size:18px; font-weight:600; color:#fff; margin-bottom:2px; }
+.block-card .block-label { font-size:10px; color:var(--sand); text-transform:uppercase; letter-spacing:.05em; }
+.block-card .block-bar   { margin-top:10px; height:4px; background:rgba(255,255,255,.1); border-radius:2px; overflow:hidden; }
+.block-card .block-fill  { height:100%; background:var(--gold); border-radius:2px; transition:width .6s ease; }
 
 /* ── EXPECTED HARVEST TABLE ─────────────────── */
 .expected-harvest-table {
@@ -261,11 +244,11 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
 }
 .expected-harvest-table tr:hover td { background: rgba(168,147,90,.06); }
 .expected-harvest-table tr:last-child td { border-bottom: none; }
-.expected-harvest-table .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-.expected-harvest-table .badge-gold { background: rgba(168,147,90,.15); color: var(--gold-dim); }
-.expected-harvest-table .future-date { color: var(--gold-dim); font-weight: 600; }
-.expected-harvest-table .past-date   { color: var(--olive); font-style: italic; }
-.expected-harvest-empty { text-align: center; color: var(--olive); padding: 24px; font-size: 13px; }
+.expected-harvest-table .badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; }
+.expected-harvest-table .badge-gold { background:rgba(168,147,90,.15); color:var(--gold-dim); }
+.expected-harvest-table .future-date { color:var(--gold-dim); font-weight:600; }
+.expected-harvest-table .past-date   { color:var(--olive); font-style:italic; }
+.expected-harvest-empty { text-align:center; color:var(--olive); padding:24px; font-size:13px; }
 
 /* ── TABLES ───────────────────────────────────── */
 .table-wrap { overflow-x:auto; }
@@ -277,6 +260,8 @@ tr:last-child td { border-bottom:none; }
 .badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; }
 .badge-gold  { background:rgba(168,147,90,.15); color:var(--gold-dim); }
 .badge-olive { background:rgba(129,132,90,.15); color:var(--olive); }
+.badge-green { background:rgba(45,140,70,.13); color:#1e7d3a; }
+.badge-red   { background:rgba(192,57,43,.12); color:#a93226; }
 
 /* ── LEGEND ───────────────────────────────────── */
 .colour-swatch { display:inline-block; width:11px; height:11px; border-radius:50%; vertical-align:middle; margin-right:6px; border:1px solid rgba(0,0,0,.12); }
@@ -291,16 +276,96 @@ tr:last-child td { border-bottom:none; }
   background: #fff; border-radius: 12px; padding: 18px;
   border: 1px solid var(--sand); margin-top: 14px;
 }
-.timeline-bar { display: flex; align-items: center; margin-bottom: 12px; gap: 12px; }
-.timeline-label { min-width: 80px; font-size: 11px; color: var(--forest); font-weight: 500; }
-.timeline-track { flex: 1; height: 28px; background: var(--cream); border-radius: 6px; overflow: hidden; position: relative; }
+.timeline-bar { display:flex; align-items:center; margin-bottom:12px; gap:12px; }
+.timeline-label { min-width:80px; font-size:11px; color:var(--forest); font-weight:500; }
+.timeline-track { flex:1; height:28px; background:var(--cream); border-radius:6px; overflow:hidden; position:relative; }
 .timeline-fill {
-  height: 100%;
+  height:100%;
   background: linear-gradient(90deg, var(--gold) 0%, var(--gold-lt) 100%);
-  border-radius: 6px; transition: width 0.6s ease;
-  display: flex; align-items: center; justify-content: flex-end;
-  padding-right: 8px; font-size: 11px; font-weight: 600; color: var(--navy);
+  border-radius:6px; transition:width .6s ease;
+  display:flex; align-items:center; justify-content:flex-end;
+  padding-right:8px; font-size:11px; font-weight:600; color:var(--navy);
 }
+
+/* ── DEPOSIT TRACKER STYLES ──────────────────── */
+.deposit-month-section {
+  margin-bottom: 28px;
+}
+.deposit-month-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--navy);
+  border-radius: 10px 10px 0 0;
+  border-bottom: 3px solid var(--gold);
+  cursor: pointer;
+  user-select: none;
+  transition: background .2s;
+}
+.deposit-month-header:hover { background: var(--navy-lt); }
+.deposit-month-header.collapsed { border-radius: 10px; border-bottom: none; }
+.deposit-month-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; font-weight: 700; color: #fff;
+}
+.deposit-month-total {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px; font-weight: 600; color: var(--gold);
+}
+.deposit-month-chevron {
+  color: var(--sand); font-size: 11px;
+  transition: transform .3s ease; margin-left: 12px;
+}
+.deposit-month-chevron.open { transform: rotate(180deg); }
+.deposit-month-body {
+  background: #fff; border: 1px solid var(--sand);
+  border-top: none; border-radius: 0 0 10px 10px;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .45s cubic-bezier(.33,1,.68,1);
+}
+.deposit-month-body.open { max-height: 2000px; }
+.deposit-month-body .table-wrap { padding: 0; }
+.deposit-month-body table { font-size: 11px; }
+.deposit-month-body th { font-size: 9px; padding: 7px 10px; }
+.deposit-month-body td { padding: 6px 10px; }
+
+/* Batch column colour coding */
+.batch-1 { border-left: 3px solid #a8935a; }
+.batch-2 { border-left: 3px solid #c4ac74; }
+.batch-3 { border-left: 3px solid #81845a; }
+.batch-4 { border-left: 3px solid #3b7dd8; }
+.batch-5 { border-left: 3px solid #5d8a4a; }
+
+.deposit-total-row td {
+  background: rgba(168,147,90,.08) !important;
+  font-weight: 700; color: var(--navy) !important;
+  border-top: 2px solid var(--sand);
+}
+.deposit-grand-total {
+  background: var(--navy); border-radius: 10px;
+  padding: 16px 20px; display: flex;
+  align-items: center; justify-content: space-between;
+  margin-top: 20px; border: 2px solid var(--gold);
+}
+.deposit-grand-total .label {
+  font-size: 12px; color: var(--sand);
+  text-transform: uppercase; letter-spacing: .1em;
+}
+.deposit-grand-total .value {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; font-weight: 700; color: var(--gold);
+}
+.batch-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 600;
+  background: rgba(168,147,90,.12); color: var(--gold-dim);
+  white-space: nowrap;
+}
+.dep-zero { color: var(--sand) !important; font-style: italic; }
+.dep-amount { font-weight: 600; color: var(--forest); }
 
 /* ── TOAST ────────────────────────────────────── */
 #toast {
@@ -328,6 +393,9 @@ tr:last-child td { border-bottom:none; }
   .expected-harvest-table table { font-size: 11px; }
   .expected-harvest-table th,
   .expected-harvest-table td { padding: 6px 8px; }
+  .deposit-month-header { flex-wrap: wrap; gap: 6px; }
+  .deposit-grand-total { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .deposit-grand-total .value { font-size: 20px; }
 }
 </style>
 </head>
@@ -363,7 +431,8 @@ tr:last-child td { border-bottom:none; }
   <button class="tab-btn"        onclick="showTab('pump',       this)">Pump Log</button>
   <button class="tab-btn"        onclick="showTab('irrigation', this)">Irrigation</button>
   <button class="tab-btn"        onclick="showTab('land',       this)">Land</button>
-  <button class="tab-btn"        onclick="showTab('financials', this)">Financials</button>
+  <button class="tab-btn"        onclick="showTab('financials', this)">Financials (Budgets &amp; Projections)</button>
+  <button class="tab-btn"        onclick="showTab('deposits',   this)">Financials (Deposit Tracker)</button>
 </nav>
 
 <main>
@@ -409,6 +478,18 @@ tr:last-child td { border-bottom:none; }
       <div class="label" id="kpi-ov-last-vol-label">Last Month Volume</div>
       <div class="sub">Actual (kg)</div>
     </div>
+    <div class="kpi-card">
+      <span class="icon">🏦</span>
+      <div class="value" id="kpi-ov-total-deposits">—</div>
+      <div class="label">Total Deposits</div>
+      <div class="sub">All months (MWK)</div>
+    </div>
+    <div class="kpi-card accent">
+      <span class="icon">📅</span>
+      <div class="value" id="kpi-ov-active-months">—</div>
+      <div class="label">Months with Deposits</div>
+      <div class="sub">Deposit tracker</div>
+    </div>
   </div>
   <div class="chart-grid cols-2">
     <div class="chart-card dark">
@@ -430,6 +511,11 @@ tr:last-child td { border-bottom:none; }
       <div class="chart-title">Land Acquisition Progress</div>
       <div class="chart-sub">Acquired vs Target (50 ha)</div>
       <div class="chart-wrap"><canvas id="c_landProgress_ov" height="160"></canvas></div>
+    </div>
+    <div class="chart-card span-2">
+      <div class="chart-title">Monthly Deposits — All Months</div>
+      <div class="chart-sub">Total deposit amount per month (MWK)</div>
+      <div class="chart-wrap"><canvas id="c_ov_deposits" height="140"></canvas></div>
     </div>
   </div>
 </div>
@@ -731,7 +817,7 @@ tr:last-child td { border-bottom:none; }
   </div>
 </div>
 
-<!-- ══ FINANCIALS ════════════════════════════════════════════════ -->
+<!-- ══ FINANCIALS (BUDGETS & PROJECTIONS) ════════════════════════ -->
 <div id="tab-financials" class="tab-panel">
   <p class="section-title" id="fin-section-title">Financial Performance</p>
   <p class="section-sub" id="fin-sub">Revenue, volume, pricing and bunch weight trends</p>
@@ -820,22 +906,98 @@ tr:last-child td { border-bottom:none; }
   </div>
 </div>
 
+<!-- ══ FINANCIALS (DEPOSIT TRACKER) ════════════════════════════ -->
+<div id="tab-deposits" class="tab-panel">
+  <p class="section-title">Financials — Deposit Tracker</p>
+  <p class="section-sub" id="dep-sub">All batch deposits recorded per month</p>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <span class="icon">🏦</span>
+      <div class="value" id="kpi-dep-grand-total">—</div>
+      <div class="label">Grand Total Deposits</div>
+      <div class="sub">All months (MWK)</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📅</span>
+      <div class="value" id="kpi-dep-active-months">—</div>
+      <div class="label">Active Months</div>
+      <div class="sub">With deposits recorded</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📈</span>
+      <div class="value" id="kpi-dep-peak-month">—</div>
+      <div class="label">Peak Month</div>
+      <div class="sub" id="kpi-dep-peak-val">—</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📊</span>
+      <div class="value" id="kpi-dep-avg-monthly">—</div>
+      <div class="label">Avg Monthly Deposits</div>
+      <div class="sub">MWK</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">🔢</span>
+      <div class="value" id="kpi-dep-total-entries">—</div>
+      <div class="label">Total Deposit Entries</div>
+      <div class="sub">Individual transactions</div>
+    </div>
+    <div class="kpi-card">
+      <span class="icon">📦</span>
+      <div class="value" id="kpi-dep-max-batches">—</div>
+      <div class="label">Max Batches Used</div>
+      <div class="sub">Across all months</div>
+    </div>
+  </div>
+
+  <div class="chart-grid cols-2">
+    <div class="chart-card span-2 dark">
+      <div class="chart-title">Monthly Deposit Totals</div>
+      <div class="chart-sub">Total deposits per month (MWK) — active months only</div>
+      <div class="chart-wrap"><canvas id="c_dep_monthly" height="140"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Batch Contribution Breakdown</div>
+      <div class="chart-sub">Total deposited per batch number (MWK)</div>
+      <div class="chart-wrap"><canvas id="c_dep_batches" height="200"></canvas></div>
+    </div>
+    <div class="chart-card dark">
+      <div class="chart-title">Deposit Count by Month</div>
+      <div class="chart-sub">Number of individual deposit entries per month</div>
+      <div class="chart-wrap"><canvas id="c_dep_count" height="200"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Accordion per-month detail -->
+  <div class="chart-title" style="margin-bottom:6px;margin-top:8px;">Month-by-Month Deposit Detail</div>
+  <div class="chart-sub" style="margin-bottom:16px;">Click any month to expand all batches and individual deposits</div>
+  <div id="deposit-accordion"></div>
+
+  <div class="deposit-grand-total">
+    <div>
+      <div class="label">Grand Total — All Deposits</div>
+      <div style="font-size:11px;color:var(--sand);margin-top:2px;" id="dep-grand-sub">—</div>
+    </div>
+    <div class="value" id="dep-grand-display">—</div>
+  </div>
+</div>
+
 </main>
 
 <script>
 'use strict';
 
 /* ════════════════════════════════════════════════════════════════
-   CSV ENDPOINTS — update with your Google Sheets publish URLs
+   CSV ENDPOINTS
    ════════════════════════════════════════════════════════════════ */
 const CSV_IRRIGATION = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=1622779254&single=true&output=csv';
 const CSV_TAGGING    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=268268980&single=true&output=csv';
 const CSV_PUMP       = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=121768597&single=true&output=csv';
 const CSV_HARVEST    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=2081044538&single=true&output=csv';
 const CSV_LAND       = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=349843810&single=true&output=csv';
-const CSV_FINANCIALS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJbMVAcL_W5nQJU71-7z7KemUt75Ddjd_uk5o11pE-LlM_HVcxwiwGQyvalj5L-Kj6mRVsd5iXWAV1/pub?gid=2036435473&single=true&output=csv'; // Paste your Financials CSV URL here
-
-
+const CSV_FINANCIALS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJbMVAcL_W5nQJU71-7z7KemUt75Ddjd_uk5o11pE-LlM_HVcxwiwGQyvalj5L-Kj6mRVsd5iXWAV1/pub?gid=2036435473&single=true&output=csv';
+const CSV_DEPOSITS   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRErLlDmjLbNlKTBdB9MQqq_UbUktZQ81h1WDnWxrgoXMch5X6KslSEB1JBrZMZJRW4QfuGsPhObn98/pub?gid=544905157&single=true&output=csv';
+// ↑ Replace YOUR_DEPOSIT_SHEET_GID with the actual gid of the Deposit Tracker sheet
 
 const TARGET_LAND_HA      = 50;
 const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
@@ -850,16 +1012,12 @@ Chart.defaults.color = '#7a7a7a';
 
 const CHARTS = {};
 
-/* ── TAB NAVIGATION ─────────────────────────────────────────────
-   FIX: dispatch resize after showing tab so Chart.js redraws
-   charts that were initialised while the panel was display:none. */
+/* ── TAB NAVIGATION ─────────────────────────────────────────────── */
 function showTab(id, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   if (btn) btn.classList.add('active');
-  // Allow the browser to paint, then trigger resize so Chart.js
-  // recalculates canvas dimensions for all charts in the new panel.
   setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
 }
 
@@ -925,6 +1083,11 @@ function cleanNum(val) {
   return parseFloat(String(val).replace(/,/g, '').replace(/%/g, '').trim()) || 0;
 }
 
+function fmtMWK(val) {
+  if (!val || val === 0) return '—';
+  return 'MWK ' + Math.round(val).toLocaleString('en');
+}
+
 function shareCell(pct, colour) {
   colour = colour || GOLD;
   return `<div style="display:flex;align-items:center;gap:6px;">
@@ -968,6 +1131,146 @@ function parseCSV(text) {
   return rows;
 }
 
+/* ════════════════════════════════════════════════════════════════
+   DEPOSIT CSV PARSER
+   ════════════════════════════════════════════════════════════════
+   The deposit sheet has a non-standard layout:
+   - Row 0: batch header label row  (sparse)
+   - Row 1: batch number row        ("Batch 1", "Batch 2" …)
+   - Row 2: column headers          (Month, Deposit no., Date, Amount, …)
+   - Then data rows grouped by month.
+   
+   Strategy: parse the raw CSV as a 2-D array (not key-value rows),
+   then find the column positions of each batch's Date + Amount pair
+   from the header rows, then walk rows looking for:
+     - Month name rows  (col 0 = month name, e.g. "Nov", "Jan")
+     - Deposit rows     (col 0 blank, col 1 = deposit number)
+     - Total rows       (col 1 = "Total")
+     - Grand Total row  (col 2 = "Grand Total")
+   
+   This approach is resilient to extra rows being added within a
+   month (the number of deposit rows can grow freely).
+   ════════════════════════════════════════════════════════════════ */
+function parseDepositCSV(text) {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+
+  function splitLine(line) {
+    const fields = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (ch === ',' && !inQ) {
+        fields.push(cur.trim()); cur = '';
+      } else { cur += ch; }
+    }
+    fields.push(cur.trim());
+    return fields;
+  }
+
+  const grid = lines.map(l => splitLine(l));
+
+  /* ── Find the header row (contains "Month" and "Deposit no.") ── */
+  let headerRowIdx = -1;
+  for (let i = 0; i < Math.min(grid.length, 10); i++) {
+    if (grid[i].some(c => /^month$/i.test(c)) && grid[i].some(c => /deposit/i.test(c))) {
+      headerRowIdx = i;
+      break;
+    }
+  }
+  if (headerRowIdx < 0) return { months: [], grandTotal: 0 };
+
+  const headers = grid[headerRowIdx];
+
+  /* ── Locate batch columns ─────────────────────────────────────── 
+     Pattern: "Date of Deposit", "Deposit Amount (MWK)" appear
+     multiple times (once per batch). Collect all their indices.     */
+  const batchDateCols   = [];
+  const batchAmtCols    = [];
+  headers.forEach((h, i) => {
+    if (/date.*deposit/i.test(h) || /deposit.*date/i.test(h)) batchDateCols.push(i);
+    if (/deposit.*amount/i.test(h) || /amount.*MWK/i.test(h)) batchAmtCols.push(i);
+  });
+
+  /* Also find "Total monthly Deposits" column */
+  const totalColIdx = headers.findIndex(h => /total.*deposit/i.test(h) || /monthly.*deposit/i.test(h));
+
+  /* ── Walk data rows ─────────────────────────────────────────── */
+  const MONTH_NAMES = /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i;
+  const months = [];
+  let currentMonth = null;
+
+  for (let i = headerRowIdx + 1; i < grid.length; i++) {
+    const row = grid[i];
+    const col0 = (row[0] || '').trim();
+    const col1 = (row[1] || '').trim();
+    const col2 = (row[2] || '').trim();
+
+    /* Grand total sentinel */
+    if (/grand total/i.test(col2) || /grand total/i.test(col0)) {
+      // parse from the total column or last amount column
+      const gv = totalColIdx >= 0 ? cleanNum(row[totalColIdx]) : 0;
+      if (gv > 0 && months.length > 0) {
+        months._grandTotalOverride = gv;
+      }
+      continue;
+    }
+
+    /* Month header row — col0 matches a month name and is non-empty */
+    if (MONTH_NAMES.test(col0) && col0.length <= 10) {
+      currentMonth = {
+        name: col0,
+        deposits: [],  // array of { batchNo, date, amount }
+        totalFromSheet: 0
+      };
+      months.push(currentMonth);
+      /* This row may ALSO contain a deposit entry in batch 1 — fall through */
+    }
+
+    if (!currentMonth) continue;
+
+    /* "Total" row for this month */
+    if (/^total$/i.test(col1)) {
+      const tv = totalColIdx >= 0
+        ? cleanNum(row[totalColIdx])
+        : (batchAmtCols.length > 0 ? batchAmtCols.reduce((s, c) => s + cleanNum(row[c]), 0) : 0);
+      currentMonth.totalFromSheet = tv;
+      continue;
+    }
+
+    /* Deposit row — gather entries from each batch column pair */
+    for (let b = 0; b < Math.max(batchDateCols.length, batchAmtCols.length); b++) {
+      const dateCol = batchDateCols[b];
+      const amtCol  = batchAmtCols[b];
+      const dateVal = dateCol !== undefined ? (row[dateCol] || '').trim() : '';
+      const amtVal  = amtCol  !== undefined ? (row[amtCol]  || '').trim() : '';
+      const amount  = cleanNum(amtVal);
+      if (amount > 0 || dateVal) {
+        currentMonth.deposits.push({
+          batchNo:  b + 1,
+          date:     dateVal,
+          amount:   amount,
+          rowDepNo: col1 || ''
+        });
+      }
+    }
+  }
+
+  /* ── Compute derived totals ──────────────────────────────────── */
+  months.forEach(m => {
+    m.computedTotal = m.deposits.reduce((s, d) => s + d.amount, 0);
+    /* Prefer the sheet's own Total row if it exists and is reasonable */
+    m.displayTotal  = m.totalFromSheet > 0 ? m.totalFromSheet : m.computedTotal;
+  });
+
+  const grandTotal = months._grandTotalOverride
+    || months.reduce((s, m) => s + m.displayTotal, 0);
+
+  return { months, grandTotal };
+}
+
 async function fetchCSV(url) {
   if (!url) return [];
   const sep = url.includes('?') ? '&' : '?';
@@ -976,9 +1279,20 @@ async function fetchCSV(url) {
   return parseCSV(await res.text());
 }
 
-/* ── CHART HELPERS ──────────────────────────────────────────────── */
+async function fetchDepositCSV(url) {
+  if (!url) return { months: [], grandTotal: 0 };
+  const sep = url.includes('?') ? '&' : '?';
+  try {
+    const res = await fetch(url + sep + '_cb=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return parseDepositCSV(await res.text());
+  } catch (e) {
+    console.warn('Deposit CSV fetch failed:', e);
+    return { months: [], grandTotal: 0 };
+  }
+}
 
-/* FIX: maintainAspectRatio is true for doughnut so it stays circular. */
+/* ── CHART HELPERS ──────────────────────────────────────────────── */
 function upsertChart(id, type, labels, data, opts) {
   opts = opts || {};
   const canvas = document.getElementById(id);
@@ -1024,7 +1338,6 @@ function upsertChart(id, type, labels, data, opts) {
     options: {
       indexAxis: horizontal ? 'y' : 'x',
       responsive: true,
-      /* FIX: doughnut needs true to maintain circular aspect ratio */
       maintainAspectRatio: isDoughnut,
       animation: { duration: 600 },
       plugins: {
@@ -1054,7 +1367,7 @@ function upsertChart(id, type, labels, data, opts) {
           ticks: {
             color: dark ? SAND : FOREST,
             font: { size: 10 },
-            callback: v => (type === 'bar' && id.includes('landProgress')) ? v + ' ha' : v
+            callback: v => v.toLocaleString()
           }
         }
       }
@@ -1141,8 +1454,143 @@ const TAG_PALETTE = {
   'Black':'#1a1a1a','Red':'#e53e3e'
 };
 
-/* ── RENDER FUNCTIONS ──────────────────────────────────────────── */
+const BATCH_COLORS = ['#a8935a','#c4ac74','#81845a','#3b7dd8','#5d8a4a','#e07b39','#c0392b','#7a6b41'];
 
+/* ── RENDER: DEPOSITS ──────────────────────────────────────────── */
+function renderDeposits(data) {
+  const { months, grandTotal } = data;
+
+  /* Filter to active months (any deposit) */
+  const active = months.filter(m => m.displayTotal > 0 || m.deposits.some(d => d.amount > 0));
+
+  /* KPIs */
+  const totalEntries  = active.reduce((s, m) => s + m.deposits.filter(d => d.amount > 0).length, 0);
+  const peakMonth     = active.length > 0 ? active.reduce((a, b) => a.displayTotal > b.displayTotal ? a : b) : null;
+  const avgMonthly    = active.length > 0 ? grandTotal / active.length : 0;
+  const maxBatchesUsed = active.length > 0
+    ? Math.max(...active.map(m => Math.max(0, ...m.deposits.map(d => d.batchNo))))
+    : 0;
+
+  setKPI('kpi-dep-grand-total',   fmtMWK(grandTotal));
+  setKPI('kpi-dep-active-months', active.length);
+  setKPI('kpi-dep-peak-month',    peakMonth ? peakMonth.name : '—');
+  setKPI('kpi-dep-peak-val',      peakMonth ? fmtMWK(peakMonth.displayTotal) : '—');
+  setKPI('kpi-dep-avg-monthly',   avgMonthly > 0 ? fmtMWK(Math.round(avgMonthly)) : '—');
+  setKPI('kpi-dep-total-entries', totalEntries.toLocaleString());
+  setKPI('kpi-dep-max-batches',   maxBatchesUsed > 0 ? 'Batch ' + maxBatchesUsed : '—');
+  setKPI('dep-sub', `${active.length} active months · ${totalEntries} individual deposits · Grand total: ${fmtMWK(grandTotal)}`);
+
+  /* Overview KPIs */
+  setKPI('kpi-ov-total-deposits',  fmtMWK(grandTotal));
+  setKPI('kpi-ov-active-months',   active.length);
+
+  /* Charts */
+  const chartLabels  = active.map(m => m.name);
+  const chartTotals  = active.map(m => m.displayTotal);
+  const chartCounts  = active.map(m => m.deposits.filter(d => d.amount > 0).length);
+
+  upsertChart('c_dep_monthly', 'bar', chartLabels, chartTotals, { dark: true });
+  upsertChart('c_ov_deposits', 'bar', chartLabels, chartTotals, { dark: false });
+  upsertChart('c_dep_count',   'bar', chartLabels, chartCounts,  { dark: true  });
+
+  /* Batch contribution chart — sum amount per batch number */
+  const batchTotals = {};
+  active.forEach(m => m.deposits.forEach(d => {
+    if (d.amount > 0) batchTotals['Batch ' + d.batchNo] = (batchTotals['Batch ' + d.batchNo] || 0) + d.amount;
+  }));
+  const batchKeys    = Object.keys(batchTotals).sort((a, b) => parseInt(a.split(' ')[1]) - parseInt(b.split(' ')[1]));
+  const batchVals    = batchKeys.map(k => batchTotals[k]);
+  const batchPalette = batchKeys.map((_, i) => BATCH_COLORS[i % BATCH_COLORS.length]);
+  upsertChart('c_dep_batches', 'bar', batchKeys, batchVals, { palette: batchPalette });
+
+  /* Grand total display */
+  setKPI('dep-grand-display', fmtMWK(grandTotal));
+  setKPI('dep-grand-sub', `${active.length} active months · ${totalEntries} deposit entries`);
+
+  /* ── Accordion ─────────────────────────────────────────────── */
+  const accordion = document.getElementById('deposit-accordion');
+  if (!accordion) return;
+
+  accordion.innerHTML = active.map((m, idx) => {
+    const isFirst   = idx === 0;
+    /* Group deposits by batch number */
+    const byBatch = {};
+    m.deposits.forEach(d => {
+      if (!byBatch[d.batchNo]) byBatch[d.batchNo] = [];
+      byBatch[d.batchNo].push(d);
+    });
+    const batchNos = Object.keys(byBatch).map(Number).sort((a, b) => a - b);
+
+    /* Build rows: one row per deposit entry */
+    const rows = m.deposits
+      .filter(d => d.amount > 0 || d.date)
+      .map(d => {
+        const amtStr  = d.amount > 0 ? `<span class="dep-amount">${fmtMWK(d.amount)}</span>` : `<span class="dep-zero">—</span>`;
+        const bColor  = BATCH_COLORS[(d.batchNo - 1) % BATCH_COLORS.length];
+        return `<tr>
+          <td><span class="batch-pill" style="border-left:3px solid ${bColor};background:${bColor}18;color:${bColor}">Batch ${d.batchNo}</span></td>
+          <td>${d.rowDepNo || '—'}</td>
+          <td>${d.date || '—'}</td>
+          <td style="text-align:right;">${amtStr}</td>
+        </tr>`;
+      }).join('');
+
+    const batchSummaryPills = batchNos.map(b => {
+      const bTotal = byBatch[b].reduce((s, d) => s + d.amount, 0);
+      const bColor = BATCH_COLORS[(b - 1) % BATCH_COLORS.length];
+      return bTotal > 0
+        ? `<span class="batch-pill" style="border-left:3px solid ${bColor};background:${bColor}18;color:${bColor}">Batch ${b}: ${fmtMWK(bTotal)}</span>`
+        : '';
+    }).filter(Boolean).join('');
+
+    return `<div class="deposit-month-section">
+      <div class="deposit-month-header ${isFirst ? '' : 'collapsed'}" onclick="toggleDepositMonth(this)">
+        <div>
+          <div class="deposit-month-name">${m.name}</div>
+          <div style="font-size:10px;color:var(--sand);margin-top:3px;display:flex;flex-wrap:wrap;gap:6px;">${batchSummaryPills}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="deposit-month-total">${fmtMWK(m.displayTotal)}</div>
+          <div class="deposit-month-chevron ${isFirst ? 'open' : ''}">▼</div>
+        </div>
+      </div>
+      <div class="deposit-month-body ${isFirst ? 'open' : ''}">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Batch</th>
+                <th>Deposit No.</th>
+                <th>Date</th>
+                <th style="text-align:right;">Amount (MWK)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows || '<tr><td colspan="4" style="text-align:center;color:var(--olive);padding:16px;">No entries</td></tr>'}
+            </tbody>
+            <tfoot>
+              <tr class="deposit-total-row">
+                <td colspan="3"><strong>Month Total</strong></td>
+                <td style="text-align:right;"><strong>${fmtMWK(m.displayTotal)}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDepositMonth(header) {
+  const body    = header.nextElementSibling;
+  const chevron = header.querySelector('.deposit-month-chevron');
+  const isOpen  = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+  header.classList.toggle('collapsed', isOpen);
+}
+
+/* ── RENDER FUNCTIONS (unchanged from original) ────────────────── */
 function renderLand(rows) {
   const blockData = {};
   rows.forEach(r => {
@@ -1183,9 +1631,6 @@ function renderLand(rows) {
   }
 
   upsertChart('c_landBlocks', 'bar', blocks, sizes, { dark: false });
-
-  /* FIX: render as doughnut (Acquired vs Remaining) so it matches
-     the centred square container on the Land tab. */
   const remaining = Math.max(TARGET_LAND_HA - totalLand, 0);
   upsertChart('c_landProgress', 'doughnut',
     ['Acquired', 'Remaining'],
@@ -1253,7 +1698,7 @@ function renderFinancials(rows) {
     ? ' — ' + [...yearsFound].sort().join(' / ')
     : '';
   const titleEl = document.getElementById('fin-section-title');
-  if (titleEl) titleEl.textContent = 'Financial Performance' + yearLabel;
+  if (titleEl) titleEl.textContent = 'Financial Performance (Budgets & Projections)' + yearLabel;
 
   function shortMonth(label) {
     if (!label) return null;
@@ -1504,8 +1949,6 @@ function renderTagging(rows, landData) {
   }
 }
 
-/* FIX: always initialise block harvest charts — even when rows is empty —
-   so the Overview "Harvest by Block" canvas always gets a Chart instance. */
 function renderHarvest(rows, landData) {
   const byBlock = {}, byMonth = {}, avgBunchWeights = [];
   const blockWeightSums = {}, blockWeightCounts = {};
@@ -1526,11 +1969,11 @@ function renderHarvest(rows, landData) {
     if (ym) byMonth[ym] = (byMonth[ym] || 0) + qty;
   });
 
-  const blocks         = Object.keys(byBlock).sort();
-  const totalKg        = Object.values(byBlock).reduce((a, b) => a + b, 0);
+  const blocks          = Object.keys(byBlock).sort();
+  const totalKg         = Object.values(byBlock).reduce((a, b) => a + b, 0);
   const globalAvgWeight = avgBunchWeights.length > 0
     ? avgBunchWeights.reduce((a, b) => a + b, 0) / avgBunchWeights.length : 0;
-  const avgQty  = rows.length > 0 ? totalKg / rows.length : 0;
+  const avgQty   = rows.length > 0 ? totalKg / rows.length : 0;
   const topBlock = blocks.length ? blocks.reduce((a, b) => byBlock[a] > byBlock[b] ? a : b) : '—';
 
   setKPI('kpi-harvest-total',  totalKg        > 0 ? totalKg.toLocaleString('en', { maximumFractionDigits: 0 }) + ' kg' : '—');
@@ -1545,7 +1988,6 @@ function renderHarvest(rows, landData) {
       (allMonthKeys.length > 0 ? ` — ${allMonthKeys[0]} to ${allMonthKeys[allMonthKeys.length - 1]}` : '')
     : 'No harvest records loaded yet');
 
-  /* Always render these charts (empty arrays render a blank chart correctly). */
   upsertChart('c_blockHarvest',  'bar', blocks, blocks.map(b => byBlock[b] || 0), { dark: true });
   upsertChart('c_blockHarvest2', 'bar', blocks, blocks.map(b => byBlock[b] || 0));
 
@@ -1589,15 +2031,14 @@ async function loadDashboard() {
   setKPI('data-status', 'Refreshing…');
 
   try {
-    /* FIX: ALL six fetches now have .catch(() => []) so a single failed
-       endpoint cannot crash the entire dashboard. */
-    const [irrigation, tagging, pump, harvest, land, financials] = await Promise.all([
+    const [irrigation, tagging, pump, harvest, land, financials, depositData] = await Promise.all([
       fetchCSV(CSV_IRRIGATION).catch(() => []),
       fetchCSV(CSV_TAGGING).catch(()    => []),
       fetchCSV(CSV_PUMP).catch(()       => []),
       fetchCSV(CSV_HARVEST).catch(()    => []),
       fetchCSV(CSV_LAND).catch(()       => []),
-      fetchCSV(CSV_FINANCIALS).catch(() => [])
+      fetchCSV(CSV_FINANCIALS).catch(() => []),
+      fetchDepositCSV(CSV_DEPOSITS).catch(() => ({ months: [], grandTotal: 0 }))
     ]);
 
     const landData = {};
@@ -1606,14 +2047,15 @@ async function loadDashboard() {
       if (b) landData[b] = parseFloat(r['Block Size (ha)']) || 0;
     });
 
-    const { totalLand }        = renderLand(land);
-    const { globalAvgWeight }  = renderHarvest(harvest, landData);
+    const { totalLand }       = renderLand(land);
+    const { globalAvgWeight } = renderHarvest(harvest, landData);
     renderIrrigation(irrigation);
     renderPump(pump);
     renderTagging(tagging, landData);
     const fin = renderFinancials(financials);
+    renderDeposits(depositData);
 
-    /* ── Overview KPIs — mirrored from Financials */
+    /* ── Overview KPIs */
     setKPI('kpi-ov-avg-weight',     fin.avgWeight > 0 ? fin.avgWeight.toFixed(1) + ' kg' : '—');
     setKPI('kpi-ov-total-vol-2026', fin.totalVol  > 0 ? fin.totalVol.toLocaleString() + ' kg' : '—');
     setKPI('kpi-ov-land-progress',  Math.min((totalLand / TARGET_LAND_HA) * 100, 100).toFixed(1) + '%');
