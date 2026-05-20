@@ -31,6 +31,15 @@
   --navy-2:  #1a3352;
   --gold-lt: #c4ac74;
   --gold-dim:#7a6b41;
+  --blue-grey: #8a949e;
+  --light-grey: #d3d6d9;
+  --beige: #d8d0c6;
+  --soft-gold: #d6cab0;
+  --light-beige: #e6e1da;
+  --turquoise: #002937;
+  --turquoise-lt: #004551;
+  --plum: #512137;
+  --plum-lt: #7e2138;
   --sat: env(safe-area-inset-top,    0px);
   --sab: env(safe-area-inset-bottom, 0px);
 }
@@ -189,6 +198,222 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
   max-height: 200px !important;
 }
 
+/* ── DEPOSIT STRIP VISUAL (from reference) ─────── */
+.latest-deposits-visual {
+  background: var(--navy);
+  border-radius: 14px;
+  padding: 22px 20px 18px;
+  border: 1px solid rgba(168,147,90,.25);
+  margin-bottom: 22px;
+}
+.latest-deposits-visual .chart-title {
+  color: var(--gold);
+  margin-bottom: 3px;
+}
+.latest-deposits-visual .chart-sub {
+  color: var(--sand);
+  opacity: .75;
+  margin-bottom: 20px;
+}
+.dep-strip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.dep-strip-card {
+  border-radius: 10px;
+  padding: 14px 14px 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  position: relative;
+  overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+.dep-strip-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+.ds-batch {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 6px;
+  opacity: .85;
+}
+.ds-amount {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.ds-date {
+  font-size: 10px;
+  opacity: .6;
+  color: #fff;
+}
+.ds-depno {
+  font-size: 10px;
+  margin-top: 6px;
+  opacity: .5;
+  color: #fff;
+}
+.dep-strip-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: rgba(168,147,90,.12);
+  border-radius: 8px;
+  border: 1px solid rgba(168,147,90,.3);
+}
+.dep-strip-total .label {
+  font-size: 11px;
+  color: var(--sand);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+.dep-strip-total .value {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+/* ── YEAR ACCORDION (from reference) ───────────── */
+.year-accordion-section {
+  margin-bottom: 20px;
+}
+.year-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--forest);
+  border-radius: 10px 10px 0 0;
+  border-bottom: 3px solid var(--gold);
+  cursor: pointer;
+  user-select: none;
+  transition: background .2s;
+}
+.year-accordion-header.collapsed {
+  border-radius: 10px;
+  border-bottom-color: transparent;
+}
+.year-accordion-header:hover {
+  background: #3d4830;
+}
+.year-accordion-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+.year-accordion-meta {
+  font-size: 11px;
+  color: var(--sand);
+  margin-top: 2px;
+}
+.year-accordion-total {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gold);
+}
+.year-accordion-chevron {
+  color: var(--sand);
+  font-size: 12px;
+  transition: transform .3s ease;
+  margin-left: 12px;
+}
+.year-accordion-chevron.open {
+  transform: rotate(180deg);
+}
+.year-accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .45s cubic-bezier(.33,1,.68,1);
+  border: 1px solid rgba(47,53,39,.3);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+}
+.year-accordion-body.open {
+  max-height: 9999px;
+}
+
+/* ── MONTH ACCORDION (nested, from reference) ──── */
+.deposit-month-section {
+  border-bottom: 1px solid rgba(168,147,90,.1);
+}
+.deposit-month-section:last-child {
+  border-bottom: none;
+}
+.deposit-month-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 18px;
+  background: var(--navy);
+  cursor: pointer;
+  user-select: none;
+  transition: background .2s;
+}
+.deposit-month-header:hover {
+  background: var(--navy-lt);
+}
+.deposit-month-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.deposit-month-year-tag {
+  font-size: 10px;
+  color: var(--sand);
+  margin-left: 8px;
+  background: rgba(168,147,90,.15);
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+.deposit-month-total {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gold);
+}
+.deposit-month-chevron {
+  color: var(--sand);
+  font-size: 10px;
+  transition: transform .3s ease;
+  margin-left: 10px;
+}
+.deposit-month-chevron.open {
+  transform: rotate(180deg);
+}
+.deposit-month-body {
+  background: #fff;
+  border-top: 1px solid var(--sand);
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .4s cubic-bezier(.33,1,.68,1);
+}
+.deposit-month-body.open {
+  max-height: 2000px;
+}
+.deposit-month-body table {
+  font-size: 11px;
+}
+.deposit-month-body th {
+  font-size: 9px;
+  padding: 7px 10px;
+}
+.deposit-month-body td {
+  padding: 6px 10px;
+}
+
 /* ── BLOCK GRID ─────────────────────────────── */
 .block-grid {
   display: grid;
@@ -288,56 +513,6 @@ tr:last-child td { border-bottom:none; }
 }
 
 /* ── DEPOSIT TRACKER STYLES ──────────────────── */
-.deposit-month-section {
-  margin-bottom: 28px;
-}
-.deposit-month-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 18px;
-  background: var(--navy);
-  border-radius: 10px 10px 0 0;
-  border-bottom: 3px solid var(--gold);
-  cursor: pointer;
-  user-select: none;
-  transition: background .2s;
-}
-.deposit-month-header:hover { background: var(--navy-lt); }
-.deposit-month-header.collapsed { border-radius: 10px; border-bottom: none; }
-.deposit-month-name {
-  font-family: 'Playfair Display', serif;
-  font-size: 16px; font-weight: 700; color: #fff;
-}
-.deposit-month-total {
-  font-family: 'Playfair Display', serif;
-  font-size: 15px; font-weight: 600; color: var(--gold);
-}
-.deposit-month-chevron {
-  color: var(--sand); font-size: 11px;
-  transition: transform .3s ease; margin-left: 12px;
-}
-.deposit-month-chevron.open { transform: rotate(180deg); }
-.deposit-month-body {
-  background: #fff; border: 1px solid var(--sand);
-  border-top: none; border-radius: 0 0 10px 10px;
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height .45s cubic-bezier(.33,1,.68,1);
-}
-.deposit-month-body.open { max-height: 2000px; }
-.deposit-month-body .table-wrap { padding: 0; }
-.deposit-month-body table { font-size: 11px; }
-.deposit-month-body th { font-size: 9px; padding: 7px 10px; }
-.deposit-month-body td { padding: 6px 10px; }
-
-/* Batch column colour coding */
-.batch-1 { border-left: 3px solid #a8935a; }
-.batch-2 { border-left: 3px solid #c4ac74; }
-.batch-3 { border-left: 3px solid #81845a; }
-.batch-4 { border-left: 3px solid #3b7dd8; }
-.batch-5 { border-left: 3px solid #5d8a4a; }
-
 .deposit-total-row td {
   background: rgba(168,147,90,.08) !important;
   font-weight: 700; color: var(--navy) !important;
@@ -361,7 +536,6 @@ tr:last-child td { border-bottom:none; }
   display: inline-flex; align-items: center; gap: 4px;
   padding: 2px 8px; border-radius: 20px;
   font-size: 10px; font-weight: 600;
-  background: rgba(168,147,90,.12); color: var(--gold-dim);
   white-space: nowrap;
 }
 .dep-zero { color: var(--sand) !important; font-style: italic; }
@@ -393,9 +567,9 @@ tr:last-child td { border-bottom:none; }
   .expected-harvest-table table { font-size: 11px; }
   .expected-harvest-table th,
   .expected-harvest-table td { padding: 6px 8px; }
-  .deposit-month-header { flex-wrap: wrap; gap: 6px; }
   .deposit-grand-total { flex-direction: column; gap: 8px; align-items: flex-start; }
   .deposit-grand-total .value { font-size: 20px; }
+  .dep-strip-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
@@ -477,18 +651,6 @@ tr:last-child td { border-bottom:none; }
       <div class="value" id="kpi-ov-last-vol">—</div>
       <div class="label" id="kpi-ov-last-vol-label">Last Month Volume</div>
       <div class="sub">Actual (kg)</div>
-    </div>
-    <div class="kpi-card">
-      <span class="icon">🏦</span>
-      <div class="value" id="kpi-ov-total-deposits">—</div>
-      <div class="label">Total Deposits</div>
-      <div class="sub">All months (MWK)</div>
-    </div>
-    <div class="kpi-card accent">
-      <span class="icon">📅</span>
-      <div class="value" id="kpi-ov-active-months">—</div>
-      <div class="label">Months with Deposits</div>
-      <div class="sub">Deposit tracker</div>
     </div>
   </div>
   <div class="chart-grid cols-2">
@@ -920,9 +1082,9 @@ tr:last-child td { border-bottom:none; }
     </div>
     <div class="kpi-card">
       <span class="icon">📅</span>
-      <div class="value" id="kpi-dep-active-months">—</div>
-      <div class="label">Active Months</div>
-      <div class="sub">With deposits recorded</div>
+      <div class="value" id="kpi-dep-last-deposit">—</div>
+      <div class="label">Last Deposit Made</div>
+      <div class="sub" id="kpi-dep-last-deposit-date">—</div>
     </div>
     <div class="kpi-card">
       <span class="icon">📈</span>
@@ -944,21 +1106,34 @@ tr:last-child td { border-bottom:none; }
     </div>
     <div class="kpi-card">
       <span class="icon">📦</span>
-      <div class="value" id="kpi-dep-max-batches">—</div>
-      <div class="label">Max Batches Used</div>
-      <div class="sub">Across all months</div>
+      <div class="value" id="kpi-dep-last-month">—</div>
+      <div class="label">Last Month's Deposits</div>
+      <div class="sub" id="kpi-dep-last-month-date">—</div>
+    </div>
+  </div>
+
+  <!-- Latest Deposits Visual — MATCHING REFERENCE DESIGN -->
+  <div class="latest-deposits-visual">
+    <div class="chart-title">Latest Month — All Deposits</div>
+    <div class="chart-sub" id="latest-dep-sub">All individual deposits recorded in the most recent month</div>
+    <div class="dep-strip-grid" id="dep-strip-grid">
+      <div style="text-align:center;color:var(--sand);padding:20px;grid-column:1/-1;">Loading…</div>
+    </div>
+    <div class="dep-strip-total">
+      <div class="label">Month Total</div>
+      <div class="value" id="dep-strip-month-total">—</div>
     </div>
   </div>
 
   <div class="chart-grid cols-2">
     <div class="chart-card span-2 dark">
       <div class="chart-title">Monthly Deposit Totals</div>
-      <div class="chart-sub">Total deposits per month (MWK) — active months only</div>
+      <div class="chart-sub">Total deposits per month (MWK) — with year labels</div>
       <div class="chart-wrap"><canvas id="c_dep_monthly" height="140"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-title">Batch Contribution Breakdown</div>
-      <div class="chart-sub">Total deposited per batch number (MWK)</div>
+      <div class="chart-sub">Total deposited per batch — brand colour palette</div>
       <div class="chart-wrap"><canvas id="c_dep_batches" height="200"></canvas></div>
     </div>
     <div class="chart-card dark">
@@ -968,9 +1143,9 @@ tr:last-child td { border-bottom:none; }
     </div>
   </div>
 
-  <!-- Accordion per-month detail -->
+  <!-- Month-by-Month Accordion — grouped by year -->
   <div class="chart-title" style="margin-bottom:6px;margin-top:8px;">Month-by-Month Deposit Detail</div>
-  <div class="chart-sub" style="margin-bottom:16px;">Click any month to expand all batches and individual deposits</div>
+  <div class="chart-sub" style="margin-bottom:16px;">Grouped by year — click a year to expand, then a month for full detail</div>
   <div id="deposit-accordion"></div>
 
   <div class="deposit-grand-total">
@@ -997,7 +1172,6 @@ const CSV_HARVEST    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16v
 const CSV_LAND       = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=349843810&single=true&output=csv';
 const CSV_FINANCIALS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJbMVAcL_W5nQJU71-7z7KemUt75Ddjd_uk5o11pE-LlM_HVcxwiwGQyvalj5L-Kj6mRVsd5iXWAV1/pub?gid=2036435473&single=true&output=csv';
 const CSV_DEPOSITS   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRErLlDmjLbNlKTBdB9MQqq_UbUktZQ81h1WDnWxrgoXMch5X6KslSEB1JBrZMZJRW4QfuGsPhObn98/pub?gid=544905157&single=true&output=csv';
-// ↑ Replace YOUR_DEPOSIT_SHEET_GID with the actual gid of the Deposit Tracker sheet
 
 const TARGET_LAND_HA      = 50;
 const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
@@ -1006,6 +1180,13 @@ const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const NAVY   = '#0d2136', GOLD   = '#a8935a', CREAM  = '#f4f2ef';
 const SAND   = '#d8d0c6', OLIVE  = '#81845a', FOREST = '#2f3527';
 const GOLD_L = '#c4ac74', GOLD_D = '#7a6b41', NAVY_L = '#1a3352';
+const BLUE_GREY = '#8a949e', LIGHT_GREY = '#d3d6d9';
+const SOFT_GOLD = '#d6cab0', LIGHT_BEIGE = '#e6e1da';
+const TURQUOISE = '#002937', TURQUOISE_LT = '#004551';
+const PLUM = '#512137', PLUM_LT = '#7e2138';
+
+// Brand-compliant batch palette — no clash with gold/navy/cream
+const BATCH_COLORS = ['#004551','#81845a','#7e2138','#002937','#2f3527','#8a949e','#512137','#d6cab0'];
 
 Chart.defaults.font.family = "'DM Sans', sans-serif";
 Chart.defaults.color = '#7a7a7a';
@@ -1088,6 +1269,11 @@ function fmtMWK(val) {
   return 'MWK ' + Math.round(val).toLocaleString('en');
 }
 
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
 function shareCell(pct, colour) {
   colour = colour || GOLD;
   return `<div style="display:flex;align-items:center;gap:6px;">
@@ -1096,6 +1282,10 @@ function shareCell(pct, colour) {
     </div>
     <span style="font-size:11px;color:var(--olive);">${pct.toFixed(1)}%</span>
   </div>`;
+}
+
+function monthLbl(m) {
+  return m.year ? m.name + ' ' + m.year : m.name;
 }
 
 function parseCSV(text) {
@@ -1133,141 +1323,88 @@ function parseCSV(text) {
 
 /* ════════════════════════════════════════════════════════════════
    DEPOSIT CSV PARSER
-   ════════════════════════════════════════════════════════════════
-   The deposit sheet has a non-standard layout:
-   - Row 0: batch header label row  (sparse)
-   - Row 1: batch number row        ("Batch 1", "Batch 2" …)
-   - Row 2: column headers          (Month, Deposit no., Date, Amount, …)
-   - Then data rows grouped by month.
-   
-   Strategy: parse the raw CSV as a 2-D array (not key-value rows),
-   then find the column positions of each batch's Date + Amount pair
-   from the header rows, then walk rows looking for:
-     - Month name rows  (col 0 = month name, e.g. "Nov", "Jan")
-     - Deposit rows     (col 0 blank, col 1 = deposit number)
-     - Total rows       (col 1 = "Total")
-     - Grand Total row  (col 2 = "Grand Total")
-   
-   This approach is resilient to extra rows being added within a
-   month (the number of deposit rows can grow freely).
    ════════════════════════════════════════════════════════════════ */
 function parseDepositCSV(text) {
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-
-  function splitLine(line) {
-    const fields = [];
-    let cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') {
-        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
-        else inQ = !inQ;
-      } else if (ch === ',' && !inQ) {
-        fields.push(cur.trim()); cur = '';
-      } else { cur += ch; }
-    }
-    fields.push(cur.trim());
-    return fields;
-  }
-
-  const grid = lines.map(l => splitLine(l));
-
-  /* ── Find the header row (contains "Month" and "Deposit no.") ── */
-  let headerRowIdx = -1;
-  for (let i = 0; i < Math.min(grid.length, 10); i++) {
-    if (grid[i].some(c => /^month$/i.test(c)) && grid[i].some(c => /deposit/i.test(c))) {
-      headerRowIdx = i;
-      break;
-    }
-  }
-  if (headerRowIdx < 0) return { months: [], grandTotal: 0 };
-
-  const headers = grid[headerRowIdx];
-
-  /* ── Locate batch columns ─────────────────────────────────────── 
-     Pattern: "Date of Deposit", "Deposit Amount (MWK)" appear
-     multiple times (once per batch). Collect all their indices.     */
-  const batchDateCols   = [];
-  const batchAmtCols    = [];
-  headers.forEach((h, i) => {
-    if (/date.*deposit/i.test(h) || /deposit.*date/i.test(h)) batchDateCols.push(i);
-    if (/deposit.*amount/i.test(h) || /amount.*MWK/i.test(h)) batchAmtCols.push(i);
-  });
-
-  /* Also find "Total monthly Deposits" column */
-  const totalColIdx = headers.findIndex(h => /total.*deposit/i.test(h) || /monthly.*deposit/i.test(h));
-
-  /* ── Walk data rows ─────────────────────────────────────────── */
-  const MONTH_NAMES = /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i;
-  const months = [];
-  let currentMonth = null;
-
-  for (let i = headerRowIdx + 1; i < grid.length; i++) {
-    const row = grid[i];
-    const col0 = (row[0] || '').trim();
-    const col1 = (row[1] || '').trim();
-    const col2 = (row[2] || '').trim();
-
-    /* Grand total sentinel */
-    if (/grand total/i.test(col2) || /grand total/i.test(col0)) {
-      // parse from the total column or last amount column
-      const gv = totalColIdx >= 0 ? cleanNum(row[totalColIdx]) : 0;
-      if (gv > 0 && months.length > 0) {
-        months._grandTotalOverride = gv;
-      }
-      continue;
-    }
-
-    /* Month header row — col0 matches a month name and is non-empty */
-    if (MONTH_NAMES.test(col0) && col0.length <= 10) {
-      currentMonth = {
-        name: col0,
-        deposits: [],  // array of { batchNo, date, amount }
-        totalFromSheet: 0
+  const rows = parseCSV(text);
+  
+  const monthsMap = {};
+  
+  rows.forEach(r => {
+    const monthName = String(r['Month'] || '').trim();
+    const fiscalYear = String(r['Fiscal Year'] || '').trim();
+    const depNo = String(r['Deposit No.'] || '').trim();
+    const batchNo = parseInt(r['Batch No.']) || 0;
+    const depositDate = String(r['Deposit Date'] || '').trim();
+    const dateRaw = String(r['Date (Raw)'] || '').trim();
+    const amount = cleanNum(r['Amount (MWK)']);
+    
+    // Skip if no month name (empty row or summary table row)
+    if (!monthName) return;
+    
+    // Skip summary table rows (they have "Month" in the month column)
+    if (monthName === 'Month' && fiscalYear === 'Fiscal Year') return;
+    
+    // Skip TOTAL row
+    if (monthName.toUpperCase() === 'TOTAL') return;
+    
+    // Skip "Last refreshed" row
+    if (monthName.toLowerCase().includes('last refreshed')) return;
+    
+    // Use the standardised Deposit Date if available, otherwise fall back to Date (Raw)
+    const dateToUse = depositDate || dateRaw;
+    const parsedDate = smartParseDate(dateToUse);
+    
+    // Use Fiscal Year for year, fall back to parsing from date
+    let year = parseInt(fiscalYear) || null;
+    if (!year && parsedDate) year = parsedDate.getFullYear();
+    
+    const monthKey = year ? monthName + ' ' + year : monthName;
+    
+    if (!monthsMap[monthKey]) {
+      monthsMap[monthKey] = {
+        name: monthName,
+        year: year,
+        deposits: [],
+        totalFromSheet: 0,
+        computedTotal: 0,
+        displayTotal: 0
       };
-      months.push(currentMonth);
-      /* This row may ALSO contain a deposit entry in batch 1 — fall through */
     }
-
-    if (!currentMonth) continue;
-
-    /* "Total" row for this month */
-    if (/^total$/i.test(col1)) {
-      const tv = totalColIdx >= 0
-        ? cleanNum(row[totalColIdx])
-        : (batchAmtCols.length > 0 ? batchAmtCols.reduce((s, c) => s + cleanNum(row[c]), 0) : 0);
-      currentMonth.totalFromSheet = tv;
-      continue;
+    
+    if (amount > 0 || dateToUse) {
+      monthsMap[monthKey].deposits.push({
+        batchNo: batchNo,
+        date: dateRaw || depositDate,
+        parsedDate: parsedDate || smartParseDate(dateRaw || depositDate),
+        amount: amount,
+        rowDepNo: depNo
+      });
     }
-
-    /* Deposit row — gather entries from each batch column pair */
-    for (let b = 0; b < Math.max(batchDateCols.length, batchAmtCols.length); b++) {
-      const dateCol = batchDateCols[b];
-      const amtCol  = batchAmtCols[b];
-      const dateVal = dateCol !== undefined ? (row[dateCol] || '').trim() : '';
-      const amtVal  = amtCol  !== undefined ? (row[amtCol]  || '').trim() : '';
-      const amount  = cleanNum(amtVal);
-      if (amount > 0 || dateVal) {
-        currentMonth.deposits.push({
-          batchNo:  b + 1,
-          date:     dateVal,
-          amount:   amount,
-          rowDepNo: col1 || ''
-        });
-      }
-    }
-  }
-
-  /* ── Compute derived totals ──────────────────────────────────── */
+  });
+  
+  // Convert to array and sort chronologically
+  const months = Object.values(monthsMap);
+  
+  // Sort by year, then by month name
+  const monthOrder = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  months.sort((a, b) => {
+    if (a.year && b.year && a.year !== b.year) return a.year - b.year;
+    const aIdx = monthOrder.indexOf((a.name || '').toLowerCase().slice(0,3));
+    const bIdx = monthOrder.indexOf((b.name || '').toLowerCase().slice(0,3));
+    if (aIdx === -1 && bIdx === -1) return 0;
+    if (aIdx === -1) return 1;
+    if (bIdx === -1) return -1;
+    return aIdx - bIdx;
+  });
+  
+  // Compute totals
   months.forEach(m => {
     m.computedTotal = m.deposits.reduce((s, d) => s + d.amount, 0);
-    /* Prefer the sheet's own Total row if it exists and is reasonable */
-    m.displayTotal  = m.totalFromSheet > 0 ? m.totalFromSheet : m.computedTotal;
+    m.displayTotal = m.computedTotal;
   });
-
-  const grandTotal = months._grandTotalOverride
-    || months.reduce((s, m) => s + m.displayTotal, 0);
-
+  
+  const grandTotal = months.reduce((s, m) => s + m.displayTotal, 0);
+  
   return { months, grandTotal };
 }
 
@@ -1454,8 +1591,6 @@ const TAG_PALETTE = {
   'Black':'#1a1a1a','Red':'#e53e3e'
 };
 
-const BATCH_COLORS = ['#a8935a','#c4ac74','#81845a','#3b7dd8','#5d8a4a','#e07b39','#c0392b','#7a6b41'];
-
 /* ── RENDER: DEPOSITS ──────────────────────────────────────────── */
 function renderDeposits(data) {
   const { months, grandTotal } = data;
@@ -1463,29 +1598,44 @@ function renderDeposits(data) {
   /* Filter to active months (any deposit) */
   const active = months.filter(m => m.displayTotal > 0 || m.deposits.some(d => d.amount > 0));
 
+  /* Find last deposit date */
+  let lastDepositDate = null, lastDepositBatch = null;
+  active.forEach(m => m.deposits.forEach(d => {
+    if (d.amount > 0 && d.parsedDate) {
+      if (!lastDepositDate || d.parsedDate > lastDepositDate) {
+        lastDepositDate = d.parsedDate;
+        lastDepositBatch = d.batchNo;
+      }
+    }
+  }));
+
+  /* Find last month's deposits total */
+  let lastMonthTotal = 0;
+  let lastMonthName = null;
+  if (active.length > 0) {
+    const lastMonth = active[active.length - 1];
+    lastMonthTotal = lastMonth.displayTotal;
+    lastMonthName = monthLbl(lastMonth);
+  }
+
   /* KPIs */
   const totalEntries  = active.reduce((s, m) => s + m.deposits.filter(d => d.amount > 0).length, 0);
   const peakMonth     = active.length > 0 ? active.reduce((a, b) => a.displayTotal > b.displayTotal ? a : b) : null;
   const avgMonthly    = active.length > 0 ? grandTotal / active.length : 0;
-  const maxBatchesUsed = active.length > 0
-    ? Math.max(...active.map(m => Math.max(0, ...m.deposits.map(d => d.batchNo))))
-    : 0;
 
   setKPI('kpi-dep-grand-total',   fmtMWK(grandTotal));
-  setKPI('kpi-dep-active-months', active.length);
-  setKPI('kpi-dep-peak-month',    peakMonth ? peakMonth.name : '—');
+  setKPI('kpi-dep-last-deposit',  lastDepositDate ? formatDate(lastDepositDate) : '—');
+  setKPI('kpi-dep-last-deposit-date', lastDepositBatch ? 'Batch ' + lastDepositBatch : '—');
+  setKPI('kpi-dep-peak-month',    peakMonth ? monthLbl(peakMonth) : '—');
   setKPI('kpi-dep-peak-val',      peakMonth ? fmtMWK(peakMonth.displayTotal) : '—');
   setKPI('kpi-dep-avg-monthly',   avgMonthly > 0 ? fmtMWK(Math.round(avgMonthly)) : '—');
   setKPI('kpi-dep-total-entries', totalEntries.toLocaleString());
-  setKPI('kpi-dep-max-batches',   maxBatchesUsed > 0 ? 'Batch ' + maxBatchesUsed : '—');
+  setKPI('kpi-dep-last-month',    lastMonthTotal > 0 ? fmtMWK(lastMonthTotal) : '—');
+  setKPI('kpi-dep-last-month-date', lastMonthName || '—');
   setKPI('dep-sub', `${active.length} active months · ${totalEntries} individual deposits · Grand total: ${fmtMWK(grandTotal)}`);
 
-  /* Overview KPIs */
-  setKPI('kpi-ov-total-deposits',  fmtMWK(grandTotal));
-  setKPI('kpi-ov-active-months',   active.length);
-
-  /* Charts */
-  const chartLabels  = active.map(m => m.name);
+  /* Charts with year in labels */
+  const chartLabels  = active.map(m => monthLbl(m));
   const chartTotals  = active.map(m => m.displayTotal);
   const chartCounts  = active.map(m => m.deposits.filter(d => d.amount > 0).length);
 
@@ -1493,7 +1643,7 @@ function renderDeposits(data) {
   upsertChart('c_ov_deposits', 'bar', chartLabels, chartTotals, { dark: false });
   upsertChart('c_dep_count',   'bar', chartLabels, chartCounts,  { dark: true  });
 
-  /* Batch contribution chart — sum amount per batch number */
+  /* Batch contribution chart */
   const batchTotals = {};
   active.forEach(m => m.deposits.forEach(d => {
     if (d.amount > 0) batchTotals['Batch ' + d.batchNo] = (batchTotals['Batch ' + d.batchNo] || 0) + d.amount;
@@ -1507,78 +1657,161 @@ function renderDeposits(data) {
   setKPI('dep-grand-display', fmtMWK(grandTotal));
   setKPI('dep-grand-sub', `${active.length} active months · ${totalEntries} deposit entries`);
 
-  /* ── Accordion ─────────────────────────────────────────────── */
+  /* ── Latest Deposits Visual (matching reference) ───────────── */
+  renderLatestDepositsVisual(active);
+
+  /* ── Accordion grouped by year ─────────────────────────────── */
+  renderDepositAccordion(active);
+}
+
+function renderLatestDepositsVisual(active) {
+  const grid = document.getElementById('dep-strip-grid');
+  const subEl = document.getElementById('latest-dep-sub');
+  const totalEl = document.getElementById('dep-strip-month-total');
+
+  if (active.length === 0) {
+    if (grid) grid.innerHTML = '<div style="text-align:center;color:var(--sand);padding:20px;grid-column:1/-1;">No deposit data found for the latest month.</div>';
+    if (totalEl) totalEl.textContent = '—';
+    return;
+  }
+
+  const lastMonth = active[active.length - 1];
+  const allDeposits = lastMonth.deposits.filter(d => d.amount > 0);
+
+  if (subEl) subEl.textContent = `All ${allDeposits.length} deposits recorded in ${monthLbl(lastMonth)}`;
+  if (totalEl) totalEl.textContent = fmtMWK(lastMonth.displayTotal);
+
+  if (grid) {
+    if (allDeposits.length === 0) {
+      grid.innerHTML = '<div style="text-align:center;color:var(--sand);padding:20px;grid-column:1/-1;">No deposits this month</div>';
+    } else {
+      grid.innerHTML = allDeposits.map(d => {
+        const color = BATCH_COLORS[(d.batchNo - 1) % BATCH_COLORS.length];
+        const bg = hexToRgba(color, 0.22);
+        return `<div class="dep-strip-card" style="background:${bg};border-color:${color}44;">
+          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color};border-radius:3px 3px 0 0;"></div>
+          <div class="ds-batch" style="color:${color};">Batch ${d.batchNo}</div>
+          <div class="ds-amount">${fmtMWK(d.amount)}</div>
+          <div class="ds-date">${d.date || '—'}</div>
+          ${d.rowDepNo ? `<div class="ds-depno">Dep. No. ${d.rowDepNo}</div>` : ''}
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+function renderDepositAccordion(active) {
   const accordion = document.getElementById('deposit-accordion');
   if (!accordion) return;
 
-  accordion.innerHTML = active.map((m, idx) => {
-    const isFirst   = idx === 0;
-    /* Group deposits by batch number */
-    const byBatch = {};
-    m.deposits.forEach(d => {
-      if (!byBatch[d.batchNo]) byBatch[d.batchNo] = [];
-      byBatch[d.batchNo].push(d);
-    });
-    const batchNos = Object.keys(byBatch).map(Number).sort((a, b) => a - b);
+  // Group by year
+  const byYear = {};
+  const yearOrder = [];
+  active.forEach(m => {
+    const y = m.year || 'Unknown';
+    if (!byYear[y]) { byYear[y] = []; yearOrder.push(y); }
+    byYear[y].push(m);
+  });
 
-    /* Build rows: one row per deposit entry */
-    const rows = m.deposits
-      .filter(d => d.amount > 0 || d.date)
-      .map(d => {
-        const amtStr  = d.amount > 0 ? `<span class="dep-amount">${fmtMWK(d.amount)}</span>` : `<span class="dep-zero">—</span>`;
-        const bColor  = BATCH_COLORS[(d.batchNo - 1) % BATCH_COLORS.length];
-        return `<tr>
-          <td><span class="batch-pill" style="border-left:3px solid ${bColor};background:${bColor}18;color:${bColor}">Batch ${d.batchNo}</span></td>
-          <td>${d.rowDepNo || '—'}</td>
-          <td>${d.date || '—'}</td>
-          <td style="text-align:right;">${amtStr}</td>
-        </tr>`;
-      }).join('');
+  accordion.innerHTML = yearOrder.map((yr, yi) => {
+    const yearMonths = byYear[yr];
+    const yearTotal = yearMonths.reduce((s, m) => s + m.displayTotal, 0);
+    const isFirstYear = yi === 0;
 
-    const batchSummaryPills = batchNos.map(b => {
-      const bTotal = byBatch[b].reduce((s, d) => s + d.amount, 0);
-      const bColor = BATCH_COLORS[(b - 1) % BATCH_COLORS.length];
-      return bTotal > 0
-        ? `<span class="batch-pill" style="border-left:3px solid ${bColor};background:${bColor}18;color:${bColor}">Batch ${b}: ${fmtMWK(bTotal)}</span>`
-        : '';
-    }).filter(Boolean).join('');
+    const monthsHTML = yearMonths.map((m, mi) => {
+      const isFirstMonth = mi === 0 && isFirstYear;
 
-    return `<div class="deposit-month-section">
-      <div class="deposit-month-header ${isFirst ? '' : 'collapsed'}" onclick="toggleDepositMonth(this)">
+      const byBatch = {};
+      m.deposits.forEach(d => {
+        if (!byBatch[d.batchNo]) byBatch[d.batchNo] = [];
+        byBatch[d.batchNo].push(d);
+      });
+      const batchNos = Object.keys(byBatch).map(Number).sort((a, b) => a - b);
+
+      const rows = m.deposits
+        .filter(d => d.amount > 0 || d.date)
+        .map(d => {
+          const amtStr  = d.amount > 0 ? `<span class="dep-amount">${fmtMWK(d.amount)}</span>` : `<span class="dep-zero">—</span>`;
+          const bColor  = BATCH_COLORS[(d.batchNo - 1) % BATCH_COLORS.length];
+          return `<tr>
+            <td><span class="batch-pill" style="border-left:3px solid ${bColor};background:${hexToRgba(bColor,.12)};color:${bColor}">Batch ${d.batchNo}</span></td>
+            <td>${d.rowDepNo || '—'}</td>
+            <td>${d.date || '—'}</td>
+            <td style="text-align:right;">${amtStr}</td>
+          </tr>`;
+        }).join('');
+
+      const batchSummaryPills = batchNos.map(b => {
+        const bTotal = byBatch[b].reduce((s, d) => s + d.amount, 0);
+        const bColor = BATCH_COLORS[(b - 1) % BATCH_COLORS.length];
+        return bTotal > 0
+          ? `<span class="batch-pill" style="border-left:3px solid ${bColor};background:${hexToRgba(bColor,.12)};color:${bColor}">Batch ${b}: ${fmtMWK(bTotal)}</span>`
+          : '';
+      }).filter(Boolean).join('');
+
+      return `<div class="deposit-month-section">
+        <div class="deposit-month-header" onclick="toggleDepositMonth(this)">
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+            <div class="deposit-month-name">${m.name}</div>
+            ${m.year ? `<span class="deposit-month-year-tag">${m.year}</span>` : ''}
+            <div style="font-size:10px;color:var(--sand);margin-top:4px;width:100%;display:flex;flex-wrap:wrap;gap:5px;">${batchSummaryPills}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+            <div class="deposit-month-total">${fmtMWK(m.displayTotal)}</div>
+            <div class="deposit-month-chevron ${isFirstMonth ? 'open' : ''}">▼</div>
+          </div>
+        </div>
+        <div class="deposit-month-body ${isFirstMonth ? 'open' : ''}">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Batch</th>
+                  <th>Deposit No.</th>
+                  <th>Date</th>
+                  <th style="text-align:right;">Amount (MWK)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows || '<tr><td colspan="4" style="text-align:center;color:var(--olive);padding:16px;">No entries</td></tr>'}
+              </tbody>
+              <tfoot>
+                <tr class="deposit-total-row">
+                  <td colspan="3"><strong>Month Total</strong></td>
+                  <td style="text-align:right;"><strong>${fmtMWK(m.displayTotal)}</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="year-accordion-section">
+      <div class="year-accordion-header ${isFirstYear ? '' : 'collapsed'}" onclick="toggleYearAccordion(this)">
         <div>
-          <div class="deposit-month-name">${m.name}</div>
-          <div style="font-size:10px;color:var(--sand);margin-top:3px;display:flex;flex-wrap:wrap;gap:6px;">${batchSummaryPills}</div>
+          <div class="year-accordion-label">${yr}</div>
+          <div class="year-accordion-meta">${yearMonths.length} month${yearMonths.length !== 1 ? 's' : ''} · ${yearMonths.reduce((s,m) => s + m.deposits.filter(d => d.amount > 0).length, 0)} deposits</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
-          <div class="deposit-month-total">${fmtMWK(m.displayTotal)}</div>
-          <div class="deposit-month-chevron ${isFirst ? 'open' : ''}">▼</div>
+          <div class="year-accordion-total">${fmtMWK(yearTotal)}</div>
+          <div class="year-accordion-chevron ${isFirstYear ? 'open' : ''}">▼</div>
         </div>
       </div>
-      <div class="deposit-month-body ${isFirst ? 'open' : ''}">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Batch</th>
-                <th>Deposit No.</th>
-                <th>Date</th>
-                <th style="text-align:right;">Amount (MWK)</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows || '<tr><td colspan="4" style="text-align:center;color:var(--olive);padding:16px;">No entries</td></tr>'}
-            </tbody>
-            <tfoot>
-              <tr class="deposit-total-row">
-                <td colspan="3"><strong>Month Total</strong></td>
-                <td style="text-align:right;"><strong>${fmtMWK(m.displayTotal)}</strong></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+      <div class="year-accordion-body ${isFirstYear ? 'open' : ''}">
+        ${monthsHTML}
       </div>
     </div>`;
   }).join('');
+}
+
+function toggleYearAccordion(header) {
+  const body    = header.nextElementSibling;
+  const chevron = header.querySelector('.year-accordion-chevron');
+  const isOpen  = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+  header.classList.toggle('collapsed', isOpen);
 }
 
 function toggleDepositMonth(header) {
@@ -1587,10 +1820,9 @@ function toggleDepositMonth(header) {
   const isOpen  = body.classList.contains('open');
   body.classList.toggle('open', !isOpen);
   chevron.classList.toggle('open', !isOpen);
-  header.classList.toggle('collapsed', isOpen);
 }
 
-/* ── RENDER FUNCTIONS (unchanged from original) ────────────────── */
+/* ── RENDER FUNCTIONS ──────────────────────────────────────────── */
 function renderLand(rows) {
   const blockData = {};
   rows.forEach(r => {
