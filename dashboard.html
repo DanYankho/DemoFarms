@@ -198,7 +198,7 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
   max-height: 200px !important;
 }
 
-/* ── DEPOSIT STRIP VISUAL (from reference) ─────── */
+/* ── DEPOSIT STRIP VISUAL ─────── */
 .latest-deposits-visual {
   background: var(--navy);
   border-radius: 14px;
@@ -282,7 +282,7 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
   color: var(--gold);
 }
 
-/* ── YEAR ACCORDION (from reference) ───────────── */
+/* ── YEAR ACCORDION ───────────── */
 .year-accordion-section {
   margin-bottom: 20px;
 }
@@ -291,7 +291,7 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
-  background: var(--forest);
+  background: var(--navy);
   border-radius: 10px 10px 0 0;
   border-bottom: 3px solid var(--gold);
   cursor: pointer;
@@ -303,7 +303,7 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
   border-bottom-color: transparent;
 }
 .year-accordion-header:hover {
-  background: #3d4830;
+  background: var(--navy-lt);
 }
 .year-accordion-label {
   font-family: 'Playfair Display', serif;
@@ -335,7 +335,7 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
   max-height: 0;
   overflow: hidden;
   transition: max-height .45s cubic-bezier(.33,1,.68,1);
-  border: 1px solid rgba(47,53,39,.3);
+  border: 1px solid rgba(13,33,54,.3);
   border-top: none;
   border-radius: 0 0 10px 10px;
 }
@@ -343,7 +343,7 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
   max-height: 9999px;
 }
 
-/* ── MONTH ACCORDION (nested, from reference) ──── */
+/* ── MONTH ACCORDION (nested) ──── */
 .deposit-month-section {
   border-bottom: 1px solid rgba(168,147,90,.1);
 }
@@ -380,8 +380,8 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
 }
 .deposit-month-total {
   font-family: 'Playfair Display', serif;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: var(--gold);
 }
 .deposit-month-chevron {
@@ -412,6 +412,13 @@ main { padding:20px 16px 48px; max-width:1280px; margin:0 auto; }
 }
 .deposit-month-body td {
   padding: 6px 10px;
+}
+
+/* White background for batch summary pills on navy headers */
+.deposit-month-header .batch-pill {
+  background: rgba(255,255,255,0.15) !important;
+  color: #fff !important;
+  border-left: 3px solid rgba(255,255,255,0.5) !important;
 }
 
 /* ── BLOCK GRID ─────────────────────────────── */
@@ -523,6 +530,12 @@ tr:last-child td { border-bottom:none; }
   padding: 16px 20px; display: flex;
   align-items: center; justify-content: space-between;
   margin-top: 20px; border: 2px solid var(--gold);
+  cursor: pointer;
+  user-select: none;
+  transition: background .2s;
+}
+.deposit-grand-total:hover {
+  background: var(--navy-lt);
 }
 .deposit-grand-total .label {
   font-size: 12px; color: var(--sand);
@@ -1112,7 +1125,7 @@ tr:last-child td { border-bottom:none; }
     </div>
   </div>
 
-  <!-- Latest Deposits Visual — MATCHING REFERENCE DESIGN -->
+  <!-- Latest Deposits Visual -->
   <div class="latest-deposits-visual">
     <div class="chart-title">Latest Month — All Deposits</div>
     <div class="chart-sub" id="latest-dep-sub">All individual deposits recorded in the most recent month</div>
@@ -1143,17 +1156,21 @@ tr:last-child td { border-bottom:none; }
     </div>
   </div>
 
-  <!-- Month-by-Month Accordion — grouped by year -->
-  <div class="chart-title" style="margin-bottom:6px;margin-top:8px;">Month-by-Month Deposit Detail</div>
-  <div class="chart-sub" style="margin-bottom:16px;">Grouped by year — click a year to expand, then a month for full detail</div>
-  <div id="deposit-accordion"></div>
-
-  <div class="deposit-grand-total">
+  <!-- Grand Total — click to reveal years -->
+  <div class="deposit-grand-total" id="deposit-grand-toggle" onclick="toggleGrandDetail()">
     <div>
       <div class="label">Grand Total — All Deposits</div>
       <div style="font-size:11px;color:var(--sand);margin-top:2px;" id="dep-grand-sub">—</div>
     </div>
-    <div class="value" id="dep-grand-display">—</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="value" id="dep-grand-display">—</div>
+      <span id="grand-chevron" style="color:var(--sand);font-size:14px;transition:transform .3s ease;">▼</span>
+    </div>
+  </div>
+  
+  <!-- Hidden year accordion container -->
+  <div id="deposit-year-container" style="max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.33,1,.68,1);margin-top:8px;">
+    <div id="deposit-accordion"></div>
   </div>
 </div>
 
@@ -1185,7 +1202,7 @@ const SOFT_GOLD = '#d6cab0', LIGHT_BEIGE = '#e6e1da';
 const TURQUOISE = '#002937', TURQUOISE_LT = '#004551';
 const PLUM = '#512137', PLUM_LT = '#7e2138';
 
-// Brand-compliant batch palette — no clash with gold/navy/cream
+// Brand-compliant batch palette
 const BATCH_COLORS = ['#004551','#81845a','#7e2138','#002937','#2f3527','#8a949e','#512137','#d6cab0'];
 
 Chart.defaults.font.family = "'DM Sans', sans-serif";
@@ -1322,7 +1339,7 @@ function parseCSV(text) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   DEPOSIT CSV PARSER
+   DEPOSIT CSV PARSER (Flat File)
    ════════════════════════════════════════════════════════════════ */
 function parseDepositCSV(text) {
   const rows = parseCSV(text);
@@ -1338,23 +1355,14 @@ function parseDepositCSV(text) {
     const dateRaw = String(r['Date (Raw)'] || '').trim();
     const amount = cleanNum(r['Amount (MWK)']);
     
-    // Skip if no month name (empty row or summary table row)
     if (!monthName) return;
-    
-    // Skip summary table rows (they have "Month" in the month column)
     if (monthName === 'Month' && fiscalYear === 'Fiscal Year') return;
-    
-    // Skip TOTAL row
     if (monthName.toUpperCase() === 'TOTAL') return;
-    
-    // Skip "Last refreshed" row
     if (monthName.toLowerCase().includes('last refreshed')) return;
     
-    // Use the standardised Deposit Date if available, otherwise fall back to Date (Raw)
     const dateToUse = depositDate || dateRaw;
     const parsedDate = smartParseDate(dateToUse);
     
-    // Use Fiscal Year for year, fall back to parsing from date
     let year = parseInt(fiscalYear) || null;
     if (!year && parsedDate) year = parsedDate.getFullYear();
     
@@ -1382,10 +1390,8 @@ function parseDepositCSV(text) {
     }
   });
   
-  // Convert to array and sort chronologically
   const months = Object.values(monthsMap);
   
-  // Sort by year, then by month name
   const monthOrder = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
   months.sort((a, b) => {
     if (a.year && b.year && a.year !== b.year) return a.year - b.year;
@@ -1397,7 +1403,6 @@ function parseDepositCSV(text) {
     return aIdx - bIdx;
   });
   
-  // Compute totals
   months.forEach(m => {
     m.computedTotal = m.deposits.reduce((s, d) => s + d.amount, 0);
     m.displayTotal = m.computedTotal;
@@ -1595,10 +1600,8 @@ const TAG_PALETTE = {
 function renderDeposits(data) {
   const { months, grandTotal } = data;
 
-  /* Filter to active months (any deposit) */
   const active = months.filter(m => m.displayTotal > 0 || m.deposits.some(d => d.amount > 0));
 
-  /* Find last deposit date */
   let lastDepositDate = null, lastDepositBatch = null;
   active.forEach(m => m.deposits.forEach(d => {
     if (d.amount > 0 && d.parsedDate) {
@@ -1609,7 +1612,6 @@ function renderDeposits(data) {
     }
   }));
 
-  /* Find last month's deposits total */
   let lastMonthTotal = 0;
   let lastMonthName = null;
   if (active.length > 0) {
@@ -1618,7 +1620,6 @@ function renderDeposits(data) {
     lastMonthName = monthLbl(lastMonth);
   }
 
-  /* KPIs */
   const totalEntries  = active.reduce((s, m) => s + m.deposits.filter(d => d.amount > 0).length, 0);
   const peakMonth     = active.length > 0 ? active.reduce((a, b) => a.displayTotal > b.displayTotal ? a : b) : null;
   const avgMonthly    = active.length > 0 ? grandTotal / active.length : 0;
@@ -1634,7 +1635,6 @@ function renderDeposits(data) {
   setKPI('kpi-dep-last-month-date', lastMonthName || '—');
   setKPI('dep-sub', `${active.length} active months · ${totalEntries} individual deposits · Grand total: ${fmtMWK(grandTotal)}`);
 
-  /* Charts with year in labels */
   const chartLabels  = active.map(m => monthLbl(m));
   const chartTotals  = active.map(m => m.displayTotal);
   const chartCounts  = active.map(m => m.deposits.filter(d => d.amount > 0).length);
@@ -1643,7 +1643,6 @@ function renderDeposits(data) {
   upsertChart('c_ov_deposits', 'bar', chartLabels, chartTotals, { dark: false });
   upsertChart('c_dep_count',   'bar', chartLabels, chartCounts,  { dark: true  });
 
-  /* Batch contribution chart */
   const batchTotals = {};
   active.forEach(m => m.deposits.forEach(d => {
     if (d.amount > 0) batchTotals['Batch ' + d.batchNo] = (batchTotals['Batch ' + d.batchNo] || 0) + d.amount;
@@ -1653,14 +1652,10 @@ function renderDeposits(data) {
   const batchPalette = batchKeys.map((_, i) => BATCH_COLORS[i % BATCH_COLORS.length]);
   upsertChart('c_dep_batches', 'bar', batchKeys, batchVals, { palette: batchPalette });
 
-  /* Grand total display */
   setKPI('dep-grand-display', fmtMWK(grandTotal));
   setKPI('dep-grand-sub', `${active.length} active months · ${totalEntries} deposit entries`);
 
-  /* ── Latest Deposits Visual (matching reference) ───────────── */
   renderLatestDepositsVisual(active);
-
-  /* ── Accordion grouped by year ─────────────────────────────── */
   renderDepositAccordion(active);
 }
 
@@ -1704,7 +1699,6 @@ function renderDepositAccordion(active) {
   const accordion = document.getElementById('deposit-accordion');
   if (!accordion) return;
 
-  // Group by year
   const byYear = {};
   const yearOrder = [];
   active.forEach(m => {
@@ -1716,11 +1710,8 @@ function renderDepositAccordion(active) {
   accordion.innerHTML = yearOrder.map((yr, yi) => {
     const yearMonths = byYear[yr];
     const yearTotal = yearMonths.reduce((s, m) => s + m.displayTotal, 0);
-    const isFirstYear = yi === 0;
 
     const monthsHTML = yearMonths.map((m, mi) => {
-      const isFirstMonth = mi === 0 && isFirstYear;
-
       const byBatch = {};
       m.deposits.forEach(d => {
         if (!byBatch[d.batchNo]) byBatch[d.batchNo] = [];
@@ -1745,12 +1736,12 @@ function renderDepositAccordion(active) {
         const bTotal = byBatch[b].reduce((s, d) => s + d.amount, 0);
         const bColor = BATCH_COLORS[(b - 1) % BATCH_COLORS.length];
         return bTotal > 0
-          ? `<span class="batch-pill" style="border-left:3px solid ${bColor};background:${hexToRgba(bColor,.12)};color:${bColor}">Batch ${b}: ${fmtMWK(bTotal)}</span>`
+          ? `<span class="batch-pill" style="border-left:3px solid ${bColor};">Batch ${b}: ${fmtMWK(bTotal)}</span>`
           : '';
       }).filter(Boolean).join('');
 
       return `<div class="deposit-month-section">
-        <div class="deposit-month-header" onclick="toggleDepositMonth(this)">
+        <div class="deposit-month-header collapsed" onclick="toggleDepositMonth(this)">
           <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
             <div class="deposit-month-name">${m.name}</div>
             ${m.year ? `<span class="deposit-month-year-tag">${m.year}</span>` : ''}
@@ -1758,10 +1749,10 @@ function renderDepositAccordion(active) {
           </div>
           <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
             <div class="deposit-month-total">${fmtMWK(m.displayTotal)}</div>
-            <div class="deposit-month-chevron ${isFirstMonth ? 'open' : ''}">▼</div>
+            <div class="deposit-month-chevron">▼</div>
           </div>
         </div>
-        <div class="deposit-month-body ${isFirstMonth ? 'open' : ''}">
+        <div class="deposit-month-body">
           <div class="table-wrap">
             <table>
               <thead>
@@ -1788,21 +1779,35 @@ function renderDepositAccordion(active) {
     }).join('');
 
     return `<div class="year-accordion-section">
-      <div class="year-accordion-header ${isFirstYear ? '' : 'collapsed'}" onclick="toggleYearAccordion(this)">
+      <div class="year-accordion-header collapsed" onclick="toggleYearAccordion(this)">
         <div>
           <div class="year-accordion-label">${yr}</div>
           <div class="year-accordion-meta">${yearMonths.length} month${yearMonths.length !== 1 ? 's' : ''} · ${yearMonths.reduce((s,m) => s + m.deposits.filter(d => d.amount > 0).length, 0)} deposits</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="year-accordion-total">${fmtMWK(yearTotal)}</div>
-          <div class="year-accordion-chevron ${isFirstYear ? 'open' : ''}">▼</div>
+          <div class="year-accordion-chevron">▼</div>
         </div>
       </div>
-      <div class="year-accordion-body ${isFirstYear ? 'open' : ''}">
+      <div class="year-accordion-body">
         ${monthsHTML}
       </div>
     </div>`;
   }).join('');
+}
+
+function toggleGrandDetail() {
+  const container = document.getElementById('deposit-year-container');
+  const chevron = document.getElementById('grand-chevron');
+  const isOpen = container.style.maxHeight !== '0px' && container.style.maxHeight !== '';
+  
+  if (isOpen) {
+    container.style.maxHeight = '0';
+    chevron.style.transform = 'rotate(0deg)';
+  } else {
+    container.style.maxHeight = '5000px';
+    chevron.style.transform = 'rotate(180deg)';
+  }
 }
 
 function toggleYearAccordion(header) {
@@ -2287,7 +2292,6 @@ async function loadDashboard() {
     const fin = renderFinancials(financials);
     renderDeposits(depositData);
 
-    /* ── Overview KPIs */
     setKPI('kpi-ov-avg-weight',     fin.avgWeight > 0 ? fin.avgWeight.toFixed(1) + ' kg' : '—');
     setKPI('kpi-ov-total-vol-2026', fin.totalVol  > 0 ? fin.totalVol.toLocaleString() + ' kg' : '—');
     setKPI('kpi-ov-land-progress',  Math.min((totalLand / TARGET_LAND_HA) * 100, 100).toFixed(1) + '%');
@@ -2296,7 +2300,6 @@ async function loadDashboard() {
     setKPI('kpi-ov-avg-price',      fin.avgPrice > 0 ? 'MWK ' + fin.avgPrice.toFixed(0)        : '—');
     setKPI('kpi-ov-last-vol',       fin.lastVol  > 0 ? fin.lastVol.toLocaleString() + ' kg'    : '—');
 
-    /* ── Overview charts */
     upsertDualBarChart('c_prodVolume', fin.months, fin.plannedVol, fin.actualVol,
       'Planned', 'Actual', NAVY_L, GOLD, false);
     upsertDualLineChart('c_priceWeight', fin.months, fin.actualPrice, fin.actualWeight,
