@@ -785,13 +785,19 @@ function renderLatestDepositsVisual(active){
   const grid=document.getElementById('dep-strip-grid'),subEl=document.getElementById('latest-dep-sub'),totalEl=document.getElementById('dep-strip-month-total');
   if(active.length===0){if(grid)grid.innerHTML='<div style="text-align:center;color:var(--sand);padding:20px;grid-column:1/-1;">No deposit data found for the latest month.</div>';if(totalEl)totalEl.textContent='—';return;}
   const lastMonth=active[active.length-1];
-  // Get all deposits and sort by parsedDate (earliest first)
+  
+  // Get all deposits with amounts or dates and sort by parsedDate (earliest first)
   const allDeposits=lastMonth.deposits.filter(d=>d.amount>0||d.date);
   allDeposits.sort((a,b)=>{
     if(a.parsedDate&&b.parsedDate)return a.parsedDate-b.parsedDate;
     if(a.parsedDate)return -1;
     if(b.parsedDate)return 1;
     return 0;
+  });
+  
+  // Assign sequential deposit numbers based on chronological order
+  allDeposits.forEach((d,index)=>{
+    d.sequentialDepNo=index+1;
   });
   
   if(subEl)subEl.textContent=`All ${allDeposits.length} deposits recorded in ${monthLbl(lastMonth)}`;
@@ -809,7 +815,7 @@ function renderLatestDepositsVisual(active){
           <div class="ds-batch" style="color:${color};">Batch ${d.batchNo}</div>
           <div class="ds-amount">${fmtMWK(d.amount)}</div>
           <div class="ds-date">${displayDate}</div>
-          ${d.rowDepNo?`<div class="ds-depno">Dep. No. ${d.rowDepNo}</div>`:''}
+          <div class="ds-depno">Dep. No. ${d.sequentialDepNo}</div>
         </div>`;
       }).join('');
     }
