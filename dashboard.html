@@ -593,7 +593,11 @@ function toast(msg,ms){const t=document.getElementById('toast');t.textContent=ms
 function parseYear(val){if(!val||String(val).trim()==='')return null;const s=String(val).trim();if(/^\d{4}-\d{2}-\d{2}/.test(s))return parseInt(s.slice(0,4));const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m)return parseInt(m[3]);const d=new Date(s);return isNaN(d.getTime())?null:d.getFullYear();}
 function smartParseDate(val){if(!val||String(val).trim()==='')return null;const s=String(val).trim();if(/^\d{4}-\d{2}-\d{2}/.test(s)){const d=new Date(s);return isNaN(d.getTime())?null:d;}const p=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(p){const a=parseInt(p[1]),b=parseInt(p[2]),yr=parseInt(p[3]);let day,mon;if(a>12){day=a;mon=b;}else if(b>12){day=b;mon=a;}else{day=a;mon=b;}const d=new Date(yr,mon-1,day);return isNaN(d.getTime())?null:d;}const d=new Date(s);return isNaN(d.getTime())?null:d;}
 function parseYearMonth(val){const d=smartParseDate(val);if(!d)return null;return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
-function formatDate(d){if(!d)return'—';return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function formatDate(d){
+  if(!d)return'—';
+  // Consistent format: "30 May 2026"
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
 function parseDate(val){return smartParseDate(val);}
 function cleanNum(val){if(!val)return 0;return parseFloat(String(val).replace(/,/g,'').replace(/%/g,'').trim())||0;}
 function fmtMWK(val){if(!val||val===0)return'—';return'MWK '+Math.round(val).toLocaleString('en');}
@@ -710,12 +714,40 @@ const TAG_PALETTE={'White ribbon':'#e8e4df','Yellow ribbon':'#d4b44a','Red ribbo
 /* ── RENDER FUNCTIONS ── */
 function renderDeposits(data){
   const{months,grandTotal}=data,active=months.filter(m=>m.displayTotal>0||m.deposits.some(d=>d.amount>0));
-  let lastDepositDate=null,lastDepositBatch=null;
-  active.forEach(m=>m.deposits.forEach(d=>{if(d.amount>0&&d.parsedDate&&(!lastDepositDate||d.parsedDate>lastDepositDate)){lastDepositDate=d.parsedDate;lastDepositBatch=d.batchNo;}}));
+  let lastDepositDate=null,lastDepositBatch=null,lastDepositAmount=0;
+  active.forEach(m=>m.deposits.forEach(d=>{if(d.amount>0&&d.parsedDate&&(!lastDepositDate||d.parsedDate>lastDepositDate)){lastDepositDate=d.parsedDate;lastDepositBatch=d.batchNo;lastDepositAmount=d.amount;}}));
+  
+  // Find first and last years for deposits
+  let firstYear=null,lastYear=null;
+  active.forEach(m=>{
+    m.deposits.forEach(d=>{
+      if(d.parsedDate&&d.amount>0){
+        const yr=d.parsedDate.getFullYear();
+        if(!firstYear||yr<firstYear)firstYear=yr;
+        if(!lastYear||yr>lastYear)lastYear=yr;
+      }
+    });
+  });
+  
   let lastMonthTotal=0,lastMonthName=null;
   if(active.length>0){const lm=active[active.length-1];lastMonthTotal=lm.displayTotal;lastMonthName=monthLbl(lm);}
   const totalEntries=active.reduce((s,m)=>s+m.deposits.filter(d=>d.amount>0).length,0),peakMonth=active.length>0?active.reduce((a,b)=>a.displayTotal>b.displayTotal?a:b):null,avgMonthly=active.length>0?grandTotal/active.length:0;
-  setKPI('kpi-dep-grand-total',fmtMWK(grandTotal));setKPI('kpi-dep-last-deposit',lastDepositDate?formatDate(lastDepositDate):'—');setKPI('kpi-dep-last-deposit-date',lastDepositBatch?'Batch '+lastDepositBatch:'—');setKPI('kpi-dep-peak-month',peakMonth?monthLbl(peakMonth):'—');setKPI('kpi-dep-peak-val',peakMonth?fmtMWK(peakMonth.displayTotal):'—');setKPI('kpi-dep-avg-monthly',avgMonthly>0?fmtMWK(Math.round(avgMonthly)):'—');setKPI('kpi-dep-total-entries',totalEntries.toLocaleString());setKPI('kpi-dep-last-month',lastMonthTotal>0?fmtMWK(lastMonthTotal):'—');setKPI('kpi-dep-last-month-date',lastMonthName||'—');setKPI('dep-sub',`${active.length} active months · ${totalEntries} individual deposits · Grand total: ${fmtMWK(grandTotal)}`);
+  
+  setKPI('kpi-dep-grand-total',fmtMWK(grandTotal));
+  // Modified: Show both date and amount for last deposit
+  setKPI('kpi-dep-last-deposit',lastDepositDate?formatDate(lastDepositDate):'—');
+  setKPI('kpi-dep-last-deposit-date',lastDepositAmount>0?`Batch ${lastDepositBatch} · ${fmtMWK(lastDepositAmount)}`:'—');
+  setKPI('kpi-dep-peak-month',peakMonth?monthLbl(peakMonth):'—');
+  setKPI('kpi-dep-peak-val',peakMonth?fmtMWK(peakMonth.displayTotal):'—');
+  setKPI('kpi-dep-avg-monthly',avgMonthly>0?fmtMWK(Math.round(avgMonthly)):'—');
+  setKPI('kpi-dep-total-entries',totalEntries.toLocaleString());
+  setKPI('kpi-dep-last-month',lastMonthTotal>0?fmtMWK(lastMonthTotal):'—');
+  setKPI('kpi-dep-last-month-date',lastMonthName||'—');
+  
+  // Modified: Show year range instead of active months
+  const yearRange=firstYear&&lastYear?(firstYear===lastYear?firstYear:`${firstYear} – ${lastYear}`):'—';
+  setKPI('dep-sub',`${yearRange} · ${totalEntries} individual deposits · Grand total: ${fmtMWK(grandTotal)}`);
+  
   const chartLabels=active.map(m=>monthLbl(m)),chartTotals=active.map(m=>m.displayTotal),chartCounts=active.map(m=>m.deposits.filter(d=>d.amount>0).length);
   upsertChart('c_dep_monthly','bar',chartLabels,chartTotals,{dark:true,showLabels:true});
   upsertChart('c_ov_deposits','bar',chartLabels,chartTotals,{dark:false,showLabels:true});
@@ -723,17 +755,45 @@ function renderDeposits(data){
   const batchTotals={};active.forEach(m=>m.deposits.forEach(d=>{if(d.amount>0)batchTotals['Batch '+d.batchNo]=(batchTotals['Batch '+d.batchNo]||0)+d.amount;}));
   const batchKeys=Object.keys(batchTotals).sort((a,b)=>parseInt(a.split(' ')[1])-parseInt(b.split(' ')[1])),batchVals=batchKeys.map(k=>batchTotals[k]),batchPalette=batchKeys.map((_,i)=>BATCH_COLORS[i%BATCH_COLORS.length]);
   upsertChart('c_dep_batches','bar',batchKeys,batchVals,{palette:batchPalette,showLabels:true});
-  setKPI('dep-grand-display',fmtMWK(grandTotal));setKPI('dep-grand-sub',`${active.length} active months · ${totalEntries} deposit entries`);
-  renderLatestDepositsVisual(active);renderDepositAccordion(active);
+  setKPI('dep-grand-display',fmtMWK(grandTotal));
+  setKPI('dep-grand-sub',yearRange!=='—'?`${yearRange} · ${totalEntries} deposit entries`:`${active.length} active months · ${totalEntries} deposit entries`);
+  renderLatestDepositsVisual(active);
+  renderDepositAccordion(active);
 }
 
 function renderLatestDepositsVisual(active){
   const grid=document.getElementById('dep-strip-grid'),subEl=document.getElementById('latest-dep-sub'),totalEl=document.getElementById('dep-strip-month-total');
   if(active.length===0){if(grid)grid.innerHTML='<div style="text-align:center;color:var(--sand);padding:20px;grid-column:1/-1;">No deposit data found for the latest month.</div>';if(totalEl)totalEl.textContent='—';return;}
-  const lastMonth=active[active.length-1],allDeposits=lastMonth.deposits.filter(d=>d.amount>0);
+  const lastMonth=active[active.length-1];
+  // Get all deposits and sort by parsedDate (earliest first)
+  const allDeposits=lastMonth.deposits.filter(d=>d.amount>0||d.date);
+  allDeposits.sort((a,b)=>{
+    if(a.parsedDate&&b.parsedDate)return a.parsedDate-b.parsedDate;
+    if(a.parsedDate)return -1;
+    if(b.parsedDate)return 1;
+    return 0;
+  });
+  
   if(subEl)subEl.textContent=`All ${allDeposits.length} deposits recorded in ${monthLbl(lastMonth)}`;
   if(totalEl)totalEl.textContent=fmtMWK(lastMonth.displayTotal);
-  if(grid){if(allDeposits.length===0){grid.innerHTML='<div style="text-align:center;color:var(--sand);padding:20px;grid-column:1/-1;">No deposits this month</div>';}else{grid.innerHTML=allDeposits.map(d=>{const color=BATCH_COLORS[(d.batchNo-1)%BATCH_COLORS.length],bg=hexToRgba(color,0.22);return`<div class="dep-strip-card" style="background:${bg};border-color:${color}44;"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color};border-radius:3px 3px 0 0;"></div><div class="ds-batch" style="color:${color};">Batch ${d.batchNo}</div><div class="ds-amount">${fmtMWK(d.amount)}</div><div class="ds-date">${d.date||'—'}</div>${d.rowDepNo?`<div class="ds-depno">Dep. No. ${d.rowDepNo}</div>`:''}</div>`;}).join('');}}
+  if(grid){
+    if(allDeposits.length===0){
+      grid.innerHTML='<div style="text-align:center;color:var(--sand);padding:20px;grid-column:1/-1;">No deposits this month</div>';
+    } else {
+      grid.innerHTML=allDeposits.map(d=>{
+        const color=BATCH_COLORS[(d.batchNo-1)%BATCH_COLORS.length],bg=hexToRgba(color,0.22);
+        // Use consistent date formatting: "30 May 2026"
+        const displayDate=d.parsedDate?d.parsedDate.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):(d.date||'—');
+        return`<div class="dep-strip-card" style="background:${bg};border-color:${color}44;">
+          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color};border-radius:3px 3px 0 0;"></div>
+          <div class="ds-batch" style="color:${color};">Batch ${d.batchNo}</div>
+          <div class="ds-amount">${fmtMWK(d.amount)}</div>
+          <div class="ds-date">${displayDate}</div>
+          ${d.rowDepNo?`<div class="ds-depno">Dep. No. ${d.rowDepNo}</div>`:''}
+        </div>`;
+      }).join('');
+    }
+  }
 }
 
 function renderDepositAccordion(active){
