@@ -714,29 +714,49 @@ const TAG_PALETTE={'White ribbon':'#e8e4df','Yellow ribbon':'#d4b44a','Red ribbo
 /* ── RENDER FUNCTIONS ── */
 function renderDeposits(data){
   const{months,grandTotal}=data,active=months.filter(m=>m.displayTotal>0||m.deposits.some(d=>d.amount>0));
-  let lastDepositDate=null,lastDepositBatch=null,lastDepositAmount=0;
-  active.forEach(m=>m.deposits.forEach(d=>{if(d.amount>0&&d.parsedDate&&(!lastDepositDate||d.parsedDate>lastDepositDate)){lastDepositDate=d.parsedDate;lastDepositBatch=d.batchNo;lastDepositAmount=d.amount;}}));
   
-  // Find first and last years for deposits
-  let firstYear=null,lastYear=null;
+  // Fix: Find the truly last deposit by sorting all deposits by date
+  let lastDepositDate=null,lastDepositBatch=null,lastDepositAmount=0,lastDepositNo='';
+  
+  // Collect all deposits with valid dates
+  const allDepositsFlat=[];
   active.forEach(m=>{
     m.deposits.forEach(d=>{
-      if(d.parsedDate&&d.amount>0){
-        const yr=d.parsedDate.getFullYear();
-        if(!firstYear||yr<firstYear)firstYear=yr;
-        if(!lastYear||yr>lastYear)lastYear=yr;
+      if(d.amount>0&&d.parsedDate){
+        allDepositsFlat.push({...d,month:m});
       }
     });
   });
   
+  // Sort by date to find the latest
+  allDepositsFlat.sort((a,b)=>a.parsedDate-b.parsedDate);
+  
+  if(allDepositsFlat.length>0){
+    const lastDeposit=allDepositsFlat[allDepositsFlat.length-1];
+    lastDepositDate=lastDeposit.parsedDate;
+    lastDepositBatch=lastDeposit.batchNo;
+    lastDepositAmount=lastDeposit.amount;
+    lastDepositNo=lastDeposit.rowDepNo;
+  }
+  
+  // Find first and last years for deposits
+  let firstYear=null,lastYear=null;
+  allDepositsFlat.forEach(d=>{
+    const yr=d.parsedDate.getFullYear();
+    if(!firstYear||yr<firstYear)firstYear=yr;
+    if(!lastYear||yr>lastYear)lastYear=yr;
+  });
+  
   let lastMonthTotal=0,lastMonthName=null;
   if(active.length>0){const lm=active[active.length-1];lastMonthTotal=lm.displayTotal;lastMonthName=monthLbl(lm);}
-  const totalEntries=active.reduce((s,m)=>s+m.deposits.filter(d=>d.amount>0).length,0),peakMonth=active.length>0?active.reduce((a,b)=>a.displayTotal>b.displayTotal?a:b):null,avgMonthly=active.length>0?grandTotal/active.length:0;
+  const totalEntries=allDepositsFlat.length;
+  const peakMonth=active.length>0?active.reduce((a,b)=>a.displayTotal>b.displayTotal?a:b):null;
+  const avgMonthly=active.length>0?grandTotal/active.length:0;
   
   setKPI('kpi-dep-grand-total',fmtMWK(grandTotal));
-  // Modified: Show both date and amount for last deposit
+  // Fixed: Show the truly last deposit with correct amount
   setKPI('kpi-dep-last-deposit',lastDepositDate?formatDate(lastDepositDate):'—');
-  setKPI('kpi-dep-last-deposit-date',lastDepositAmount>0?`Batch ${lastDepositBatch} · ${fmtMWK(lastDepositAmount)}`:'—');
+  setKPI('kpi-dep-last-deposit-date',lastDepositAmount>0?`Batch ${lastDepositBatch} · ${fmtMWK(lastDepositAmount)}${lastDepositNo?' · Dep. No. '+lastDepositNo:''}`:'—');
   setKPI('kpi-dep-peak-month',peakMonth?monthLbl(peakMonth):'—');
   setKPI('kpi-dep-peak-val',peakMonth?fmtMWK(peakMonth.displayTotal):'—');
   setKPI('kpi-dep-avg-monthly',avgMonthly>0?fmtMWK(Math.round(avgMonthly)):'—');
@@ -744,7 +764,7 @@ function renderDeposits(data){
   setKPI('kpi-dep-last-month',lastMonthTotal>0?fmtMWK(lastMonthTotal):'—');
   setKPI('kpi-dep-last-month-date',lastMonthName||'—');
   
-  // Modified: Show year range instead of active months
+  // Show year range instead of active months
   const yearRange=firstYear&&lastYear?(firstYear===lastYear?firstYear:`${firstYear} – ${lastYear}`):'—';
   setKPI('dep-sub',`${yearRange} · ${totalEntries} individual deposits · Grand total: ${fmtMWK(grandTotal)}`);
   
@@ -760,7 +780,7 @@ function renderDeposits(data){
   renderLatestDepositsVisual(active);
   renderDepositAccordion(active);
 }
-
+  
 function renderLatestDepositsVisual(active){
   const grid=document.getElementById('dep-strip-grid'),subEl=document.getElementById('latest-dep-sub'),totalEl=document.getElementById('dep-strip-month-total');
   if(active.length===0){if(grid)grid.innerHTML='<div style="text-align:center;color:var(--sand);padding:20px;grid-column:1/-1;">No deposit data found for the latest month.</div>';if(totalEl)totalEl.textContent='—';return;}
