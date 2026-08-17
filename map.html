@@ -3,13 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Elim Farms — Live Map</title>
+  <title>Demo Farms — Live Map</title>
   
-  <!-- ═══ PWA MANIFEST + FULL-SCREEN META (ALIGNED WITH DASHBOARD) ═══════════════════════════ -->
   <link rel="manifest" href="manifest.json"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="Elim Farms"/>
+  <meta name="apple-mobile-web-app-title" content="Demo Farms"/>
   <meta name="theme-color" content="#a8935a"/>
   <meta name="format-detection" content="telephone=no"/>
   <meta name="msapplication-TileColor" content="#0d2136"/>
@@ -17,14 +16,12 @@
   <link rel="apple-touch-icon" href="browser.png"/>
   <link rel="icon" type="image/png" href="browser.png"/>
   
-  <!-- D3 -->
+  <!-- D3 is kept for UI manipulations and data formatting -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   
-  <!-- Google Fonts (ALIGNED WITH DASHBOARD) -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <style>
-    /* ---------- DESIGN TOKENS (ALIGNED WITH DASHBOARD) ---------- */
     :root {
       --navy:    #0d2136;
       --gold:    #a8935a;
@@ -38,8 +35,6 @@
       --gold-dim:#7a6b41;
       --sat: env(safe-area-inset-top,    0px);
       --sab: env(safe-area-inset-bottom, 0px);
-      
-      /* Map-specific tokens - SINGLE GREEN COLOR */
       --block-color: #0f5c3f;
       --mobile-padding: 16px;
       --click-target-stroke: clamp(16px, 5vw, 24px);
@@ -48,25 +43,18 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overscroll-behavior: none; }
     body {
-      background: var(--cream); color: var(--navy);
+      background: #E6E1DA; color: var(--navy);
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      min-height: 100vh;
-      padding-top: var(--sat); padding-bottom: var(--sab);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      overflow: hidden;
-      touch-action: manipulation;
+      min-height: 100vh; padding-top: var(--sat); padding-bottom: var(--sab);
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      overflow: hidden; touch-action: manipulation;
     }
 
-    /* Standalone mode adjustments */
     html.standalone body {
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
+      padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
     }
 
-    /* ---------- LOADING SCREEN (ALIGNED WITH DASHBOARD) ---------- */
     #loading-screen {
       position: fixed; inset: 0; background: var(--navy);
       display: flex; flex-direction: column;
@@ -93,7 +81,6 @@
       100% { width:0%;  margin-left:100%; }
     }
 
-    /* ---------- TOAST (ALIGNED WITH DASHBOARD) ---------- */
     #toast {
       position:fixed; bottom:calc(20px + var(--sab)); left:50%;
       transform:translateX(-50%) translateY(80px);
@@ -105,707 +92,169 @@
     }
     #toast.show { transform:translateX(-50%) translateY(0); }
 
-    /* ---------- Header ---------- */
     .header {
-      position: absolute;
-      top: max(20px, env(safe-area-inset-top));
-      left: var(--mobile-padding);
-      right: var(--mobile-padding);
-      z-index: 75;
-      pointer-events: none;
-      text-align: center;
+      position: absolute; top: max(20px, env(safe-area-inset-top));
+      left: var(--mobile-padding); right: var(--mobile-padding);
+      z-index: 75; pointer-events: none; text-align: center;
     }
-    
-    .header.hidden {
-      opacity: 0;
-      visibility: hidden;
-    }
-    
+    .header.hidden { opacity: 0; visibility: hidden; }
     .header h1 {
-      margin: 0 auto;
-      padding: 12px 18px;
-      font-size: clamp(14px, 3vw, 19px);
-      color: var(--navy);
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(13,33,54,0.15);
-      font-weight: 700;
-      pointer-events: auto;
-      display: inline-block;
-      max-width: 100%;
-      white-space: normal;
-      line-height: 1.2;
-      font-family: 'Playfair Display', serif;
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(168,147,90,0.3);
+      margin: 0 auto; padding: 12px 18px; font-size: clamp(14px, 3vw, 19px);
+      color: var(--navy); background: #fff; border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(13,33,54,0.15); font-weight: 700;
+      pointer-events: auto; display: inline-block; max-width: 100%;
+      white-space: normal; line-height: 1.2; font-family: 'Playfair Display', serif;
+      backdrop-filter: blur(8px); border: 1px solid rgba(168,147,90,0.3);
     }
-    
     .header h1 span {
-      font-size: 10px;
-      color: var(--gold);
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      display: block;
-      margin-top: 2px;
+      font-size: 10px; color: var(--gold); letter-spacing: .12em;
+      text-transform: uppercase; display: block; margin-top: 2px;
     }
 
-    /* Search dropdown */
-    .search-dropdown {
-      position: absolute;
-      top: 100%;
-      bottom: auto;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #fff;
-      border: 1px solid var(--sand);
-      width: 90%;
-      max-width: 300px;
-      border-radius: 12px;
-      box-shadow: 0 8px 28px rgba(13,33,54,0.15);
-      padding: 12px;
-      display: none;
-      z-index: 80;
-      pointer-events: auto;
-      max-height: 50vh;
-      overflow-y: auto;
-      margin-top: 8px;
-    }
-    
-    .search-dropdown.flipped {
-      top: auto;
-      bottom: 100%;
-      margin-top: 0;
-      margin-bottom: 8px;
-    }
-    
-    .search-dropdown input {
-      width: 100%;
-      padding: clamp(12px, 3vh, 14px);
-      border: 1px solid var(--sand);
-      border-radius: 8px;
-      font-size: clamp(14px, 4vw, 16px);
-      margin-bottom: 12px;
-      font-family: 'DM Sans', sans-serif;
-    }
-    
-    .search-dropdown input:focus {
-      outline: none;
-      border-color: var(--gold);
-      box-shadow: 0 0 0 2px rgba(168, 147, 90, 0.2);
-    }
-    
-    .search-results-list {
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    
-    .search-result-item {
-      padding: clamp(10px, 2.5vh, 14px);
-      border-bottom: 1px solid var(--sand);
-      cursor: pointer;
-      font-size: clamp(14px, 4vw, 16px);
-      font-weight: 500;
-      transition: all 0.2s ease;
-      user-select: none;
-      color: var(--forest);
-    }
-    
-    .search-result-item:last-child {
-      border-bottom: none;
-    }
-    
-    .search-result-item:hover,
-    .search-result-item.highlighted {
-      background-color: rgba(168,147,90,0.1);
-      color: var(--navy);
-    }
-
-    /* Farm info footer */
     .farm-info {
-      position: absolute;
-      bottom: max(20px, 8vh, env(safe-area-inset-bottom));
-      left: max(12px, 3vw);
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
-      z-index: 60;
-      pointer-events: none;
+      position: absolute; bottom: max(20px, 8vh, env(safe-area-inset-bottom));
+      left: max(12px, 3vw); display: flex; flex-direction: column;
+      align-items: flex-start; gap: 4px; z-index: 60; pointer-events: none;
       padding: clamp(10px, 2vh, 16px) clamp(12px, 3vw, 20px);
-      background: var(--navy);
-      border-radius: 12px;
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(168,147,90,0.3);
-      box-shadow: 0 4px 12px rgba(13,33,54,0.08);
+      background: var(--navy); border-radius: 12px; backdrop-filter: blur(8px);
+      border: 1px solid rgba(168,147,90,0.3); box-shadow: 0 4px 12px rgba(13,33,54,0.08);
       max-width: min(280px, 45vw);
     }
+    .farm-name { font-size: clamp(16px, 4vw, 18px); font-weight: 700; color: var(--gold); font-family: 'Playfair Display', serif; margin: 0; }
+    .farm-stats { font-size: clamp(12px, 3vw, 14px); color: var(--sand); margin: 0; }
 
-    .farm-name {
-      font-size: clamp(16px, 4vw, 18px);
-      font-weight: 700;
-      color: var(--gold);
-      font-family: 'Playfair Display', serif;
-      margin: 0;
-    }
-
-    .farm-stats {
-      font-size: clamp(12px, 3vw, 14px);
-      color: var(--sand);
-      margin: 0;
-    }
-
-    /* ---------- Map Container ---------- */
-    #map-container {
+    #map-container { position: absolute; width: 100vw; height: 100vh; left: 0; top: 0; overflow: hidden; touch-action: none; }
+    
+    /* Flourish Embed styling */
+    #flourish-iframe-container {
       position: absolute;
-      width: 100vw;
-      height: 100vh;
-      left: 0;
-      top: 0;
-      overflow: hidden;
-      touch-action: none;
+      top: 0; left: 0; width: 100%; height: 100%;
+      transform: translateY(20px) scaleY(0.5) scaleX(0.5); 
+      transform-origin: top center;
     }
-    
-    svg { 
-      width: 100%; 
-      height: 100%; 
-      display: block; 
-      background: linear-gradient(145deg, var(--cream) 0%, #f0ede9 100%);
+    #flourish-iframe-container iframe {
+      width: 100%; height: 100%; border: none;
     }
 
-    /* Block styles — filter/stroke handled by JS for SVG reliability */
-    .block {
-      fill: var(--block-color);
-      stroke: #ffffff;
-      stroke-width: 2px;
-      cursor: pointer;
-      paint-order: stroke;
-      outline: none !important;
-      -webkit-tap-highlight-color: transparent !important;
-      transition: opacity 150ms ease;
-    }
-    
-    .block-click-target {
-      fill: transparent !important;
-      stroke: transparent !important;
-      pointer-events: all !important;
-      cursor: pointer !important;
-      outline: none !important;
-      -webkit-tap-highlight-color: transparent !important;
-      stroke-width: var(--click-target-stroke) !important;
-    }
-    
-    .block-click-target:focus, .block-click-target:active {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-    
-    
-    .block.faded {
-      opacity: 0.12;
-    }
-
-    /* Block labels */
-    .block-label {
-      font-size: clamp(8px, 2.5vw, 10px);
-      font-weight: 600;
-      fill: var(--navy);
-      text-anchor: middle;
-      pointer-events: none;
-      user-select: none;
-      paint-order: stroke;
-      stroke: white;
-      stroke-width: 2px;
-      stroke-opacity: 0.9;
-      font-family: 'DM Sans', sans-serif;
-    }
-    
-    .block-label.hidden {
-      display: none;
-    }
-
-    /* ---------- Control Buttons (ORIGINAL COLORS) ---------- */
     .control-buttons {
-      position: absolute;
-      right: max(8px, 2vw);
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 70;
-      display: flex;
-      flex-direction: column;
-      gap: clamp(8px, 2vh, 16px);
+      position: absolute; right: max(8px, 2vw); top: 50%; transform: translateY(-50%);
+      z-index: 70; display: flex; flex-direction: column; gap: clamp(8px, 2vh, 16px);
     }
-    
-    .control-button-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-    
+    .control-button-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; }
     .button-label {
-      font-size: clamp(8px, 2.2vw, 10px);
-      color: var(--navy);
-      text-align: center;
-      font-weight: 600;
-      background: #fff;
-      padding: 2px 6px;
-      border-radius: 10px;
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(168,147,90,0.3);
+      font-size: clamp(8px, 2.2vw, 10px); color: var(--navy); text-align: center;
+      font-weight: 600; background: #fff; padding: 2px 6px; border-radius: 10px;
+      backdrop-filter: blur(4px); border: 1px solid rgba(168,147,90,0.3);
     }
-    
     .control-button {
-      width: clamp(44px, 10vw, 52px);
-      height: clamp(44px, 10vw, 52px);
-      border-radius: 50%;
-      background: #fff;
-      border: 1px solid rgba(168,147,90,0.3);
-      box-shadow: 0 4px 12px rgba(13,33,54,0.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: clamp(20px, 5vw, 24px);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      backdrop-filter: blur(8px);
-      color: var(--gold);
+      width: clamp(44px, 10vw, 52px); height: clamp(44px, 10vw, 52px); border-radius: 50%;
+      background: #fff; border: 1px solid rgba(168,147,90,0.3);
+      box-shadow: 0 4px 12px rgba(13,33,54,0.12); display: flex; align-items: center;
+      justify-content: center; font-size: clamp(20px, 5vw, 24px); cursor: pointer;
+      transition: all 0.2s ease; backdrop-filter: blur(8px); color: var(--gold);
     }
-    
-    .control-button:active {
-      transform: scale(0.92);
-      background: var(--gold);
-      color: var(--navy);
-    }
-    
-    .control-button.active {
-      background: var(--gold);
-      color: var(--navy);
-      border-color: var(--navy);
-    }
+    .control-button:active { transform: scale(0.92); background: var(--gold); color: var(--navy); }
+    .control-button.active { background: var(--gold); color: var(--navy); border-color: var(--navy); }
+    .control-button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-    .control-button:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* ---------- Bottom Panels ---------- */
+    /* Full Screen Panels */
     .info-panel, .stats-panel {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 0;
-      background: #ffffff;
-      border-top-left-radius: 24px;
-      border-top-right-radius: 24px;
-      box-shadow: 0 -4px 20px rgba(13,33,54,0.15);
-      z-index: 90;
-      overflow: hidden;
-      padding: 0;
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+      background: #ffffff; z-index: 90; overflow: hidden;
       transform: translateY(100%);
-      transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1), height 0s 0.35s;
-      border-top: 3px solid var(--gold);
+      transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1);
     }
-    
-    /* Block info panel — compact, no scroll */
-    .info-panel.visible {
-      height: auto;
-      max-height: min(42vh, 360px);
+    .info-panel.visible, .stats-panel.visible {
       transform: translateY(0);
-      transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1), height 0s;
-    }
-
-    /* Stats/list panels can be taller since they have more rows */
-    .stats-panel.visible { 
-      height: min(55vh, 500px);
-      transform: translateY(0);
-      transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1), height 0s;
     }
     
     .panel-header {
-      position: sticky;
-      top: 0;
-      background: white;
-      z-index: 10;
-      padding: 10px clamp(16px, 4vw, 20px) 8px;
+      position: sticky; top: 0; background: white; z-index: 10;
+      padding: max(20px, env(safe-area-inset-top)) clamp(16px, 4vw, 20px) 15px; 
       border-bottom: 1px solid var(--sand);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    
-    .panel-content {
-      height: calc(100% - 58px);
-      overflow-y: auto;
-      padding: 0 clamp(16px, 4vw, 20px) 12px;
-      -webkit-overflow-scrolling: touch;
+    .panel-content { 
+      height: calc(100vh - 100px); 
+      height: calc(100dvh - 100px); 
+      overflow-y: auto; 
+      padding: clamp(20px, 4vh, 30px) clamp(16px, 4vw, 30px) max(40px, env(safe-area-inset-bottom)); 
+      -webkit-overflow-scrolling: touch; 
     }
-    
-    .panel-title { 
-      color: var(--navy); 
-      font-weight: 700; 
-      font-size: clamp(17px, 4.5vw, 21px);
-      font-family: 'Playfair Display', serif;
-      margin: 0;
-    }
-    
-    .panel-subtitle { 
-      color: var(--olive); 
-      font-size: clamp(12px, 3vw, 14px);
-      font-weight: 500;
-      margin: 2px 0 0;
-      letter-spacing: .04em;
-    }
-    
+    .panel-title { color: var(--navy); font-weight: 700; font-size: clamp(22px, 5vw, 28px); font-family: 'Playfair Display', serif; margin: 0; }
+    .panel-subtitle { color: var(--olive); font-size: clamp(14px, 3vw, 16px); font-weight: 500; margin: 4px 0 0; letter-spacing: .04em; }
     .close-button {
-      width: clamp(36px, 8vw, 44px);
-      height: clamp(36px, 8vw, 44px);
-      border-radius: 50%;
-      background: rgba(168,147,90,0.15);
-      border: 1px solid rgba(168,147,90,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: clamp(20px, 5vw, 24px);
-      cursor: pointer;
-      touch-action: manipulation;
-      transition: all 0.2s ease;
-      color: var(--gold);
+      width: clamp(44px, 10vw, 52px); height: clamp(44px, 10vw, 52px); border-radius: 50%;
+      background: rgba(168,147,90,0.15); border: 1px solid rgba(168,147,90,0.3);
+      display: flex; align-items: center; justify-content: center; font-size: clamp(24px, 5vw, 28px);
+      cursor: pointer; touch-action: manipulation; transition: all 0.2s ease; color: var(--gold);
+      flex-shrink: 0;
     }
-    
-    .close-button:active {
-      background: var(--gold);
-      transform: scale(0.92);
-      color: var(--navy);
-    }
+    .close-button:active { background: var(--gold); transform: scale(0.92); color: var(--navy); }
 
-    /* Detail rows */
-    .detail-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 7px 0;
-      border-bottom: 1px solid var(--sand);
-    }
+    .stats-title { color: var(--navy); font-weight: 700; font-size: clamp(24px, 5vw, 32px); margin: 0; font-family: 'Playfair Display', serif; }
+    .stats-table { width: 100%; border-collapse: collapse; font-size: clamp(16px, 3.5vw, 18px); }
+    .stats-table thead { position: sticky; top: 0; background: var(--navy); z-index: 5; }
+    .stats-table th { color: var(--gold); font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: .07em; padding: 14px 12px; text-align: left; white-space: nowrap; }
+    .stats-table tr { border-bottom: 1px solid var(--sand); height: clamp(64px, 10vh, 72px); }
+    .stats-table tr:last-child { border-bottom: none; }
+    .stats-table td { padding: clamp(12px, 2vh, 16px) clamp(8px, 2vw, 12px); vertical-align: middle; color: var(--forest); }
+    .stats-table .stat-name { font-weight: 600; color: var(--forest); opacity: 0.85; }
+    .stats-table .stat-value { text-align: right; font-weight: 700; color: var(--navy); }
 
-    .detail-row:last-child {
-      border-bottom: none;
-    }
-
-    .detail-label {
-      color: var(--forest);
-      font-weight: 600;
-      font-size: clamp(12px, 3vw, 14px);
-      opacity: 0.85;
-    }
-
-    .detail-value {
-      color: var(--navy);
-      font-weight: 700;
-      font-size: clamp(13px, 3.5vw, 15px);
-      font-family: 'DM Sans', sans-serif;
-    }
-
-    /* Density chart */
-    .density-chart {
-      width: 100%;
-      height: 36px;
-      background: var(--sand);
-      border-radius: 10px;
-      margin: 8px 0 4px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: inset 0 2px 4px rgba(13,33,54,0.05);
-    }
-
-    .density-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--gold), #c4ac74);
-      border-radius: 12px;
-      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .chart-label {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: var(--navy);
-      font-weight: 700;
-      font-size: clamp(13px, 3.5vw, 15px);
-      text-shadow: 0 1px 3px rgba(255,255,255,0.9);
-      font-family: 'Playfair Display', serif;
-      background: rgba(255,255,255,0.95);
-      padding: 4px 12px;
-      border-radius: 20px;
-      box-shadow: 0 2px 6px rgba(13,33,54,0.08);
-      border: 1px solid rgba(168,147,90,0.3);
-    }
-
-    /* Stats panels - FIXED HEADER VISIBILITY */
-    .stats-title {
-      color: var(--navy);
-      font-weight: 700;
-      font-size: clamp(20px, 5vw, 24px);
-      margin: 0;
-      font-family: 'Playfair Display', serif;
-    }
-    
-    .stats-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: clamp(14px, 3.5vw, 16px);
-    }
-    
-    .stats-table thead {
-      position: sticky;
-      top: 0;
-      background: var(--navy);
-      z-index: 5;
-    }
-    
-    .stats-table th {
-      color: var(--gold);
-      font-weight: 600;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      padding: 9px 12px;
-      text-align: left;
-      white-space: nowrap;
-    }
-    
-    .stats-table tr {
-      border-bottom: 1px solid var(--sand);
-      height: clamp(48px, 8vh, 56px);
-    }
-    
-    .stats-table tr:last-child {
-      border-bottom: none;
-    }
-    
-    .stats-table td {
-      padding: clamp(8px, 2vh, 12px) clamp(6px, 2vw, 8px);
-      vertical-align: middle;
-      color: var(--forest);
-    }
-    
-    .stats-table .stat-name {
-      font-weight: 600;
-      color: var(--forest);
-      opacity: 0.85;
-    }
-    
-    .stats-table .stat-value {
-      text-align: right;
-      font-weight: 700;
-      color: var(--navy);
-    }
-
-    /* Help modal */
     .help-panel {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 85%;
-      max-width: 360px;
-      max-height: 80vh;
-      background: white;
-      border-radius: 24px;
-      box-shadow: 0 20px 40px rgba(13,33,54,0.25);
-      z-index: 1000;
-      padding: 0;
-      overflow: hidden;
-      display: none;
-      border: 1px solid rgba(168,147,90,0.3);
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 90%; max-width: 420px; max-height: 80vh; background: white; border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(13,33,54,0.25); z-index: 1000; padding: 0; overflow: hidden;
+      display: none; border: 1px solid rgba(168,147,90,0.3);
     }
-    
-    .help-panel.visible {
-      display: block;
-    }
-    
+    .help-panel.visible { display: block; }
     .help-panel-header {
-      position: relative;
-      padding: clamp(16px, 3vh, 20px) clamp(16px, 4vw, 20px) clamp(12px, 2vh, 15px);
-      border-bottom: 1px solid var(--sand);
-      background: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      position: relative; padding: clamp(20px, 3vh, 24px) clamp(20px, 4vw, 24px) clamp(16px, 2vh, 18px);
+      border-bottom: 1px solid var(--sand); background: white; display: flex; justify-content: space-between; align-items: center;
     }
-
-    .help-panel-header h2 {
-      color: var(--navy);
-      margin: 0;
-      font-size: clamp(18px, 5vw, 22px);
-      font-family: 'Playfair Display', serif;
-    }
-
+    .help-panel-header h2 { color: var(--navy); margin: 0; font-size: clamp(22px, 5vw, 26px); font-family: 'Playfair Display', serif; }
     .help-close-button {
-      width: clamp(36px, 8vw, 40px);
-      height: clamp(36px, 8vw, 40px);
-      border-radius: 50%;
-      background: rgba(168,147,90,0.15);
-      border: 1px solid rgba(168,147,90,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: clamp(18px, 5vw, 22px);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      color: var(--gold);
+      width: clamp(40px, 8vw, 44px); height: clamp(40px, 8vw, 44px); border-radius: 50%;
+      background: rgba(168,147,90,0.15); border: 1px solid rgba(168,147,90,0.3);
+      display: flex; align-items: center; justify-content: center; font-size: clamp(22px, 5vw, 26px);
+      cursor: pointer; transition: all 0.2s ease; color: var(--gold);
     }
+    .help-close-button:active { background: var(--gold); transform: scale(0.92); color: var(--navy); }
+    .help-panel-content { max-height: calc(80vh - 100px); overflow-y: auto; padding: 0 clamp(20px, 4vw, 24px) clamp(20px, 3vh, 24px); }
+    .help-item { margin-bottom: clamp(16px, 2.5vh, 20px); padding-bottom: clamp(16px, 2.5vh, 20px); border-bottom: 1px solid var(--sand); }
+    .help-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+    .help-item h3 { margin: 0 0 8px 0; font-size: clamp(18px, 4vw, 20px); color: var(--navy); font-weight: 700; font-family: 'Playfair Display', serif; }
+    .help-item p { margin: 0; font-size: clamp(15px, 3.5vw, 16px); color: var(--forest); line-height: 1.5; font-family: 'DM Sans', sans-serif; }
 
-    .help-close-button:active {
-      background: var(--gold);
-      transform: scale(0.92);
-      color: var(--navy);
-    }
+    .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13,33,54,0.6); backdrop-filter: blur(4px); z-index: 999; display: none; }
+    .overlay.visible { display: block; }
 
-    .help-panel-content {
-      max-height: calc(80vh - 80px);
-      overflow-y: auto;
-      padding: 0 clamp(16px, 4vw, 20px) clamp(16px, 3vh, 20px);
-    }
-    
-    .help-item {
-      margin-bottom: clamp(12px, 2.5vh, 16px);
-      padding-bottom: clamp(12px, 2.5vh, 16px);
-      border-bottom: 1px solid var(--sand);
-    }
-    
-    .help-item:last-child {
-      border-bottom: none;
-    }
-    
-    .help-item h3 {
-      margin: 0 0 6px 0;
-      font-size: clamp(15px, 4vw, 17px);
-      color: var(--navy);
-      font-weight: 700;
-      font-family: 'Playfair Display', serif;
-    }
-    
-    .help-item p {
-      margin: 0;
-      font-size: clamp(13px, 3.5vw, 15px);
-      color: var(--forest);
-      line-height: 1.5;
-      font-family: 'DM Sans', sans-serif;
-    }
-    
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(13,33,54,0.6);
-      backdrop-filter: blur(4px);
-      z-index: 999;
-      display: none;
-    }
-    
-    .overlay.visible {
-      display: block;
-    }
-
-    /* Badge styling for tables */
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    .badge-gold {
-      background: rgba(168,147,90,.15);
-      color: var(--gold-dim);
-    }
-
-    /* ---------- RESPONSIVE ADJUSTMENTS ---------- */
-    @media (max-height: 700px) {
-      .info-panel.visible, .stats-panel.visible { height: 65vh; }
-      .control-buttons { gap: 8px; }
-    }
-
-    @media (max-height: 500px) {
-      .info-panel.visible, .stats-panel.visible { height: 75vh; }
-      .farm-info { bottom: 10px; padding: 8px 12px; }
-      .farm-name { font-size: 16px; }
-      .farm-stats { font-size: 12px; }
-      .control-button { width: 40px; height: 40px; font-size: 18px; }
-    }
-
-    @media (max-width: 320px) {
-      .control-button { width: 40px; height: 40px; font-size: 18px; }
-      .button-label { font-size: 8px; padding: 2px 4px; }
-      .header h1 { font-size: 16px; padding: 8px 12px; }
-    }
-
-    @media (orientation: landscape) and (max-height: 450px) {
-      .farm-info { bottom: 10px; left: 10px; padding: 6px 10px; }
-      .farm-name { font-size: 14px; }
-      .farm-stats { font-size: 11px; }
-      .control-button { width: 38px; height: 38px; font-size: 16px; }
-      .button-label { font-size: 8px; }
-    }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+    .badge-gold { background: rgba(168,147,90,.15); color: var(--gold-dim); }
   </style>
 </head>
-
 <body>
-  <!-- Loading Screen (Aligned with Dashboard) -->
   <div id="loading-screen">
     <div class="loading-logo">🍌</div>
-    <div class="loading-title">Elim Farms</div>
+    <div class="loading-title">Demo Farms</div>
     <div class="loading-sub">Live Map</div>
     <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
   </div>
 
-  <!-- Toast Notification (Aligned with Dashboard) -->
   <div id="toast"></div>
 
-  <div class="header" id="header">
-    <h1 id="page-title">🍌 Elim Farms<span>Live Map</span></h1>
-    <div id="searchDropdown" class="search-dropdown" role="search" aria-hidden="true">
-      <input type="text" id="block-search" placeholder="Search blocks (M1, M2...)..." autocomplete="off" aria-label="Search blocks by name" />
-      <div id="search-results" class="search-results-list" role="listbox"></div>
-    </div>
-  </div>
-
   <div class="farm-info" id="farmInfo">
-    <p class="farm-name" id="farmNameDisplay">Elim Farms</p>
-    <p class="farm-stats" id="farmStatsDisplay">Syncing live data...</p>
+    <p class="farm-name" id="farmNameDisplay">Demo Farms</p>
+    <p class="farm-stats" id="farmStatsDisplay">7 blocks · 7.15 ha</p>
   </div>
 
   <div id="map-container">
-    <svg id="map-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-      <defs>
-        <!-- Removed high-yield pattern - using single color -->
-        <!-- Pulse on click (bloom burst) -->
-        <filter id="pulseEffect" x="-25%" y="-25%" width="150%" height="150%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
-          <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="pulse" />
-          <feBlend in="SourceGraphic" in2="pulse" mode="screen" />
-        </filter>
-        <!-- Hover glow — soft green halo -->
-        <filter id="hoverGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
-          <feFlood flood-color="#0f5c3f" flood-opacity="0.7" result="color" />
-          <feComposite in="color" in2="blur" operator="in" result="shadow" />
-          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <!-- Selected glow — gold halo -->
-        <filter id="selectedGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur" />
-          <feFlood flood-color="#ffd700" flood-opacity="0.75" result="color" />
-          <feComposite in="color" in2="blur" operator="in" result="shadow" />
-          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-    </svg>
+    <!-- FLOURISH EMBED REPLACES SVG MAP -->
+    <div id="flourish-iframe-container" class="flourish-embed flourish-map" data-src="visualisation/29986827">
+      <script src="https://public.flourish.studio/resources/embed.js"></script>
+      <noscript><img src="https://public.flourish.studio/visualisation/29986827/thumbnail" width="100%" alt="map visualization" /></noscript>
+    </div>
     
     <div class="control-buttons">
       <div class="control-button-wrapper">
@@ -817,35 +266,12 @@
         <span class="button-label">Blocks</span>
       </div>
       <div class="control-button-wrapper">
-        <button id="search-button" class="control-button" aria-label="Search blocks">🔍</button>
-        <span class="button-label">Search</span>
-      </div>
-      <div class="control-button-wrapper">
-        <button id="prev-block" class="control-button" aria-label="Previous block">←</button>
-        <span class="button-label">Prev</span>
-      </div>
-      <div class="control-button-wrapper">
-        <button id="next-block" class="control-button" aria-label="Next block">→</button>
-        <span class="button-label">Next</span>
-      </div>
-      <div class="control-button-wrapper">
         <button id="help-button" class="control-button" aria-label="Show help">❓</button>
         <span class="button-label">Help</span>
       </div>
     </div>
     
-    <!-- Bottom Panels -->
-    <div id="block-panel" class="info-panel" role="dialog" aria-modal="true" aria-hidden="true">
-      <div class="panel-header">
-        <div>
-          <div class="panel-title" id="block-panel-title">Block Details</div>
-          <div class="panel-subtitle" id="block-panel-subtitle"></div>
-        </div>
-        <button class="close-button" aria-label="Close panel">×</button>
-      </div>
-      <div class="panel-content" id="block-panel-content"></div>
-    </div>
-    
+    <!-- Full Screen Panels -->
     <div id="summary-panel" class="stats-panel" role="dialog" aria-modal="true" aria-hidden="true">
       <div class="panel-header">
         <div class="stats-title">Farm Summary</div>
@@ -886,150 +312,83 @@
     </div>
     <div class="help-panel-content">
       <div class="help-item">
-        <h3>Exploring Blocks</h3>
-        <p>Tap any block on the map to view detailed statistics including block size, land distribution, harvest weight, and irrigation details.</p>
+        <h3>Interactive Map</h3>
+        <p>The map is fully interactive! Hover over any block on the map to see a popup with detailed information about that specific area, including harvest stats and block size.</p>
       </div>
       <div class="help-item">
         <h3>Farm Summary</h3>
-        <p>Use the 📊 button to view overall farm statistics aggregated from Harvesting and Irrigation records.</p>
+        <p>Use the 📊 button to view an overall farm summary. This opens a full-screen panel displaying aggregated statistics from all harvesting and irrigation records.</p>
       </div>
       <div class="help-item">
         <h3>All Blocks</h3>
-        <p>The 🌱 button shows a complete list of all blocks with their key metrics from the Land and Harvesting sheets.</p>
-      </div>
-      <div class="help-item">
-        <h3>Search</h3>
-        <p>Tap 🔍 to search for specific blocks by name (e.g., M1, M2). Results appear as you type.</p>
-      </div>
-      <div class="help-item">
-        <h3>Navigation</h3>
-        <p>Use ← → buttons to cycle through blocks in order.</p>
-      </div>
-      <div class="help-item">
-        <h3>Color Legend</h3>
-        <p><span style="color: var(--block-color);">●</span> All blocks use uniform green (#2c5282)</p>
+        <p>The 🌱 button shows a complete list of all blocks. It opens a full-screen panel with their key metrics from the Land and Harvesting sheets, making it easy to compare different blocks.</p>
       </div>
     </div>
   </div>
 
   <script>
   (function(){
-    // ========== ALPHA-ELIM DATA CONFIG (ALIGNED WITH DASHBOARD) ==========
-    const COLUMNS = {
-      LAND: {
-        BLOCK: 'Block',
-        SIZE_HA: 'Block Size (ha)'
-      },
-      HARVEST: {
-        BLOCK: 'BLOCK',
-        BUNCH_WEIGHT: 'AVERAGE BUNCH WEIGHT (KG)',
-        QUANTITY_KG: 'QUANTITY HARVESTED (KG)',
-        DATE: 'DATE OF HARVESTING'
-      },
-      IRRIGATION: {
-        BLOCK: 'BLOCK',
-        FUEL_L: 'FUEL (litres)',
-        DATE: 'DATE'
-      }
+    // ========== HARDCODED BLOCK DATA ==========
+    const HARVEST_DATA = {
+      "Block A": { totalWeight: 24500, avgWeight: 25.20, share: "24.7%" },
+      "Block B": { totalWeight: 18200, avgWeight: 23.80, share: "18.4%" },
+      "Block C": { totalWeight: 12800, avgWeight: 24.50, share: "12.9%" },
+      "Block D": { totalWeight: 21500, avgWeight: 26.10, share: "21.7%" },
+      "Block E": { totalWeight: 9800,  avgWeight: 22.90, share: "9.9%"  },
+      "Block F": { totalWeight: 7200,  avgWeight: 23.20, share: "7.3%"  },
+      "Block G": { totalWeight: 5100,  avgWeight: 24.00, share: "5.1%"  }
     };
 
-    // Google Sheets CSV URLs - UPDATE THESE WITH YOUR PUBLISHED URLs
-    const CSV_URLS = {
-      LAND: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=349843810&single=true&output=csv',
-      HARVEST: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=2081044538&single=true&output=csv',
-      IRRIGATION: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLM16vIO2FHQ2eiBi4FI81Riz8PXcezxTr593YK0WxrjMUr1kWjBSYULgngEc4ZnlUvwCC8Zgs7O2/pub?gid=1622779254&single=true&output=csv'
-      // Pump data not used in map metrics but available if needed
-    };
+    function generateIrrigationData() {
+      const irrData = {};
+      Object.keys(HARVEST_DATA).forEach(block => {
+        const sessions = Math.floor(Math.random() * 8) + 3; // 3 to 10 sessions
+        const fuelUsed = (Math.random() * (sessions * 12)).toFixed(1); // up to 12L per session
+        irrData[block] = { fuelUsed: parseFloat(fuelUsed), sessions: sessions };
+      });
+      return irrData;
+    }
 
     // ========== APP STATE ==========
-    let totalFarmArea = 0;
-
-    // Data stores
+    let totalFarmArea = 7.15;
     let landData = {};
-    let harvestData = {};
-    let irrigationData = {};
+    let irrigationData = generateIrrigationData();
+    let blocks = [];
 
-    // UI Elements
-    const mapContainer = document.getElementById("map-container");
-    const svg = d3.select("#map-svg");
-    let width = mapContainer.clientWidth, height = mapContainer.clientHeight;
-    svg.attr("viewBox", `0 0 ${width} ${height}`);
+    // Initialize data directly for UI panels
+    Object.keys(HARVEST_DATA).forEach(name => {
+      let size = 0;
+      if (name === "Block A") size = 1.85;
+      else if (name === "Block B") size = 1.20;
+      else if (name === "Block C") size = 0.95;
+      else if (name === "Block D") size = 1.45;
+      else if (name === "Block E") size = 0.75;
+      else if (name === "Block F") size = 0.55;
+      else if (name === "Block G") size = 0.40;
+      
+      landData[name] = { size, planted: 0 };
+      blocks.push(name);
+    });
 
-    const mapGroup = svg.append("g").attr("id", "mapGroup");
-    const header = d3.select("#header");
     const farmInfo = d3.select("#farmInfo");
     const loadingScreen = d3.select("#loading-screen");
     
     const summaryButton = d3.select("#summary-button");
     const blocksButton = d3.select("#blocks-button");
-    const searchButton = d3.select("#search-button");
-    const prevButton = d3.select("#prev-block");
-    const nextButton = d3.select("#next-block");
     const helpButton = d3.select("#help-button");
     
-    const blockPanel = d3.select("#block-panel");
     const summaryPanel = d3.select("#summary-panel");
     const blocksPanel = d3.select("#blocks-panel");
     const helpPanel = d3.select("#help-panel");
     const overlay = d3.select("#overlay");
     
-    const searchDropdown = d3.select("#searchDropdown");
-    const blockSearch = d3.select("#block-search");
-    const searchResults = d3.select("#search-results");
-    
-    const blockPanelTitle = d3.select("#block-panel-title");
-    const blockPanelSubtitle = d3.select("#block-panel-subtitle");
-    const blockPanelContent = d3.select("#block-panel-content");
     const summaryPanelContent = d3.select("#summary-panel-content");
     const blocksTableBody = d3.select("#blocks-table-body");
     const blocksPanelSubtitle = d3.select("#blocks-panel-subtitle");
-    
     const farmStatsDisplay = d3.select("#farmStatsDisplay");
 
-    const projection = d3.geoIdentity().reflectY(true);
-    const path = d3.geoPath().projection(projection);
-
-    let geoData = null;
-    let blocks = [];
-    let blockSelection = null;
-    let clickLayer = null;
-    let blockLabels = null;
-    let zoomBehavior = null;
-    let selectedBlock = null;
-    let selectedBlockIndex = -1;
-    let currentTransform = d3.zoomIdentity;
-    let activePanel = null;
-    let lastFocusedElement = null;
-
-    // 🔧 CONFIGURATION
-    const config = {
-      colors: {
-        block: "#2c5282"  // Single uniform green
-      },
-      map: {
-        scale: 0.9,
-        padding: 0.05,
-        labelBaseFontSize: 11,
-        initialZoomFactor: 0.85,
-        offsetX: 30,
-        offsetY: 100
-      }
-    };
-
-    // ========== UTILITIES (ALIGNED WITH DASHBOARD) ==========
-    function debounce(func, wait) {
-      let timeout;
-      return function() {
-        const context = this, args = arguments;
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(context, args), wait);
-      };
-    }
-
     function trapFocus(element) {
-      const focusableSelectors = [
-        'button', '[href]', 'input', 'select', 'textarea', '[tabindex]:not([tabindex="-1"])'
-      ].join(',');
+      const focusableSelectors = ['button', '[href]', 'input', 'select', 'textarea', '[tabindex]:not([tabindex="-1"])'].join(',');
       const focusableElements = element.querySelectorAll(focusableSelectors);
       const firstFocusable = focusableElements[0];
       const lastFocusable = focusableElements[focusableElements.length - 1];
@@ -1037,179 +396,16 @@
       function handleKeyDown(e) {
         if (e.key !== 'Tab') return;
         if (e.shiftKey) {
-          if (document.activeElement === firstFocusable) {
-            e.preventDefault();
-            lastFocusable.focus();
-          }
+          if (document.activeElement === firstFocusable) { e.preventDefault(); lastFocusable.focus(); }
         } else {
-          if (document.activeElement === lastFocusable) {
-            e.preventDefault();
-            firstFocusable.focus();
-          }
+          if (document.activeElement === lastFocusable) { e.preventDefault(); firstFocusable.focus(); }
         }
       }
-
       element.addEventListener('keydown', handleKeyDown);
       if (firstFocusable) firstFocusable.focus();
       return () => element.removeEventListener('keydown', handleKeyDown);
     }
 
-    function applyMapTransform() {
-      projection.scale(projection.scale() * config.map.initialZoomFactor);
-      const t = projection.translate();
-      projection.translate([t[0] + config.map.offsetX, t[1] + config.map.offsetY]);
-    }
-
-    // ========== SMART DATE PARSER (ALIGNED WITH DASHBOARD) ==========
-    function smartParseDate(val) {
-      if (!val || String(val).trim() === '') return null;
-      const s = String(val).trim();
-      
-      // Try ISO format first
-      if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
-        const d = new Date(s);
-        return isNaN(d.getTime()) ? null : d;
-      }
-      
-      // Try DD/MM/YYYY or MM/DD/YYYY format
-      const parts = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if (parts) {
-        const a = parseInt(parts[1]), b = parseInt(parts[2]), yr = parseInt(parts[3]);
-        let day, mon;
-        if (a > 12) { day = a; mon = b; }
-        else if (b > 12) { day = b; mon = a; }
-        else { day = a; mon = b; }
-        
-        const d = new Date(yr, mon - 1, day);
-        return isNaN(d.getTime()) ? null : d;
-      }
-      
-      const d = new Date(s);
-      return isNaN(d.getTime()) ? null : d;
-    }
-
-    function parseYearMonth(val) {
-      const d = smartParseDate(val);
-      if (!d) return null;
-      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-    }
-
-    // ========== CSV PARSER (ALPHA-ELIM COMPATIBLE) ==========
-    function parseCSV(text) {
-      const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-      while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
-      if (lines.length < 2) return [];
-
-      function splitLine(line) {
-        const fields = [];
-        let cur = '', inQ = false;
-        for (let i = 0; i < line.length; i++) {
-          const ch = line[i];
-          if (ch === '"') {
-            if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
-            else inQ = !inQ;
-          } else if (ch === ',' && !inQ) {
-            fields.push(cur.trim()); cur = '';
-          } else {
-            cur += ch;
-          }
-        }
-        fields.push(cur.trim());
-        return fields;
-      }
-
-      const headers = splitLine(lines[0]);
-      const rows = [];
-      for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-        const vals = splitLine(lines[i]);
-        if (vals.every(v => v === '')) continue;
-        const obj = {};
-        headers.forEach((h, idx) => { obj[h] = vals[idx] !== undefined ? vals[idx] : ''; });
-        rows.push(obj);
-      }
-      return rows;
-    }
-
-    async function fetchCSV(url) {
-      if (!url) return [];
-      const sep = url.includes('?') ? '&' : '?';
-      const res = await fetch(url + sep + '_cb=' + Date.now());
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return parseCSV(await res.text());
-    }
-
-    // ========== DATA PROCESSING (ALIGNED WITH DASHBOARD) ==========
-    function processLandData(rows) {
-      landData = {};
-      blocks = [];
-      totalFarmArea = 0;
-      
-      rows.forEach(r => {
-        const block = String(r[COLUMNS.LAND.BLOCK] || '').trim();
-        const size = parseFloat(r[COLUMNS.LAND.SIZE_HA]) || 0;
-        if (block) {
-          landData[block] = { size };
-          blocks.push(block);
-          totalFarmArea += size;
-        }
-      });
-    }
-
-    function processHarvestData(rows) {
-      harvestData = {};
-      
-      rows.forEach(r => {
-        const block = String(r[COLUMNS.HARVEST.BLOCK] || '').trim();
-        if (!block) return;
-        
-        // Use QUANTITY HARVESTED (KG) for total weight (aligned with dashboard)
-        const quantity = parseFloat(r[COLUMNS.HARVEST.QUANTITY_KG]) || 0;
-        // Use AVERAGE BUNCH WEIGHT (KG) for average calculation
-        const avgWeight = parseFloat(r[COLUMNS.HARVEST.BUNCH_WEIGHT]) || 0;
-        
-        if (!harvestData[block]) {
-          harvestData[block] = { 
-            totalWeight: 0, 
-            bunchCount: 0,
-            weightSum: 0  // For calculating average
-          };
-        }
-        harvestData[block].totalWeight += quantity;
-        harvestData[block].bunchCount += 1;
-        if (avgWeight > 0) {
-          harvestData[block].weightSum += avgWeight;
-        }
-      });
-      
-      // Calculate per-block average bunch weight
-      Object.keys(harvestData).forEach(block => {
-        const d = harvestData[block];
-        // Average of recorded average bunch weights for this block
-        d.avgWeight = d.bunchCount > 0 && d.weightSum > 0 
-          ? d.weightSum / d.bunchCount 
-          : 0;
-      });
-    }
-
-    function processIrrigationData(rows) {
-      irrigationData = {};
-      
-      rows.forEach(r => {
-        const block = String(r[COLUMNS.IRRIGATION.BLOCK] || '').trim();
-        const fuel = parseFloat(r[COLUMNS.IRRIGATION.FUEL_L]) || 0;
-        
-        if (block) {
-          if (!irrigationData[block]) {
-            irrigationData[block] = { fuelUsed: 0, sessions: 0 };
-          }
-          irrigationData[block].fuelUsed += fuel;
-          irrigationData[block].sessions += 1;
-        }
-      });
-    }
-
-    // ========== TOAST NOTIFICATION (ALIGNED WITH DASHBOARD) ==========
     function toast(msg, ms) {
       const t = document.getElementById('toast');
       t.textContent = msg;
@@ -1217,419 +413,20 @@
       setTimeout(() => t.classList.remove('show'), ms || 2800);
     }
 
-    async function loadData() {
-      try {
-        loadingScreen.classed('hidden', false);
-        farmStatsDisplay.text("Connecting…");
-        
-        // Load GeoJSON
-        geoData = await d3.json("ElimFarms.geojson");
-        
-        // Load CSVs
-        const [landRows, harvestRows, irrigationRows] = await Promise.all([
-          fetchCSV(CSV_URLS.LAND),
-          fetchCSV(CSV_URLS.HARVEST),
-          fetchCSV(CSV_URLS.IRRIGATION)
-        ]);
-        
-        // Process data (aligned with dashboard)
-        processLandData(landRows);
-        processHarvestData(harvestRows);
-        processIrrigationData(irrigationRows);
-        
-        updateFarmInfo();
-        initMap();
-        
-        setTimeout(() => loadingScreen.classed('hidden', true), 300);
-        toast('✓ Map loaded');
-        
-      } catch (error) {
-        console.error("✗ Error loading data:", error);
+    // Hide loading screen once Flourish is visually interactable
+    function hideLoadingScreen() {
+      setTimeout(() => {
         loadingScreen.classed('hidden', true);
-        farmStatsDisplay.text("⚠ Offline");
-        toast('⚠ Could not load data — check CSV URLs');
-      }
+        toast('✓ Map loaded successfully');
+      }, 1000); // Give a 1s buffer to ensure Flourish has rendered
     }
 
-    function updateFarmInfo() {
-      const totalBlocks = blocks.length;
-      farmStatsDisplay.text(`${totalBlocks} blocks · ${totalFarmArea.toFixed(1)} ha`);
-    }
-
-    function initMap() {
-      projection.fitSize([width, height], geoData);
-      applyMapTransform();
-      
-      // Draw blocks with SINGLE UNIFORM GREEN COLOR
-      blockSelection = mapGroup.append("g").attr("class", "blocks")
-        .selectAll("path")
-        .data(geoData.features)
-        .enter()
-        .append("path")
-        .attr("class", "block")
-        .attr("d", d => {
-          try { return path(d); } catch (e) { return null; }
-        })
-        .attr("fill", config.colors.block)
-        .style("stroke-width", "2px")
-        .style("stroke", "#ffffff")
-        .on("mouseover", function(event, d) {
-          const el = d3.select(this);
-          if (el.classed("faded")) return; // don't glow faded blocks
-          if (!el.classed("selected")) {
-            el.raise();
-            el.attr("filter", "url(#hoverGlow)").attr("stroke-width", "3px");
-          }
-        })
-        .on("mouseout", function(event, d) {
-          const el = d3.select(this);
-          if (!el.classed("selected")) {
-            el.attr("filter", null).attr("stroke-width", "2px");
-          }
-        });
-
-      addClickLayer();
-      initZoom();
-      addBlockLabels();
-      setupEventListeners();
-    }
-
-    function addClickLayer() {
-      if (!geoData || !geoData.features) return;
-      removeClickLayer();
-      
-      const strokeValue = getComputedStyle(document.documentElement)
-        .getPropertyValue('--click-target-stroke').trim() || '20px';
-      
-      clickLayer = mapGroup.append("g").attr("class", "click-layer");
-
-      clickLayer.selectAll("path")
-        .data(geoData.features)
-        .enter()
-        .append("path")
-        .attr("class", "block-click-target")
-        .attr("d", d => { try { return path(d); } catch (e) { return null; } })
-        .attr("data-field", d => d.properties?.Field_Name || "")
-        .style("fill", "transparent")
-        .style("stroke", "transparent")
-        .style("stroke-width", strokeValue)
-        .style("pointer-events", "all")
-        .style("cursor", "pointer")
-        .on("click", (event, d) => onBlockClick(event, d))
-        .on("touchstart", (event, d) => { event.preventDefault(); onBlockClick(event, d); });
-    }
-
-    function removeClickLayer() {
-      d3.selectAll(".click-layer").remove();
-      clickLayer = null;
-    }
-
-    function addBlockLabels() {
-      if (!geoData || !geoData.features) return;
-      removeBlockLabels();
-      
-      const labelsGroup = mapGroup.append("g").attr("class", "block-labels");
-
-      blockLabels = labelsGroup.selectAll("text")
-        .data(geoData.features)
-        .enter()
-        .append("text")
-        .attr("class", "block-label")
-        .attr("data-field", d => d.properties?.Field_Name || "")
-        .text(d => {
-          const name = d.properties?.Field_Name || "";
-          return name.length > 8 ? name.substring(0, 6) + "…" : name;
-        })
-        .attr("x", d => { try { return path.centroid(d)[0]; } catch (e) { return 0; } })
-        .attr("y", d => { try { return path.centroid(d)[1]; } catch (e) { return 0; } });
-    }
-
-    function removeBlockLabels() {
-      d3.selectAll(".block-labels").remove();
-      blockLabels = null;
-    }
-
-    function updateLabelPositions() {
-      if (!blockLabels) return;
-      blockLabels
-        .attr("x", d => { try { return currentTransform.apply(path.centroid(d))[0]; } catch (e) { return 0; } })
-        .attr("y", d => { try { return currentTransform.apply(path.centroid(d))[1]; } catch (e) { return 0; } });
-    }
-
-    function initZoom() {
-      zoomBehavior = d3.zoom()
-        .scaleExtent([0.5, 8])
-        .on("zoom", (event) => {
-          currentTransform = event.transform;
-          mapGroup.attr("transform", event.transform);
-          updateLabelPositions();
-        });
-      svg.call(zoomBehavior);
-    }
-
-    function focusOnBlock(feature) {
-      try {
-        const bounds = path.bounds(feature);
-        const dx = bounds[1][0] - bounds[0][0];
-        const dy = bounds[1][1] - bounds[0][1];
-        const x = (bounds[0][0] + bounds[1][0]) / 2;
-        const y = (bounds[0][1] + bounds[1][1]) / 2;
-        
-        const targetScale = Math.min(width, height) < 400 ? 0.75 : 0.65;
-        const scale = Math.max(1.2, Math.min(5, targetScale / Math.max(dx / (width * 0.65), dy / (height * 0.65))));
-        const verticalAnchor = height < 600 ? 0.35 : 0.38;
-        const translate = [width * 0.5 - scale * x, height * verticalAnchor - scale * y];
-
-        const newTransform = d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale);
-        currentTransform = newTransform;
-        // Animated zoom-in like desktop.html (smooth, 900ms)
-        svg.transition().duration(900).ease(d3.easeCubicInOut)
-          .call(zoomBehavior.transform, newTransform);
-        updateLabelPositions();
-      } catch (e) {
-        console.warn("Error focusing on block:", e);
-      }
-    }
-
-    function resetView() {
-      selectedBlock = null;
-      selectedBlockIndex = -1;
-      // Animated zoom-out like desktop.html (smooth, 700ms)
-      svg.transition().duration(700).ease(d3.easeCubicInOut)
-        .call(zoomBehavior.transform, d3.zoomIdentity)
-        .on("end", () => { currentTransform = d3.zoomIdentity; updateLabelPositions(); });
-      
-      if (blockSelection) {
-        blockSelection
-          .classed("faded", false)
-          .classed("selected", false)
-          .attr("filter", null)
-          .attr("stroke-width", "2px");
-      }
-      hideAllPanels();
-      header.classed("hidden", false);
-      farmInfo.classed("hidden", false);
-      if (blockLabels) blockLabels.classed("hidden", false);
-    }
-
-    function onBlockClick(event, d) {
-      const fieldName = d.properties?.Field_Name;
-      if (!fieldName) return;
-      
-      if (selectedBlock === fieldName) { resetView(); return; }
-      
-      selectedBlock = fieldName;
-      selectedBlockIndex = blocks.indexOf(fieldName);
-      
-      // Reset all blocks
-      blockSelection
-        .classed("faded", dd => dd !== d)
-        .classed("selected", dd => dd === d)
-        .attr("filter", null)
-        .attr("stroke-width", "2px");
-
-      // Apply gold glow + thicker stroke to selected block
-      const selectedEl = blockSelection.filter(dd => dd === d);
-      selectedEl
-        .raise()
-        .attr("stroke-width", "3.5px")
-        .attr("filter", "url(#selectedGlow)");
-
-      // Pulse animation on top of the glow
-      selectedEl
-        .transition().duration(800)
-          .attr("filter", "url(#pulseEffect)")
-        .transition().duration(800)
-          .attr("filter", "url(#selectedGlow)"); // settle back to gold glow
-      
-      header.classed("hidden", true);
-      farmInfo.classed("hidden", true);
-      focusOnBlock(d);
-      showPanel(blockPanel);
-      updateBlockPanel(d);
-      if (blockLabels) blockLabels.classed("hidden", true);
-    }
-
-    // ========== BLOCK PANEL METRICS (COMPACT - NO SCROLL) ==========
-    function updateBlockPanel(feature) {
-      const fieldName = feature.properties?.Field_Name;
-      if (!fieldName) return;
-      
-      blockPanelTitle.text(fieldName);
-      
-      const lData = landData[fieldName] || {};
-      const blockSize = lData.size || 0;
-      const landPercent = totalFarmArea > 0 ? ((blockSize / totalFarmArea) * 100).toFixed(1) : "0.0";
-      
-      const hData = harvestData[fieldName] || {};
-      const avgBunchWeight = hData.avgWeight || 0;
-      const totalHarvestWeight = hData.totalWeight || 0;
-      
-      const iData = irrigationData[fieldName] || {};
-      const irrFuel = iData.fuelUsed || 0;
-      const irrSessions = iData.sessions || 0;
-      
-      blockPanelSubtitle.text(`${blockSize.toFixed(2)} ha · ${landPercent}% of farm`);
-      
-      // Compact bar inline with the subtitle row
-      const barPct = Math.min(100, parseFloat(landPercent));
-
-      const html = `
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
-          <div class="detail-row" style="grid-column:span 1; border-right:1px solid var(--sand); padding-right:12px; margin-right:12px;">
-            <span class="detail-label">Block Size</span>
-            <span class="detail-value">${blockSize.toFixed(2)} ha</span>
-          </div>
-          <div class="detail-row" style="grid-column:span 1;">
-            <span class="detail-label">Farm Share</span>
-            <span class="detail-value">${landPercent}%</span>
-          </div>
-          <div class="detail-row" style="grid-column:span 1; border-right:1px solid var(--sand); padding-right:12px; margin-right:12px;">
-            <span class="detail-label">Avg Bunch Wt</span>
-            <span class="detail-value">${avgBunchWeight > 0 ? avgBunchWeight.toFixed(1) + ' kg' : '—'}</span>
-          </div>
-          <div class="detail-row" style="grid-column:span 1;">
-            <span class="detail-label">Total Harvested</span>
-            <span class="detail-value">${totalHarvestWeight > 0 ? (totalHarvestWeight/1000).toFixed(1) + ' t' : '—'}</span>
-          </div>
-          <div class="detail-row" style="grid-column:span 1; border-right:1px solid var(--sand); padding-right:12px; margin-right:12px;">
-            <span class="detail-label">Irr. Sessions</span>
-            <span class="detail-value">${irrSessions}</span>
-          </div>
-          <div class="detail-row" style="grid-column:span 1;">
-            <span class="detail-label">Fuel Used</span>
-            <span class="detail-value">${irrFuel.toFixed(1)} L</span>
-          </div>
-        </div>
-        <div style="margin-top:8px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <span style="font-size:11px; font-weight:600; color:var(--forest); opacity:0.75; text-transform:uppercase; letter-spacing:.07em;">Land Allocation</span>
-            <span style="font-size:11px; font-weight:700; color:var(--gold-dim);">${landPercent}% of farm</span>
-          </div>
-          <div class="density-chart">
-            <div class="density-fill" style="width:${barPct}%"></div>
-          </div>
-        </div>
-      `;
-      blockPanelContent.html(html);
-    }
-
-    function showPanel(panel) {
-      hideAllPanels();
-      panel.classed("visible", true).attr("aria-hidden", "false");
-      activePanel = panel;
-      if (panel.node().id === 'help-panel') {
-        lastFocusedElement = document.activeElement;
-        window.focusTrapCleanup = trapFocus(panel.node());
-      }
-    }
-    
-    function hideAllPanels() {
-      blockPanel.classed("visible", false).attr("aria-hidden", "true");
-      summaryPanel.classed("visible", false).attr("aria-hidden", "true");
-      blocksPanel.classed("visible", false).attr("aria-hidden", "true");
-      
-      if (activePanel?.node()?.id === 'help-panel' && window.focusTrapCleanup) {
-        window.focusTrapCleanup();
-        window.focusTrapCleanup = null;
-        if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
-      }
-      activePanel = null;
-    }
-
-    // ========== SUMMARY PANEL — DASHBOARD CARD LAYOUT ==========
-    function updateSummaryPanel() {
-      const totalArea = totalFarmArea;
-      const totalBlocks = blocks.length;
-      
-      const allWeights = Object.values(harvestData).map(d => d.avgWeight).filter(w => w > 0);
-      const avgBunchWeight = allWeights.length > 0 
-        ? allWeights.reduce((a,b) => a+b, 0) / allWeights.length : 0;
-      const totalHarvestKg = Object.values(harvestData).reduce((a,b) => a + (b.totalWeight||0), 0);
-      const totalIrrFuel = Object.values(irrigationData).reduce((a,b) => a + (b.fuelUsed||0), 0);
-      const totalIrrSessions = Object.values(irrigationData).reduce((a,b) => a + (b.sessions||0), 0);
-      const blocksWithHarvest = Object.keys(harvestData).filter(b => (harvestData[b]?.totalWeight||0) > 0).length;
-      
-      const sorted = [...blocks].sort((a,b) => (harvestData[b]?.totalWeight||0) - (harvestData[a]?.totalWeight||0));
-      const topBlock = sorted[0];
-      const topBlockHarvest = harvestData[topBlock]?.totalWeight || 0;
-
-      const html = `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 0 10px;">
-          <div style="background:var(--navy);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;border:1px solid rgba(168,147,90,0.25);">
-            <span style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.09em;">Total Area</span>
-            <span style="font-size:clamp(20px,5vw,26px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${totalArea.toFixed(1)}<span style="font-size:13px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> ha</span></span>
-            <span style="font-size:11px;color:var(--sand);">${totalBlocks} blocks total</span>
-          </div>
-          <div style="background:var(--navy);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;border:1px solid rgba(168,147,90,0.25);">
-            <span style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.09em;">Total Harvest</span>
-            <span style="font-size:clamp(20px,5vw,26px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${totalHarvestKg > 0 ? (totalHarvestKg/1000).toFixed(1) : '—'}<span style="font-size:13px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> t</span></span>
-            <span style="font-size:11px;color:var(--sand);">${blocksWithHarvest} active blocks</span>
-          </div>
-          <div style="background:linear-gradient(135deg,#1a3352,#0d2136);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;border:1px solid rgba(168,147,90,0.2);">
-            <span style="font-size:10px;font-weight:700;color:var(--gold-lt);text-transform:uppercase;letter-spacing:.09em;">Avg Bunch Wt</span>
-            <span style="font-size:clamp(20px,5vw,26px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${avgBunchWeight > 0 ? avgBunchWeight.toFixed(1) : '—'}<span style="font-size:13px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> kg</span></span>
-            <span style="font-size:11px;color:var(--sand);">per bunch</span>
-          </div>
-          <div style="background:linear-gradient(135deg,#1a3352,#0d2136);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;border:1px solid rgba(168,147,90,0.2);">
-            <span style="font-size:10px;font-weight:700;color:var(--gold-lt);text-transform:uppercase;letter-spacing:.09em;">Irrigation</span>
-            <span style="font-size:clamp(20px,5vw,26px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${totalIrrFuel.toFixed(0)}<span style="font-size:13px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> L</span></span>
-            <span style="font-size:11px;color:var(--sand);">${totalIrrSessions} sessions</span>
-          </div>
-        </div>
-
-        ${topBlock && topBlockHarvest > 0 ? `
-        <div style="margin:0 0 14px;padding:12px 16px;background:rgba(168,147,90,0.08);border-radius:12px;border:1px solid rgba(168,147,90,0.25);display:flex;align-items:center;justify-content:space-between;gap:12px;">
-          <div style="min-width:0;">
-            <div style="font-size:10px;font-weight:700;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.09em;margin-bottom:3px;">🏆 Top Block</div>
-            <div style="font-size:17px;font-weight:700;color:var(--navy);font-family:'Playfair Display',serif;">${topBlock}</div>
-            <div style="font-size:12px;color:var(--olive);margin-top:2px;">${(topBlockHarvest/1000).toFixed(2)} t · ${landData[topBlock]?.size?.toFixed(2)||'—'} ha</div>
-          </div>
-          <div style="background:var(--navy);border-radius:10px;padding:10px 14px;text-align:center;flex-shrink:0;">
-            <div style="font-size:17px;font-weight:700;color:var(--gold);font-family:'Playfair Display',serif;">${harvestData[topBlock]?.avgWeight > 0 ? harvestData[topBlock].avgWeight.toFixed(1) : '—'}</div>
-            <div style="font-size:10px;color:var(--sand);margin-top:1px;">kg avg</div>
-          </div>
-        </div>` : ''}
-
-        <div style="font-size:10px;font-weight:700;color:var(--olive);text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px;">Block Breakdown</div>
-        <table class="stats-table" style="margin-bottom:12px;">
-          <thead><tr>
-            <th>Block</th>
-            <th style="text-align:right">Size</th>
-            <th style="text-align:right">Harvest</th>
-            <th style="text-align:right">Avg</th>
-          </tr></thead>
-          <tbody>${sorted.map(b => {
-            const sz = (landData[b]?.size||0).toFixed(2);
-            const hw = harvestData[b]?.totalWeight||0;
-            const av = harvestData[b]?.avgWeight||0;
-            const isTop = b === topBlock && topBlockHarvest > 0;
-            return `<tr style="cursor:pointer${isTop?';background:rgba(168,147,90,0.06)':''}" data-block="${b}">
-              <td><span class="badge badge-gold">${b}</span>${isTop?' <span style="font-size:10px">🏆</span>':''}</td>
-              <td style="text-align:right;color:var(--forest)">${sz}</td>
-              <td style="text-align:right;font-weight:${hw>0?700:400};color:${hw>0?'var(--navy)':'var(--sand)'}">
-                ${hw>0?(hw/1000).toFixed(2)+'t':'—'}</td>
-              <td style="text-align:right;color:${av>0?'var(--navy)':'var(--sand)'}">
-                ${av>0?av.toFixed(1):'—'}</td>
-            </tr>`;
-          }).join('')}</tbody>
-        </table>
-      `;
-      summaryPanelContent.html(html);
-      summaryPanelContent.selectAll("tr[data-block]").on("click", function() {
-        const blockName = d3.select(this).attr("data-block");
-        const feature = geoData.features.find(f => f.properties?.Field_Name === blockName);
-        if (feature) { hideAllPanels(); onBlockClick({ currentTarget: null }, feature); }
-      });
-    }
-
-    // ========== BLOCKS PANEL ==========
     function updateBlocksPanel() {
-      blocksPanelSubtitle.text(`${blocks.length} blocks · ${totalFarmArea.toFixed(1)} ha`);
+      blocksPanelSubtitle.text(`${blocks.length} blocks · ${totalFarmArea.toFixed(2)} ha`);
       let html = '';
       blocks.forEach(blockName => {
         const lData = landData[blockName] || {};
-        const hData = harvestData[blockName] || {};
+        const hData = HARVEST_DATA[blockName] || {};
         const size = lData.size || 0;
         const harvest = hData.totalWeight || 0;
         const avg = hData.avgWeight || 0;
@@ -1641,127 +438,93 @@
         </tr>`;
       });
       blocksTableBody.html(html);
-      blocksTableBody.selectAll("tr").on("click", function() {
-        const blockName = d3.select(this).attr("data-block");
-        const feature = geoData.features.find(f => f.properties?.Field_Name === blockName);
-        if (feature) { hideAllPanels(); onBlockClick({ currentTarget: null }, feature); showPanel(blockPanel); }
-      });
     }
 
-    // ========== SEARCH ==========
-    function setupSearch() {
-      searchButton.on("click", function(e) {
-        e.stopPropagation();
-        const isExpanded = searchDropdown.style("display") === "block";
-        if (isExpanded) {
-          hideSearchDropdown();
-        } else {
-          showSearchDropdown();
-          adjustSearchDropdownPosition();
-        }
-      });
+    function updateSummaryPanel() {
+      const totalArea = totalFarmArea;
+      const totalBlocks = blocks.length;
+      const totalHarvestKg = Object.values(HARVEST_DATA).reduce((a,b) => a + (b.totalWeight||0), 0);
+      const totalIrrFuel = Object.values(irrigationData).reduce((a,b) => a + (b.fuelUsed||0), 0);
+      const totalIrrSessions = Object.values(irrigationData).reduce((a,b) => a + (b.sessions||0), 0);
       
-      blockSearch.on("input", debounce(function() {
-        const query = this.value.toLowerCase().trim();
-        searchResults.html("");
-        
-        if (query.length < 2) {
-          if (query.length === 0) searchDropdown.style("display", "none");
-          return;
-        }
+      const allWeights = Object.values(HARVEST_DATA).map(d => d.avgWeight).filter(w => w > 0);
+      const avgBunchWeight = allWeights.length > 0 ? allWeights.reduce((a,b) => a+b, 0) / allWeights.length : 0;
 
-        const matches = blocks.filter(b => 
-          b.toLowerCase().includes(query)
-        ).slice(0, 10);
+      const sorted = [...blocks].sort((a,b) => (HARVEST_DATA[b]?.totalWeight||0) - (HARVEST_DATA[a]?.totalWeight||0));
+      const topBlock = sorted[0];
+      const topBlockHarvest = HARVEST_DATA[topBlock]?.totalWeight || 0;
 
-        if (matches.length === 0) {
-          searchResults.html('<div style="padding:12px;color:var(--olive);font-size:14px">No blocks found</div>');
-          return;
-        }
+      const html = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px 0 16px;">
+          <div style="background:var(--navy);border-radius:18px;padding:20px 24px;display:flex;flex-direction:column;gap:6px;border:1px solid rgba(168,147,90,0.25);">
+            <span style="font-size:14px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.09em;">Total Area</span>
+            <span style="font-size:clamp(28px,6vw,36px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${totalArea.toFixed(2)}<span style="font-size:18px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> ha</span></span>
+            <span style="font-size:15px;color:var(--sand);">${totalBlocks} blocks total</span>
+          </div>
+          <div style="background:var(--navy);border-radius:18px;padding:20px 24px;display:flex;flex-direction:column;gap:6px;border:1px solid rgba(168,147,90,0.25);">
+            <span style="font-size:14px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.09em;">Total Harvest</span>
+            <span style="font-size:clamp(28px,6vw,36px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${(totalHarvestKg/1000).toFixed(1)}<span style="font-size:18px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> t</span></span>
+            <span style="font-size:15px;color:var(--sand);">${totalBlocks} active blocks</span>
+          </div>
+          <div style="background:linear-gradient(135deg,#1a3352,#0d2136);border-radius:18px;padding:20px 24px;display:flex;flex-direction:column;gap:6px;border:1px solid rgba(168,147,90,0.2);">
+            <span style="font-size:14px;font-weight:700;color:var(--gold-lt);text-transform:uppercase;letter-spacing:.09em;">Avg Bunch Wt</span>
+            <span style="font-size:clamp(28px,6vw,36px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${avgBunchWeight.toFixed(2)}<span style="font-size:18px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> kg</span></span>
+            <span style="font-size:15px;color:var(--sand);">per bunch</span>
+          </div>
+          <div style="background:linear-gradient(135deg,#1a3352,#0d2136);border-radius:18px;padding:20px 24px;display:flex;flex-direction:column;gap:6px;border:1px solid rgba(168,147,90,0.2);">
+            <span style="font-size:14px;font-weight:700;color:var(--gold-lt);text-transform:uppercase;letter-spacing:.09em;">Irrigation</span>
+            <span style="font-size:clamp(28px,6vw,36px);font-weight:700;color:#fff;font-family:'Playfair Display',serif;line-height:1.1;">${totalIrrFuel.toFixed(0)}<span style="font-size:18px;color:var(--sand);font-family:'DM Sans',sans-serif;font-weight:400;"> L</span></span>
+            <span style="font-size:15px;color:var(--sand);">${totalIrrSessions} sessions</span>
+          </div>
+        </div>
 
-        matches.forEach(block => {
-          searchResults.append("div")
-            .attr("class", "search-result-item")
-            .attr("role", "option")
-            .attr("tabindex", "0")
-            .text(block)
-            .on("click", function() {
-              const feature = geoData.features.find(f => 
-                f.properties?.Field_Name === block
-              );
-              if (feature) {
-                onBlockClick({ currentTarget: null }, feature);
-                hideSearchDropdown();
-                blockSearch.node().blur();
-              }
-            })
-            .on("keydown", function(e) {
-              if (e.key === "Enter") this.click();
-            });
-        });
-      }, 250));
-      
-      document.addEventListener('click', e => {
-        if (!e.target.closest('.header')) hideSearchDropdown();
-      });
-      
-      window.addEventListener('resize', debounce(adjustSearchDropdownPosition, 150));
-      
-      blockSearch.on("keydown", function(event) {
-        const items = searchResults.selectAll(".search-result-item").nodes();
-        if (!items.length || items[0].textContent === "No blocks found") return;
-        
-        if (event.key === "ArrowDown") {
-          event.preventDefault();
-          moveHighlight(1, items);
-        } else if (event.key === "ArrowUp") {
-          event.preventDefault();
-          moveHighlight(-1, items);
-        } else if (event.key === "Enter") {
-          event.preventDefault();
-          const highlighted = searchResults.select(".highlighted");
-          if (!highlighted.empty()) highlighted.node().click();
-        } else if (event.key === "Escape") {
-          hideSearchDropdown();
-          blockSearch.node().blur();
-        }
-      });
+        <div style="margin:0 0 20px;padding:18px 24px;background:rgba(168,147,90,0.08);border-radius:16px;border:1px solid rgba(168,147,90,0.25);display:flex;align-items:center;justify-content:space-between;gap:16px;">
+          <div style="min-width:0;">
+            <div style="font-size:14px;font-weight:700;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px;">🏆 Top Block</div>
+            <div style="font-size:24px;font-weight:700;color:var(--navy);font-family:'Playfair Display',serif;">${topBlock}</div>
+            <div style="font-size:16px;color:var(--olive);margin-top:4px;">${(topBlockHarvest/1000).toFixed(2)} t · ${landData[topBlock]?.size?.toFixed(2)||'—'} ha</div>
+          </div>
+          <div style="background:var(--navy);border-radius:14px;padding:14px 20px;text-align:center;flex-shrink:0;">
+            <div style="font-size:24px;font-weight:700;color:var(--gold);font-family:'Playfair Display',serif;">${HARVEST_DATA[topBlock]?.avgWeight.toFixed(2) || '—'}</div>
+            <div style="font-size:13px;color:var(--sand);margin-top:2px;">kg avg</div>
+          </div>
+        </div>
+
+        <div style="font-size:14px;font-weight:700;color:var(--olive);text-transform:uppercase;letter-spacing:.09em;margin-bottom:12px;">Block Breakdown</div>
+        <table class="stats-table" style="margin-bottom:20px;">
+          <thead><tr>
+            <th>Block</th>
+            <th style="text-align:right">Size</th>
+            <th style="text-align:right">Harvest</th>
+            <th style="text-align:right">Avg</th>
+          </tr></thead>
+          <tbody>${sorted.map(b => {
+            const sz = (landData[b]?.size||0).toFixed(2);
+            const hw = HARVEST_DATA[b]?.totalWeight||0;
+            const av = HARVEST_DATA[b]?.avgWeight||0;
+            const isTop = b === topBlock && topBlockHarvest > 0;
+            return `<tr style="cursor:pointer${isTop?';background:rgba(168,147,90,0.06)':''}" data-block="${b}">
+              <td><span class="badge badge-gold">${b}</span>${isTop?' <span style="font-size:14px">🏆</span>':''}</td>
+              <td style="text-align:right;color:var(--forest)">${sz}</td>
+              <td style="text-align:right;font-weight:${hw>0?700:400};color:${hw>0?'var(--navy)':'var(--sand)'}">
+                ${hw>0?(hw/1000).toFixed(2)+'t':'—'}</td>
+              <td style="text-align:right;color:${av>0?'var(--navy)':'var(--sand)'}">
+                ${av>0?av.toFixed(1):'—'}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      `;
+      summaryPanelContent.html(html);
+    }
+
+    function showPanel(panel) {
+      hideAllPanels();
+      panel.classed("visible", true).attr("aria-hidden", "false");
     }
     
-    function moveHighlight(direction, items) {
-      const current = searchResults.select(".highlighted");
-      let newIndex = -1;
-      
-      if (current.empty()) {
-        newIndex = direction > 0 ? 0 : items.length - 1;
-      } else {
-        const currentIndex = Array.from(items).indexOf(current.node());
-        newIndex = (currentIndex + direction + items.length) % items.length;
-      }
-      
-      searchResults.selectAll(".highlighted").classed("highlighted", false);
-      d3.select(items[newIndex]).classed("highlighted", true);
-      items[newIndex].scrollIntoView({ block: "nearest" });
-    }
-    
-    function adjustSearchDropdownPosition() {
-      const dropdown = searchDropdown.node();
-      if (!dropdown || searchDropdown.style("display") === "none") return;
-      const rect = dropdown.getBoundingClientRect();
-      if (rect.bottom > window.innerHeight - 20) searchDropdown.classed("flipped", true);
-      else searchDropdown.classed("flipped", false);
-    }
-
-    function showSearchDropdown() {
-      searchDropdown.style("display", "block").attr("aria-hidden", "false");
-      setTimeout(() => { blockSearch.node().focus(); adjustSearchDropdownPosition(); }, 100);
-    }
-    
-    function hideSearchDropdown() {
-      searchDropdown.style("display", "none").attr("aria-hidden", "true");
-      searchDropdown.classed("flipped", false);
-      blockSearch.node().value = "";
-      searchResults.html("");
+    function hideAllPanels() {
+      summaryPanel.classed("visible", false).attr("aria-hidden", "true");
+      blocksPanel.classed("visible", false).attr("aria-hidden", "true");
     }
 
     function setupHelp() {
@@ -1772,7 +535,6 @@
     }
 
     function showHelpPanel() {
-      lastFocusedElement = document.activeElement;
       helpPanel.classed("visible", true);
       overlay.classed("visible", true).attr("aria-hidden", "false");
       window.focusTrapCleanup = trapFocus(helpPanel.node());
@@ -1782,86 +544,24 @@
       if (window.focusTrapCleanup) { window.focusTrapCleanup(); window.focusTrapCleanup = null; }
       helpPanel.classed("visible", false);
       overlay.classed("visible", false).attr("aria-hidden", "true");
-      if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
-      lastFocusedElement = null;
-    }
-
-    function selectPreviousBlock() {
-      if (blocks.length === 0) return;
-      const newIndex = selectedBlockIndex === -1 ? blocks.length - 1 : (selectedBlockIndex - 1 + blocks.length) % blocks.length;
-      navigateToBlock(newIndex);
-    }
-    
-    function selectNextBlock() {
-      if (blocks.length === 0) return;
-      const newIndex = selectedBlockIndex === -1 ? 0 : (selectedBlockIndex + 1) % blocks.length;
-      navigateToBlock(newIndex);
-    }
-    
-    function navigateToBlock(index) {
-      const blockName = blocks[index];
-      const feature = geoData.features.find(f => f.properties?.Field_Name === blockName);
-      if (feature) onBlockClick({ currentTarget: null }, feature);
     }
 
     function setupEventListeners() {
-      summaryButton.on("click", () => { updateSummaryPanel(); showPanel(summaryPanel); header.classed("hidden", true); farmInfo.classed("hidden", true); });
-      blocksButton.on("click", () => { updateBlocksPanel(); showPanel(blocksPanel); header.classed("hidden", true); farmInfo.classed("hidden", true); });
-      prevButton.on("click", selectPreviousBlock);
-      nextButton.on("click", selectNextBlock);
-      d3.select("#block-panel .close-button").on("click", resetView);
-      d3.select("#summary-panel .close-button").on("click", resetView);
-      d3.select("#blocks-panel .close-button").on("click", resetView);
-      setupSearch();
-      setupHelp();
-      svg.on("click", (event) => { if (event.target?.tagName?.toLowerCase() === 'svg') resetView(); });
-      
-      window.addEventListener("resize", debounce(() => {
-        width = mapContainer.clientWidth;
-        height = mapContainer.clientHeight;
-        svg.attr("viewBox", `0 0 ${width} ${height}`);
-        
-        if (geoData) {
-          projection.fitSize([width, height], geoData);
-          applyMapTransform();
-          
-          svg.selectAll("path.block, path.block-click-target").attr("d", d => {
-            try { return path(d); } catch (e) { return null; }
-          });
-          removeClickLayer(); addClickLayer();
-          removeBlockLabels(); addBlockLabels();
-          if (selectedBlock) {
-            const feature = geoData.features.find(f => f.properties?.Field_Name === selectedBlock);
-            if (feature) focusOnBlock(feature);
-          }
-        }
-        if (searchDropdown.style("display") === "block") adjustSearchDropdownPosition();
-      }, 250));
+      summaryButton.on("click", () => { updateSummaryPanel(); showPanel(summaryPanel); farmInfo.classed("hidden", true); });
+      blocksButton.on("click", () => { updateBlocksPanel(); showPanel(blocksPanel); farmInfo.classed("hidden", true); });
+      d3.select("#summary-panel .close-button").on("click", () => { hideAllPanels(); farmInfo.classed("hidden", false); });
+      d3.select("#blocks-panel .close-button").on("click", () => { hideAllPanels(); farmInfo.classed("hidden", false); });
+      setupHelp(); 
     }
 
-    // ========== PWA / FULLSCREEN HANDLING ==========
-    if (window.matchMedia('(display-mode: standalone)').matches || 
-        window.navigator.standalone === true) {
-      document.documentElement.classList.add('standalone');
-    }
-
-    document.addEventListener('touchmove', function(e) {
-      if (e.target.closest('#map-container')) {
-        if (!e.target.closest('.panel-content') && !e.target.closest('.search-results-list')) {
-          // Allow map zoom/pan via D3
-        }
-      }
-    }, { passive: false });
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(err => {
-          console.log('SW registration failed (optional):', err);
-        });
-      });
-    }
-
-    window.addEventListener('DOMContentLoaded', loadData);
+    // Hide loading screen when the window loads (Flourish will load asynchronously)
+    window.addEventListener('load', hideLoadingScreen);
+    // Fallback to hide loading screen after 5 seconds just in case 'load' doesn't trigger due to iframe quirks
+    setTimeout(hideLoadingScreen, 5000);
+    
+    // Init UI
+    setupEventListeners();
+    farmStatsDisplay.text(`${blocks.length} blocks · ${totalFarmArea.toFixed(2)} ha`);
     
   })();
   </script>
